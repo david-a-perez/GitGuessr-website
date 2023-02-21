@@ -63,3 +63,13 @@ cargo watch -x run -i frontend/
 
 # Tips
 * Use the [mold](https://github.com/rui314/mold) linker for slightly faster compilation.
+
+
+# Containerize your application
+      
+## Building a container
+`docker build -t image-name .`
+
+## Running the container
+`docker run -e SECRET_KEY=123 -e DATABASE_URL=postgres://postgres:postgres@localhost/database -p 3000:3000 image-name`
+
