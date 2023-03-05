@@ -1,10 +1,9 @@
-use crate::models::correct_answer::{CorrectAnswer, CreateCorrectAnswer, UpdateCorrectAnswer};
+use crate::models::correct_answer::CorrectAnswer;
 use actix_web::{
-    delete,
     error::ErrorNotFound,
-    get, post, put,
-    web::{Data, Json, Path, Query},
-    Error, HttpResponse, Responder, Result,
+    get,
+    web::{Data, Path, Query},
+    HttpResponse, Responder,
 };
 use create_rust_app::Database;
 

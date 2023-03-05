@@ -1,13 +1,12 @@
 use crate::models::{
     answer_choice::{AnswerChoice, CreateAnswerChoice},
     correct_answer::{CorrectAnswer, CreateCorrectAnswer},
-    lobby::{CreateLobby, Lobby, UpdateLobby},
+    lobby::{CreateLobby, Lobby},
     question::{CreateQuestion, Question},
 };
 use actix_web::{
-    delete,
     error::{ErrorInternalServerError, ErrorNotFound},
-    get, post, put,
+    get, post,
     web::{Data, Json, Path, Query},
     HttpResponse, Responder,
 };

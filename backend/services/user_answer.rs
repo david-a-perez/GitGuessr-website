@@ -1,8 +1,7 @@
-use crate::models::user_answer::{CreateUserAnswer, UpdateUserAnswer, UserAnswer};
+use crate::models::user_answer::{CreateUserAnswer, UserAnswer};
 use actix_web::{
-    delete,
     error::{ErrorInternalServerError, ErrorNotFound},
-    get, post, put,
+    get, post,
     web::{Data, Json, Path, Query},
     HttpResponse, Responder,
 };

@@ -1,9 +1,8 @@
-use crate::models::question::{CreateQuestion, Question, UpdateQuestion};
+use crate::models::question::Question;
 use actix_web::{
-    delete,
     error::{ErrorInternalServerError, ErrorNotFound},
-    get, post, put,
-    web::{Data, Json, Path, Query},
+    get,
+    web::{Data, Path, Query},
     HttpResponse, Responder,
 };
 use create_rust_app::Database;

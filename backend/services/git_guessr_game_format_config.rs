@@ -1,11 +1,8 @@
-use crate::models::git_guessr_game_format_config::{
-    CreateGitGuessrGameFormatConfig, GitGuessrGameFormatConfig, UpdateGitGuessrGameFormatConfig,
-};
+use crate::models::git_guessr_game_format_config::GitGuessrGameFormatConfig;
 use actix_web::{
-    delete,
     error::{ErrorInternalServerError, ErrorNotFound},
-    get, post, put,
-    web::{Data, Json, Path, Query},
+    get,
+    web::{Data, Path, Query},
     HttpResponse, Responder,
 };
 use create_rust_app::Database;
