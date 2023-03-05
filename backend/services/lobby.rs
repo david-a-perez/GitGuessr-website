@@ -1,6 +1,12 @@
-use actix_web::{delete, Error, get, HttpResponse, post, put, Result, web::{Data, Json, Path, Query}};
-use create_rust_app::Database;
 use crate::models::lobby::{CreateLobby, Lobby, UpdateLobby};
+use actix_web::{
+    delete,
+    error::{ErrorInternalServerError, ErrorNotFound},
+    get, post, put,
+    web::{Data, Json, Path, Query},
+    HttpResponse, Responder,
+};
+use create_rust_app::Database;
 
 #[tsync::tsync]
 #[derive(serde::Deserialize)]
@@ -10,49 +16,45 @@ pub struct PaginationParams {
 }
 
 #[get("")]
-async fn index(
-    db: Data<Database>,
-    Query(info): Query<PaginationParams>,
-) -> HttpResponse {
-    let mut con = db.get_connection();
+async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl Responder {
+    actix_web::web::block(move || {
+        let mut conn = db.get_connection();
 
-    let result = Lobby::paginate(&mut con, info.page, info.page_size);
-
-    if result.is_ok() {
-        HttpResponse::Ok().json(result.unwrap())
-    } else {
-        HttpResponse::InternalServerError().finish()
-    }
+        Lobby::paginate(&mut conn, info.page, info.page_size)
+    })
+    .await
+    .map(|result| match result {
+        Ok(result) => Ok(HttpResponse::Ok().json(result)),
+        Err(err) => Err(ErrorInternalServerError(err)),
+    })
 }
 
 #[get("/{id}")]
-async fn read(
-    db: Data<Database>,
-    item_id: Path<String>,
-) -> HttpResponse {
-    let mut con = db.get_connection();
+async fn read(db: Data<Database>, item_id: Path<String>) -> impl Responder {
+    actix_web::web::block(move || {
+        let mut conn = db.get_connection();
 
-    let result = Lobby::read(&mut con, item_id.into_inner());
-
-    if result.is_ok() {
-        let todo = result.unwrap();
-
-        HttpResponse::Ok().json(todo)
-    } else {
-        HttpResponse::NotFound().finish()
-    }
+        Lobby::read(&mut conn, item_id.into_inner())
+    })
+    .await
+    .map(|result| match result {
+        Ok(result) => Ok(HttpResponse::Ok().json(result)),
+        Err(err) => Err(ErrorNotFound(err)),
+    })
 }
 
 #[post("")]
-async fn create(
-    db: Data<Database>,
-    Json(item): Json<CreateLobby>,
-) -> Result<HttpResponse, Error> {
-    let mut con = db.get_connection();
+async fn create(db: Data<Database>, Json(item): Json<CreateLobby>) -> impl Responder {
+    actix_web::web::block(move || {
+        let mut conn = db.get_connection();
 
-    let result = Lobby::create(&mut con, &item).expect("Creation error");
-
-    Ok(HttpResponse::Created().json(result))
+        Lobby::create(&mut conn, &item)
+    })
+    .await
+    .map(|result| match result {
+        Ok(result) => Ok(HttpResponse::Created().json(result)),
+        Err(err) => Err(ErrorInternalServerError(err)),
+    })
 }
 
 #[put("/{id}")]
@@ -60,32 +62,31 @@ async fn update(
     db: Data<Database>,
     item_id: Path<String>,
     Json(item): Json<UpdateLobby>,
-) -> HttpResponse {
-    let mut con = db.get_connection();
+) -> impl Responder {
+    actix_web::web::block(move || {
+        let mut conn = db.get_connection();
 
-    let result = Lobby::update(&mut con, item_id.into_inner(), &item);
-
-    if result.is_ok() {
-        HttpResponse::Ok().finish()
-    } else {
-        HttpResponse::InternalServerError().finish()
-    }
+        Lobby::update(&mut conn, item_id.into_inner(), &item)
+    })
+    .await
+    .map(|result| match result {
+        Ok(result) => Ok(HttpResponse::Ok().json(result)),
+        Err(err) => Err(ErrorInternalServerError(err)),
+    })
 }
 
 #[delete("/{id}")]
-async fn destroy(
-    db: Data<Database>,
-    item_id: Path<String>,
-) -> HttpResponse {
-    let mut con = db.get_connection();
+async fn destroy(db: Data<Database>, item_id: Path<String>) -> impl Responder {
+    actix_web::web::block(move || {
+        let mut conn = db.get_connection();
 
-    let result = Lobby::delete(&mut con, item_id.into_inner());
-
-    if result.is_ok() {
-        HttpResponse::Ok().finish()
-    } else {
-        HttpResponse::InternalServerError().finish()
-    }
+        Lobby::delete(&mut conn, item_id.into_inner())
+    })
+    .await
+    .map(|result| match result {
+        Ok(result) => Ok(HttpResponse::Ok().json(result)),
+        Err(err) => Err(ErrorInternalServerError(err)),
+    })
 }
 
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {

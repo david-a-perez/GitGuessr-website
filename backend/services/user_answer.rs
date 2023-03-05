@@ -1,4 +1,4 @@
-use crate::models::todos::{CreateTodo, Todo, UpdateTodo};
+use crate::models::user_answer::{CreateUserAnswer, UpdateUserAnswer, UserAnswer};
 use actix_web::{
     delete,
     error::{ErrorInternalServerError, ErrorNotFound},
@@ -20,7 +20,7 @@ async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Todo::paginate(&mut conn, info.page, info.page_size)
+        UserAnswer::paginate(&mut conn, info.page, info.page_size)
     })
     .await
     .map(|result| match result {
@@ -29,12 +29,12 @@ async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl
     })
 }
 
-#[get("/{id}")]
-async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
+#[get("/{user_id}/{question_id}")]
+async fn read(db: Data<Database>, user_id: Path<i32>, question_id: Path<i32>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Todo::read(&mut conn, item_id.into_inner())
+        UserAnswer::read(&mut conn, user_id.into_inner(), question_id.into_inner())
     })
     .await
     .map(|result| match result {
@@ -44,11 +44,11 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 }
 
 #[post("")]
-async fn create(db: Data<Database>, Json(item): Json<CreateTodo>) -> impl Responder {
+async fn create(db: Data<Database>, Json(item): Json<CreateUserAnswer>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Todo::create(&mut conn, &item)
+        UserAnswer::create(&mut conn, &item)
     })
     .await
     .map(|result| match result {
@@ -57,16 +57,22 @@ async fn create(db: Data<Database>, Json(item): Json<CreateTodo>) -> impl Respon
     })
 }
 
-#[put("/{id}")]
+#[put("/{user_id}/{question_id}")]
 async fn update(
     db: Data<Database>,
-    item_id: Path<i32>,
-    Json(item): Json<UpdateTodo>,
+    user_id: Path<i32>,
+    question_id: Path<i32>,
+    Json(item): Json<UpdateUserAnswer>,
 ) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Todo::update(&mut conn, item_id.into_inner(), &item)
+        UserAnswer::update(
+            &mut conn,
+            user_id.into_inner(),
+            question_id.into_inner(),
+            &item,
+        )
     })
     .await
     .map(|result| match result {
@@ -75,12 +81,12 @@ async fn update(
     })
 }
 
-#[delete("/{id}")]
-async fn destroy(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
+#[delete("/{user_id}/{question_id}")]
+async fn destroy(db: Data<Database>, user_id: Path<i32>, question_id: Path<i32>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Todo::delete(&mut conn, item_id.into_inner())
+        UserAnswer::delete(&mut conn, user_id.into_inner(), question_id.into_inner())
     })
     .await
     .map(|result| match result {

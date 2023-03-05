@@ -4,9 +4,9 @@ extern crate diesel;
 use actix_web::middleware::{Compress, Logger, NormalizePath};
 use actix_web::web::Data;
 use actix_web::{web, App, HttpServer};
+use diesel::connection::SimpleConnection;
 
-use crate::models::lobby::{CreateLobby, Lobby};
-use crate::models::repository::{CreateRepository, Repository};
+// use crate::models::lobby::{CreateLobby, Lobby};
 
 mod mail;
 mod models;
@@ -18,36 +18,11 @@ async fn main() -> std::io::Result<()> {
     #[cfg(debug_assertions)]
     create_rust_app::setup_development().await;
     let app_data = create_rust_app::setup();
-    {
-        use crate::diesel::RunQueryDsl;
-        use crate::schema::repository::dsl::*;
-        let mut conn = app_data.database.get_connection();
-        diesel::insert_into(repository)
-            .values(CreateRepository {
-                name: "GitOxide".to_string(),
-                filename: "gitoxide".to_string(),
-            })
-            .on_conflict(name)
-            .do_update()
-            .set(CreateRepository {
-                name: "GitOxide".to_string(),
-                filename: "gitoxide".to_string(),
-            })
-            .get_results::<Repository>(&mut conn)
-            .unwrap();
-    }
 
-    {
-        use crate::diesel::RunQueryDsl;
-        use crate::schema::lobby::dsl::*;
-        let mut conn = app_data.database.get_connection();
-        diesel::insert_into(lobby)
-            .values(CreateLobby {
-                repository: "GitOxide".to_string(),
-            })
-            .get_results::<Lobby>(&mut conn)
-            .unwrap();
-    }
+    let mut conn = app_data.database.get_connection();
+
+    conn.batch_execute(&std::fs::read_to_string("db/data.sql")?)
+        .unwrap();
 
     HttpServer::new(move || {
         let mut app = App::new()
@@ -59,10 +34,15 @@ async fn main() -> std::io::Result<()> {
         app = app.app_data(Data::new(app_data.mailer.clone()));
 
         let mut api_scope = web::scope("/api");
-        api_scope = api_scope.service(services::repository::endpoints(web::scope("/repository")));
+        api_scope = api_scope.service(services::correct_answer::endpoints(web::scope("/correct_answer")));
+        api_scope = api_scope.service(services::git_guessr_game_format_config::endpoints(web::scope("/git_guessr_game_format_config")));
         api_scope = api_scope.service(services::lobby::endpoints(web::scope("/lobby")));
-        api_scope = api_scope.service(gitguessr_auth::endpoints(web::scope("/auth")));
+        api_scope = api_scope.service(services::obfuscated_game_format_config::endpoints(web::scope("/obfuscated_game_format_config")));
+        api_scope = api_scope.service(services::question::endpoints(web::scope("/question")));
+        api_scope = api_scope.service(services::repository::endpoints(web::scope("/repository")));
         api_scope = api_scope.service(services::todo::endpoints(web::scope("/todos")));
+        api_scope = api_scope.service(services::user_answer::endpoints(web::scope("/user_answers")));
+        api_scope = api_scope.service(gitguessr_auth::endpoints(web::scope("/auth")));
 
         // #[cfg(debug_assertions)]
         // {

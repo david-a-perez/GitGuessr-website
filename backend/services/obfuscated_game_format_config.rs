@@ -1,4 +1,4 @@
-use crate::models::todos::{CreateTodo, Todo, UpdateTodo};
+use crate::models::obfuscated_game_format_config::{CreateObfuscatedGameFormatConfig, ObfuscatedGameFormatConfig, UpdateObfuscatedGameFormatConfig};
 use actix_web::{
     delete,
     error::{ErrorInternalServerError, ErrorNotFound},
@@ -20,7 +20,7 @@ async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Todo::paginate(&mut conn, info.page, info.page_size)
+        ObfuscatedGameFormatConfig::paginate(&mut conn, info.page, info.page_size)
     })
     .await
     .map(|result| match result {
@@ -30,11 +30,11 @@ async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl
 }
 
 #[get("/{id}")]
-async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
+async fn read(db: Data<Database>, item_id: Path<String>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Todo::read(&mut conn, item_id.into_inner())
+        ObfuscatedGameFormatConfig::read(&mut conn, item_id.into_inner())
     })
     .await
     .map(|result| match result {
@@ -44,11 +44,11 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 }
 
 #[post("")]
-async fn create(db: Data<Database>, Json(item): Json<CreateTodo>) -> impl Responder {
+async fn create(db: Data<Database>, Json(item): Json<CreateObfuscatedGameFormatConfig>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Todo::create(&mut conn, &item)
+        ObfuscatedGameFormatConfig::create(&mut conn, &item)
     })
     .await
     .map(|result| match result {
@@ -60,13 +60,13 @@ async fn create(db: Data<Database>, Json(item): Json<CreateTodo>) -> impl Respon
 #[put("/{id}")]
 async fn update(
     db: Data<Database>,
-    item_id: Path<i32>,
-    Json(item): Json<UpdateTodo>,
+    item_id: Path<String>,
+    Json(item): Json<UpdateObfuscatedGameFormatConfig>,
 ) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Todo::update(&mut conn, item_id.into_inner(), &item)
+        ObfuscatedGameFormatConfig::update(&mut conn, item_id.into_inner(), &item)
     })
     .await
     .map(|result| match result {
@@ -76,11 +76,11 @@ async fn update(
 }
 
 #[delete("/{id}")]
-async fn destroy(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
+async fn destroy(db: Data<Database>, item_id: Path<String>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Todo::delete(&mut conn, item_id.into_inner())
+        ObfuscatedGameFormatConfig::delete(&mut conn, item_id.into_inner())
     })
     .await
     .map(|result| match result {
