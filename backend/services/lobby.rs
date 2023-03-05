@@ -89,10 +89,10 @@ async fn destroy(
 }
 
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-    return scope
+    scope
         .service(index)
         .service(read)
         .service(create)
         .service(update)
-        .service(destroy);
+        .service(destroy)
 }
