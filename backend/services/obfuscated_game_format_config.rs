@@ -1,4 +1,6 @@
-use crate::models::obfuscated_game_format_config::{CreateObfuscatedGameFormatConfig, ObfuscatedGameFormatConfig, UpdateObfuscatedGameFormatConfig};
+use crate::models::obfuscated_game_format_config::{
+    CreateObfuscatedGameFormatConfig, ObfuscatedGameFormatConfig, UpdateObfuscatedGameFormatConfig,
+};
 use actix_web::{
     delete,
     error::{ErrorInternalServerError, ErrorNotFound},
@@ -44,7 +46,10 @@ async fn read(db: Data<Database>, item_id: Path<String>) -> impl Responder {
 }
 
 #[post("")]
-async fn create(db: Data<Database>, Json(item): Json<CreateObfuscatedGameFormatConfig>) -> impl Responder {
+async fn create(
+    db: Data<Database>,
+    Json(item): Json<CreateObfuscatedGameFormatConfig>,
+) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 

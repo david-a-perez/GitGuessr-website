@@ -5,7 +5,6 @@ use crate::schema::*;
 use diesel::QueryResult;
 use serde::{Deserialize, Serialize};
 
-
 type Connection = create_rust_app::Connection;
 
 #[tsync::tsync]
@@ -43,7 +42,6 @@ pub struct PaginationResult<T> {
 }
 
 impl Repository {
-
     pub fn create(db: &mut Connection, item: &CreateRepository) -> QueryResult<Self> {
         use crate::schema::repository::dsl::*;
 
@@ -57,12 +55,19 @@ impl Repository {
     }
 
     /// Paginates through the table where page is a 0-based index (i.e. page 0 is the first page)
-    pub fn paginate(db: &mut Connection, page: i64, page_size: i64) -> QueryResult<PaginationResult<Self>> {
+    pub fn paginate(
+        db: &mut Connection,
+        page: i64,
+        page_size: i64,
+    ) -> QueryResult<PaginationResult<Self>> {
         use crate::schema::repository::dsl::*;
 
         let page_size = if page_size < 1 { 1 } else { page_size };
         let total_items = repository.count().get_result(db)?;
-        let items = repository.limit(page_size).offset(page * page_size).load::<Self>(db)?;
+        let items = repository
+            .limit(page_size)
+            .offset(page * page_size)
+            .load::<Self>(db)?;
 
         Ok(PaginationResult {
             items,
@@ -70,14 +75,20 @@ impl Repository {
             page,
             page_size,
             /* ceiling division of integers */
-            num_pages: total_items / page_size + i64::from(total_items % page_size != 0)
+            num_pages: total_items / page_size + i64::from(total_items % page_size != 0),
         })
     }
 
-    pub fn update(db: &mut Connection, param_name: String, item: &UpdateRepository) -> QueryResult<Self> {
+    pub fn update(
+        db: &mut Connection,
+        param_name: String,
+        item: &UpdateRepository,
+    ) -> QueryResult<Self> {
         use crate::schema::repository::dsl::*;
 
-        diesel::update(repository.filter(name.eq(param_name))).set(item).get_result(db)
+        diesel::update(repository.filter(name.eq(param_name)))
+            .set(item)
+            .get_result(db)
     }
 
     pub fn delete(db: &mut Connection, param_name: String) -> QueryResult<usize> {
@@ -85,5 +96,4 @@ impl Repository {
 
         diesel::delete(repository.filter(name.eq(param_name))).execute(db)
     }
-
 }

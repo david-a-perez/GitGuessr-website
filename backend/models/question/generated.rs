@@ -1,15 +1,26 @@
 /* This file is generated and managed by dsync */
 
 use crate::diesel::*;
+use crate::models::lobby::Lobby;
 use crate::schema::*;
 use diesel::QueryResult;
 use serde::{Deserialize, Serialize};
-use crate::models::lobby::Lobby;
 
 type Connection = create_rust_app::Connection;
 
 #[tsync::tsync]
-#[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset, Identifiable, Associations, Selectable)]
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    Queryable,
+    Insertable,
+    AsChangeset,
+    Identifiable,
+    Associations,
+    Selectable,
+)]
 #[diesel(table_name=question, primary_key(id), belongs_to(Lobby, foreign_key=lobby_id))]
 pub struct Question {
     pub id: i32,
@@ -49,7 +60,6 @@ pub struct PaginationResult<T> {
 }
 
 impl Question {
-
     pub fn create(db: &mut Connection, item: &CreateQuestion) -> QueryResult<Self> {
         use crate::schema::question::dsl::*;
 
@@ -63,12 +73,19 @@ impl Question {
     }
 
     /// Paginates through the table where page is a 0-based index (i.e. page 0 is the first page)
-    pub fn paginate(db: &mut Connection, page: i64, page_size: i64) -> QueryResult<PaginationResult<Self>> {
+    pub fn paginate(
+        db: &mut Connection,
+        page: i64,
+        page_size: i64,
+    ) -> QueryResult<PaginationResult<Self>> {
         use crate::schema::question::dsl::*;
 
         let page_size = if page_size < 1 { 1 } else { page_size };
         let total_items = question.count().get_result(db)?;
-        let items = question.limit(page_size).offset(page * page_size).load::<Self>(db)?;
+        let items = question
+            .limit(page_size)
+            .offset(page * page_size)
+            .load::<Self>(db)?;
 
         Ok(PaginationResult {
             items,
@@ -76,14 +93,16 @@ impl Question {
             page,
             page_size,
             /* ceiling division of integers */
-            num_pages: total_items / page_size + i64::from(total_items % page_size != 0)
+            num_pages: total_items / page_size + i64::from(total_items % page_size != 0),
         })
     }
 
     pub fn update(db: &mut Connection, param_id: i32, item: &UpdateQuestion) -> QueryResult<Self> {
         use crate::schema::question::dsl::*;
 
-        diesel::update(question.filter(id.eq(param_id))).set(item).get_result(db)
+        diesel::update(question.filter(id.eq(param_id)))
+            .set(item)
+            .get_result(db)
     }
 
     pub fn delete(db: &mut Connection, param_id: i32) -> QueryResult<usize> {
@@ -91,5 +110,4 @@ impl Question {
 
         diesel::delete(question.filter(id.eq(param_id))).execute(db)
     }
-
 }

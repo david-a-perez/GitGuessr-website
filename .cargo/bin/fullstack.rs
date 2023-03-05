@@ -39,7 +39,7 @@ pub fn main() {
 
     dsync::main();
     tsync::main();
-    
+
     if std::env::var("DEV_SERVER_PORT").is_err() {
         std::env::set_var(
             "DEV_SERVER_PORT",

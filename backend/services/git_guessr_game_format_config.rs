@@ -1,4 +1,6 @@
-use crate::models::git_guessr_game_format_config::{CreateGitGuessrGameFormatConfig, GitGuessrGameFormatConfig, UpdateGitGuessrGameFormatConfig};
+use crate::models::git_guessr_game_format_config::{
+    CreateGitGuessrGameFormatConfig, GitGuessrGameFormatConfig, UpdateGitGuessrGameFormatConfig,
+};
 use actix_web::{
     delete,
     error::{ErrorInternalServerError, ErrorNotFound},
@@ -44,7 +46,10 @@ async fn read(db: Data<Database>, item_id: Path<String>) -> impl Responder {
 }
 
 #[post("")]
-async fn create(db: Data<Database>, Json(item): Json<CreateGitGuessrGameFormatConfig>) -> impl Responder {
+async fn create(
+    db: Data<Database>,
+    Json(item): Json<CreateGitGuessrGameFormatConfig>,
+) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 

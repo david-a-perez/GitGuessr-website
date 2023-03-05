@@ -1,4 +1,4 @@
-use std::{process::Command, path::PathBuf};
+use std::{path::PathBuf, process::Command};
 
 #[cfg(windows)]
 pub const NPM: &'static str = "npm.cmd";
@@ -14,7 +14,7 @@ pub fn main() {
         println!("========================================================");
         panic!("Port 21012 is taken but is required for development!")
     }
-    
+
     let dir = env!("CARGO_MANIFEST_DIR");
 
     Command::new(NPM)

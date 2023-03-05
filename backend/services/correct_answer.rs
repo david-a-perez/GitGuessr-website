@@ -1,6 +1,10 @@
-use actix_web::{delete, Error, get, HttpResponse, post, put, Result, web::{Data, Json, Path, Query}};
+use crate::models::correct_answer::{CorrectAnswer, CreateCorrectAnswer, UpdateCorrectAnswer};
+use actix_web::{
+    delete, get, post, put,
+    web::{Data, Json, Path, Query},
+    Error, HttpResponse, Result,
+};
 use create_rust_app::Database;
-use crate::models::correct_answer::{CreateCorrectAnswer, CorrectAnswer, UpdateCorrectAnswer};
 
 #[tsync::tsync]
 #[derive(serde::Deserialize)]
@@ -10,10 +14,7 @@ pub struct PaginationParams {
 }
 
 #[get("")]
-async fn index(
-    db: Data<Database>,
-    Query(info): Query<PaginationParams>,
-) -> HttpResponse {
+async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> HttpResponse {
     let mut con = db.get_connection();
 
     let result = CorrectAnswer::paginate(&mut con, info.page, info.page_size);
@@ -26,10 +27,7 @@ async fn index(
 }
 
 #[get("/{id}")]
-async fn read(
-    db: Data<Database>,
-    item_id: Path<i32>,
-) -> HttpResponse {
+async fn read(db: Data<Database>, item_id: Path<i32>) -> HttpResponse {
     let mut con = db.get_connection();
 
     let result = CorrectAnswer::read(&mut con, item_id.into_inner());
@@ -73,10 +71,7 @@ async fn update(
 }
 
 #[delete("/{id}")]
-async fn destroy(
-    db: Data<Database>,
-    item_id: Path<i32>,
-) -> HttpResponse {
+async fn destroy(db: Data<Database>, item_id: Path<i32>) -> HttpResponse {
     let mut con = db.get_connection();
 
     let result = CorrectAnswer::delete(&mut con, item_id.into_inner());

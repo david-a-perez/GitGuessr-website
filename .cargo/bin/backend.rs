@@ -1,4 +1,4 @@
-use std::{process::Command, path::PathBuf};
+use std::{path::PathBuf, process::Command};
 
 pub fn main() {
     let dir = env!("CARGO_MANIFEST_DIR");
