@@ -1,0 +1,23 @@
+[package]
+edition = "2021"
+name = "gitguessr_auth"
+version = "0.0.0"
+publish = false
+
+[dependencies]
+actix-web = "4.2.1"
+actix-http = "3.0.4"
+derive_more = "0.99.17"
+futures = "0.3.25"
+serde_json = "1.0.93"
+lazy_static = { version="1.4.0" }
+serde = { version = "1.0.152", features = ["derive"] }
+diesel = { version="2.0.0-rc.1", default-features = false, features = ["uuid", "r2d2", "chrono"] }
+anyhow = "1.0.57"
+rust-argon2 = "1.0"
+rand = "0.8.5"
+jsonwebtoken = "8.2.0"
+tsync = "1.6.0"
+chrono = { version = "0.4.23", default-features = false, features = ["clock", "serde"] }
+create-rust-app = { version = "9", default-features = false, features = ["database_postgres"] }
+

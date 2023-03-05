@@ -19,7 +19,7 @@ name = "frontend"
 path = ".cargo/bin/frontend.rs"
 
 [[bin]]
-name = "GitGuessr"
+name = "git_guessr"
 path = "backend/main.rs"
 
 [dependencies]
@@ -29,9 +29,10 @@ actix-multipart = "0.4.0"
 actix-web = "4.0.1"
 dsync = "0"
 futures-util = "0.3.21"
-create-rust-app = {version="9", default-features = false, features=["plugin_auth", "plugin_container", "plugin_dev", "database_postgres", "backend_actix-web"]}
+create-rust-app = {version="9", default-features = false, features=["plugin_container", "plugin_dev", "database_postgres", "backend_actix-web"]}
 serde_json = "1.0.79"
 tsync = "1"
+gitguessr_auth = { path = "gitguessr_auth" }
 
 [dependencies.chrono]
 features = ["serde"]
@@ -50,10 +51,13 @@ version = "1.0.133"
 features = ["full"]
 version = "1"
 
+[patch.crates-io]
+watchexec = { git = "https://github.com/david-a-perez/watchexec", branch = "switch-to-gix-config" }
+
 [package]
-default-run = "GitGuessr"
+default-run = "git_guessr"
 edition = "2021"
-name = "GitGuessr"
+name = "git_guessr"
 publish = false
 version = "0.1.0"
 [profile.dev]

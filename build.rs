@@ -29,17 +29,23 @@ fn shell(command: &str) {
     // println!("build.rs => {:?}", output.stdout);
     let mut file =
         File::create(format!("build-log-{}.txt", command)).expect("Couldn't create file...");
-    file.write(b"build log\n\n\n\nSTDOUT:\n")
+    file.write_all(b"build log\n\n\n\nSTDOUT:\n")
         .expect("Couldn't write to build log");
     file.write_all(&output.stdout)
         .expect("Couldn't write to build log");
-    file.write(b"\n\n\n\nSTDERR:\n")
+    file.write_all(b"\n\n\n\nSTDERR:\n")
         .expect("Couldn't write to build log");
     file.write_all(&output.stderr)
         .expect("Couldn't write to build log");
 }
 
 fn main() {
+    #[cfg(debug_assertions)]
+    println!("cargo:rerun-if-changed=build.rs");
+
+    #[cfg(not(debug_assertions))]
+    println!("cargo:rerun-if-changed=frontend");
+
     // Only install frontend dependencies when building release
     #[cfg(not(debug_assertions))]
     shell("cd frontend && npm install --frozen-lockfile");
