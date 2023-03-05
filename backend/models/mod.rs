@@ -10,3 +10,4 @@ pub mod question;
 pub mod repository;
 pub mod todos;
 pub mod user_answer;
+pub mod answer_choice;

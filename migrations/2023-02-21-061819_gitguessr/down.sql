@@ -1,6 +1,7 @@
 -- This file should undo anything in `up.sql`
 DROP TABLE user_answer;
 DROP TABLE correct_answer;
+DROP TABLE answer_choice;
 DROP TABLE question;
 DROP TABLE lobby;
 DROP TABLE git_guessr_game_format_config;

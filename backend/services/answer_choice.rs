@@ -1,10 +1,10 @@
-use crate::models::question::{CreateQuestion, Question, UpdateQuestion};
+use crate::models::answer_choice::{AnswerChoice, CreateAnswerChoice, UpdateAnswerChoice};
 use actix_web::{
     delete,
-    error::{ErrorInternalServerError, ErrorNotFound},
+    error::ErrorNotFound,
     get, post, put,
     web::{Data, Json, Path, Query},
-    HttpResponse, Responder,
+    Error, HttpResponse, Responder, Result,
 };
 use create_rust_app::Database;
 
@@ -19,22 +19,20 @@ pub struct PaginationParams {
 async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
-
-        Question::paginate(&mut conn, info.page, info.page_size)
+        AnswerChoice::paginate(&mut conn, info.page, info.page_size)
     })
     .await
     .map(|result| match result {
         Ok(result) => Ok(HttpResponse::Ok().json(result)),
-        Err(err) => Err(ErrorInternalServerError(err)),
+        Err(err) => Err(ErrorNotFound(err)),
     })
 }
 
-#[get("/{id}")]
-async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
+#[get("/{question_id}/{answer}")]
+async fn read(db: Data<Database>, question_id: Path<i32>, answer: Path<String>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
-
-        Question::read(&mut conn, item_id.into_inner())
+        AnswerChoice::read(&mut conn, question_id.into_inner(), answer.into_inner())
     })
     .await
     .map(|result| match result {
@@ -44,48 +42,55 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 }
 
 // #[post("")]
-// async fn create(db: Data<Database>, Json(item): Json<CreateQuestion>) -> impl Responder {
+// async fn create(db: Data<Database>, Json(item): Json<CreateAnswerChoice>) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
-
-//         Question::create(&mut conn, &item)
+//         AnswerChoice::create(&mut conn, &item)
 //     })
 //     .await
 //     .map(|result| match result {
-//         Ok(result) => Ok(HttpResponse::Created().json(result)),
-//         Err(err) => Err(ErrorInternalServerError(err)),
+//         Ok(result) => Ok(HttpResponse::Ok().json(result)),
+//         Err(err) => Err(ErrorNotFound(err)),
 //     })
 // }
 
-// #[put("/{id}")]
+// #[put("/{question_id}/{answer}")]
 // async fn update(
 //     db: Data<Database>,
-//     item_id: Path<i32>,
-//     Json(item): Json<UpdateQuestion>,
+//     question_id: Path<i32>,
+//     answer: Path<String>,
+//     Json(item): Json<UpdateAnswerChoice>,
 // ) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
-
-//         Question::update(&mut conn, item_id.into_inner(), &item)
+//         AnswerChoice::update(
+//             &mut conn,
+//             question_id.into_inner(),
+//             answer.into_inner(),
+//             &item,
+//         )
 //     })
 //     .await
 //     .map(|result| match result {
 //         Ok(result) => Ok(HttpResponse::Ok().json(result)),
-//         Err(err) => Err(ErrorInternalServerError(err)),
+//         Err(err) => Err(ErrorNotFound(err)),
 //     })
 // }
 
-// #[delete("/{id}")]
-// async fn destroy(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
+// #[delete("/{question_id}/{answer}")]
+// async fn destroy(
+//     db: Data<Database>,
+//     question_id: Path<i32>,
+//     answer: Path<String>,
+// ) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
-
-//         Question::delete(&mut conn, item_id.into_inner())
+//         AnswerChoice::delete(&mut conn, question_id.into_inner(), answer.into_inner())
 //     })
 //     .await
 //     .map(|result| match result {
 //         Ok(result) => Ok(HttpResponse::Ok().json(result)),
-//         Err(err) => Err(ErrorInternalServerError(err)),
+//         Err(err) => Err(ErrorNotFound(err)),
 //     })
 // }
 

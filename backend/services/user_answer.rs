@@ -57,49 +57,46 @@ async fn create(db: Data<Database>, Json(item): Json<CreateUserAnswer>) -> impl 
     })
 }
 
-#[put("/{user_id}/{question_id}")]
-async fn update(
-    db: Data<Database>,
-    user_id: Path<i32>,
-    question_id: Path<i32>,
-    Json(item): Json<UpdateUserAnswer>,
-) -> impl Responder {
-    actix_web::web::block(move || {
-        let mut conn = db.get_connection();
+// #[put("/{user_id}/{question_id}")]
+// async fn update(
+//     db: Data<Database>,
+//     user_id: Path<i32>,
+//     question_id: Path<i32>,
+//     Json(item): Json<UpdateUserAnswer>,
+// ) -> impl Responder {
+//     actix_web::web::block(move || {
+//         let mut conn = db.get_connection();
 
-        UserAnswer::update(
-            &mut conn,
-            user_id.into_inner(),
-            question_id.into_inner(),
-            &item,
-        )
-    })
-    .await
-    .map(|result| match result {
-        Ok(result) => Ok(HttpResponse::Ok().json(result)),
-        Err(err) => Err(ErrorInternalServerError(err)),
-    })
-}
+//         UserAnswer::update(
+//             &mut conn,
+//             user_id.into_inner(),
+//             question_id.into_inner(),
+//             &item,
+//         )
+//     })
+//     .await
+//     .map(|result| match result {
+//         Ok(result) => Ok(HttpResponse::Ok().json(result)),
+//         Err(err) => Err(ErrorInternalServerError(err)),
+//     })
+// }
 
-#[delete("/{user_id}/{question_id}")]
-async fn destroy(db: Data<Database>, user_id: Path<i32>, question_id: Path<i32>) -> impl Responder {
-    actix_web::web::block(move || {
-        let mut conn = db.get_connection();
+// #[delete("/{user_id}/{question_id}")]
+// async fn destroy(db: Data<Database>, user_id: Path<i32>, question_id: Path<i32>) -> impl Responder {
+//     actix_web::web::block(move || {
+//         let mut conn = db.get_connection();
 
-        UserAnswer::delete(&mut conn, user_id.into_inner(), question_id.into_inner())
-    })
-    .await
-    .map(|result| match result {
-        Ok(result) => Ok(HttpResponse::Ok().json(result)),
-        Err(err) => Err(ErrorInternalServerError(err)),
-    })
-}
+//         UserAnswer::delete(&mut conn, user_id.into_inner(), question_id.into_inner())
+//     })
+//     .await
+//     .map(|result| match result {
+//         Ok(result) => Ok(HttpResponse::Ok().json(result)),
+//         Err(err) => Err(ErrorInternalServerError(err)),
+//     })
+// }
 
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-    scope
-        .service(index)
-        .service(read)
-        .service(create)
-        .service(update)
-        .service(destroy)
+    scope.service(index).service(read).service(create)
+    // .service(update)
+    // .service(destroy)
 }

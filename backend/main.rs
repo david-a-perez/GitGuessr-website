@@ -34,6 +34,9 @@ async fn main() -> std::io::Result<()> {
         app = app.app_data(Data::new(app_data.mailer.clone()));
 
         let mut api_scope = web::scope("/api");
+        api_scope = api_scope.service(services::answer_choice::endpoints(web::scope(
+            "/answer_choice",
+        )));
         api_scope = api_scope.service(services::correct_answer::endpoints(web::scope(
             "/correct_answer",
         )));

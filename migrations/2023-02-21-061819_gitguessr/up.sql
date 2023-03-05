@@ -47,11 +47,21 @@ CREATE TABLE question (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 SELECT manage_updated_at('question');
-CREATE TABLE correct_answer (
-    question_id SERIAL PRIMARY KEY REFERENCES question(id),
+CREATE TABLE answer_choice (
+    question_id SERIAL REFERENCES question(id),
     answer TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (question_id, answer)
+);
+SELECT manage_updated_at('answer_choice');
+CREATE TABLE correct_answer (
+    question_id SERIAL REFERENCES question(id),
+    answer TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (question_id, answer) REFERENCES answer_choice (question_id, answer),
+    PRIMARY KEY (question_id)
 );
 SELECT manage_updated_at('correct_answer');
 CREATE TABLE user_answer (
@@ -60,6 +70,7 @@ CREATE TABLE user_answer (
     answer TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (question_id, answer) REFERENCES answer_choice (question_id, answer),
     PRIMARY KEY (user_id, question_id)
 );
 SELECT manage_updated_at('user_answer');

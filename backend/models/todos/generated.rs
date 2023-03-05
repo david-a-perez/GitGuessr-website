@@ -5,6 +5,7 @@ use crate::schema::*;
 use diesel::QueryResult;
 use serde::{Deserialize, Serialize};
 
+
 type Connection = create_rust_app::Connection;
 
 #[tsync::tsync]
@@ -45,6 +46,7 @@ pub struct PaginationResult<T> {
 }
 
 impl Todo {
+
     pub fn create(db: &mut Connection, item: &CreateTodo) -> QueryResult<Self> {
         use crate::schema::todos::dsl::*;
 
@@ -58,19 +60,12 @@ impl Todo {
     }
 
     /// Paginates through the table where page is a 0-based index (i.e. page 0 is the first page)
-    pub fn paginate(
-        db: &mut Connection,
-        page: i64,
-        page_size: i64,
-    ) -> QueryResult<PaginationResult<Self>> {
+    pub fn paginate(db: &mut Connection, page: i64, page_size: i64) -> QueryResult<PaginationResult<Self>> {
         use crate::schema::todos::dsl::*;
 
         let page_size = if page_size < 1 { 1 } else { page_size };
         let total_items = todos.count().get_result(db)?;
-        let items = todos
-            .limit(page_size)
-            .offset(page * page_size)
-            .load::<Self>(db)?;
+        let items = todos.limit(page_size).offset(page * page_size).load::<Self>(db)?;
 
         Ok(PaginationResult {
             items,
@@ -78,16 +73,14 @@ impl Todo {
             page,
             page_size,
             /* ceiling division of integers */
-            num_pages: total_items / page_size + i64::from(total_items % page_size != 0),
+            num_pages: total_items / page_size + i64::from(total_items % page_size != 0)
         })
     }
 
     pub fn update(db: &mut Connection, param_id: i32, item: &UpdateTodo) -> QueryResult<Self> {
         use crate::schema::todos::dsl::*;
 
-        diesel::update(todos.filter(id.eq(param_id)))
-            .set(item)
-            .get_result(db)
+        diesel::update(todos.filter(id.eq(param_id))).set(item).get_result(db)
     }
 
     pub fn delete(db: &mut Connection, param_id: i32) -> QueryResult<usize> {
@@ -95,4 +88,5 @@ impl Todo {
 
         diesel::delete(todos.filter(id.eq(param_id))).execute(db)
     }
+
 }

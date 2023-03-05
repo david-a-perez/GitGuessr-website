@@ -1,6 +1,15 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    answer_choice (question_id, answer) {
+        question_id -> Int4,
+        answer -> Text,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
+    }
+}
+
+diesel::table! {
     correct_answer (question_id) {
         question_id -> Int4,
         answer -> Text,
@@ -116,6 +125,7 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(answer_choice -> question (question_id));
 diesel::joinable!(correct_answer -> question (question_id));
 diesel::joinable!(git_guessr_game_format_config -> repository (repository));
 diesel::joinable!(lobby -> repository (repository));
@@ -128,6 +138,7 @@ diesel::joinable!(user_roles -> users (user_id));
 diesel::joinable!(user_sessions -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    answer_choice,
     correct_answer,
     git_guessr_game_format_config,
     lobby,

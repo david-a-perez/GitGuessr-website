@@ -1,4 +1,9 @@
-use crate::models::lobby::{CreateLobby, Lobby, UpdateLobby};
+use crate::models::{
+    answer_choice::{AnswerChoice, CreateAnswerChoice},
+    correct_answer::{CorrectAnswer, CreateCorrectAnswer},
+    lobby::{CreateLobby, Lobby, UpdateLobby},
+    question::{CreateQuestion, Question},
+};
 use actix_web::{
     delete,
     error::{ErrorInternalServerError, ErrorNotFound},
@@ -48,7 +53,35 @@ async fn create(db: Data<Database>, Json(item): Json<CreateLobby>) -> impl Respo
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Lobby::create(&mut conn, &item)
+        let lobby = Lobby::create(&mut conn, &item)?;
+
+        let question = Question::create(
+            &mut conn,
+            &CreateQuestion {
+                lobby_id: lobby.id.clone(),
+                question_text: "What is 1+1".to_string(),
+            },
+        )?;
+
+        for i in 0..4 {
+            AnswerChoice::create(
+                &mut conn,
+                &CreateAnswerChoice {
+                    question_id: question.id,
+                    answer: i.to_string(),
+                },
+            )?;
+        }
+
+        CorrectAnswer::create(
+            &mut conn,
+            &CreateCorrectAnswer {
+                question_id: question.id,
+                answer: "2".to_string(),
+            },
+        )?;
+
+        Ok::<Lobby, diesel::result::Error>(lobby)
     })
     .await
     .map(|result| match result {
@@ -57,43 +90,40 @@ async fn create(db: Data<Database>, Json(item): Json<CreateLobby>) -> impl Respo
     })
 }
 
-#[put("/{id}")]
-async fn update(
-    db: Data<Database>,
-    item_id: Path<String>,
-    Json(item): Json<UpdateLobby>,
-) -> impl Responder {
-    actix_web::web::block(move || {
-        let mut conn = db.get_connection();
+// #[put("/{id}")]
+// async fn update(
+//     db: Data<Database>,
+//     item_id: Path<String>,
+//     Json(item): Json<UpdateLobby>,
+// ) -> impl Responder {
+//     actix_web::web::block(move || {
+//         let mut conn = db.get_connection();
 
-        Lobby::update(&mut conn, item_id.into_inner(), &item)
-    })
-    .await
-    .map(|result| match result {
-        Ok(result) => Ok(HttpResponse::Ok().json(result)),
-        Err(err) => Err(ErrorInternalServerError(err)),
-    })
-}
+//         Lobby::update(&mut conn, item_id.into_inner(), &item)
+//     })
+//     .await
+//     .map(|result| match result {
+//         Ok(result) => Ok(HttpResponse::Ok().json(result)),
+//         Err(err) => Err(ErrorInternalServerError(err)),
+//     })
+// }
 
-#[delete("/{id}")]
-async fn destroy(db: Data<Database>, item_id: Path<String>) -> impl Responder {
-    actix_web::web::block(move || {
-        let mut conn = db.get_connection();
+// #[delete("/{id}")]
+// async fn destroy(db: Data<Database>, item_id: Path<String>) -> impl Responder {
+//     actix_web::web::block(move || {
+//         let mut conn = db.get_connection();
 
-        Lobby::delete(&mut conn, item_id.into_inner())
-    })
-    .await
-    .map(|result| match result {
-        Ok(result) => Ok(HttpResponse::Ok().json(result)),
-        Err(err) => Err(ErrorInternalServerError(err)),
-    })
-}
+//         Lobby::delete(&mut conn, item_id.into_inner())
+//     })
+//     .await
+//     .map(|result| match result {
+//         Ok(result) => Ok(HttpResponse::Ok().json(result)),
+//         Err(err) => Err(ErrorInternalServerError(err)),
+//     })
+// }
 
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-    scope
-        .service(index)
-        .service(read)
-        .service(create)
-        .service(update)
-        .service(destroy)
+    scope.service(index).service(read).service(create)
+    // .service(update)
+    // .service(destroy)
 }

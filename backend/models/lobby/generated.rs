@@ -1,26 +1,15 @@
 /* This file is generated and managed by dsync */
 
 use crate::diesel::*;
-use crate::models::repository::Repository;
 use crate::schema::*;
 use diesel::QueryResult;
 use serde::{Deserialize, Serialize};
+use crate::models::repository::Repository;
 
 type Connection = create_rust_app::Connection;
 
 #[tsync::tsync]
-#[derive(
-    Debug,
-    Serialize,
-    Deserialize,
-    Clone,
-    Queryable,
-    Insertable,
-    AsChangeset,
-    Identifiable,
-    Associations,
-    Selectable,
-)]
+#[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset, Identifiable, Associations, Selectable)]
 #[diesel(table_name=lobby, primary_key(id), belongs_to(Repository, foreign_key=repository))]
 pub struct Lobby {
     pub id: String,
@@ -57,6 +46,7 @@ pub struct PaginationResult<T> {
 }
 
 impl Lobby {
+
     pub fn create(db: &mut Connection, item: &CreateLobby) -> QueryResult<Self> {
         use crate::schema::lobby::dsl::*;
 
@@ -70,19 +60,12 @@ impl Lobby {
     }
 
     /// Paginates through the table where page is a 0-based index (i.e. page 0 is the first page)
-    pub fn paginate(
-        db: &mut Connection,
-        page: i64,
-        page_size: i64,
-    ) -> QueryResult<PaginationResult<Self>> {
+    pub fn paginate(db: &mut Connection, page: i64, page_size: i64) -> QueryResult<PaginationResult<Self>> {
         use crate::schema::lobby::dsl::*;
 
         let page_size = if page_size < 1 { 1 } else { page_size };
         let total_items = lobby.count().get_result(db)?;
-        let items = lobby
-            .limit(page_size)
-            .offset(page * page_size)
-            .load::<Self>(db)?;
+        let items = lobby.limit(page_size).offset(page * page_size).load::<Self>(db)?;
 
         Ok(PaginationResult {
             items,
@@ -90,16 +73,14 @@ impl Lobby {
             page,
             page_size,
             /* ceiling division of integers */
-            num_pages: total_items / page_size + i64::from(total_items % page_size != 0),
+            num_pages: total_items / page_size + i64::from(total_items % page_size != 0)
         })
     }
 
     pub fn update(db: &mut Connection, param_id: String, item: &UpdateLobby) -> QueryResult<Self> {
         use crate::schema::lobby::dsl::*;
 
-        diesel::update(lobby.filter(id.eq(param_id)))
-            .set(item)
-            .get_result(db)
+        diesel::update(lobby.filter(id.eq(param_id))).set(item).get_result(db)
     }
 
     pub fn delete(db: &mut Connection, param_id: String) -> QueryResult<usize> {
@@ -107,4 +88,5 @@ impl Lobby {
 
         diesel::delete(lobby.filter(id.eq(param_id))).execute(db)
     }
+
 }

@@ -1,3 +1,4 @@
+pub mod answer_choice;
 pub mod correct_answer;
 pub mod git_guessr_game_format_config;
 pub mod lobby;
