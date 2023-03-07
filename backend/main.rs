@@ -44,6 +44,9 @@ async fn main() -> std::io::Result<()> {
             web::scope("/git_guessr_game_format_config"),
         ));
         api_scope = api_scope.service(services::lobby::endpoints(web::scope("/lobby")));
+        api_scope = api_scope.service(services::lobby_participant::endpoints(web::scope(
+            "/lobby_participant",
+        )));
         api_scope = api_scope.service(services::obfuscated_game_format_config::endpoints(
             web::scope("/obfuscated_game_format_config"),
         ));

@@ -4,6 +4,9 @@ use crate::diesel::*;
 use crate::schema::*;
 use diesel::QueryResult;
 use serde::{Deserialize, Serialize};
+use crate::models::answer_choice::AnswerChoice;
+use crate::models::lobby::Lobby;
+use crate::models::lobby_participant::LobbyParticipant;
 use crate::models::question::Question;
 use crate::models::users::User;
 
@@ -11,11 +14,14 @@ type Connection = create_rust_app::Connection;
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset, Identifiable, Associations, Selectable)]
-#[diesel(table_name=user_answer, primary_key(user_id,question_id), belongs_to(Question, foreign_key=question_id) , belongs_to(User, foreign_key=user_id))]
+#[diesel(table_name=user_answer, primary_key(id), belongs_to(AnswerChoice, foreign_key=answer_choice_id) , belongs_to(Lobby, foreign_key=lobby_id) , belongs_to(LobbyParticipant, foreign_key=lobby_participant_id) , belongs_to(Question, foreign_key=question_id) , belongs_to(User, foreign_key=user_id))]
 pub struct UserAnswer {
-    pub user_id: i32,
+    pub id: i32,
+    pub answer_choice_id: i32,
     pub question_id: i32,
-    pub answer: String,
+    pub lobby_participant_id: i32,
+    pub user_id: i32,
+    pub lobby_id: String,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
@@ -24,16 +30,22 @@ pub struct UserAnswer {
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=user_answer)]
 pub struct CreateUserAnswer {
-    pub user_id: i32,
+    pub answer_choice_id: i32,
     pub question_id: i32,
-    pub answer: String,
+    pub lobby_participant_id: i32,
+    pub user_id: i32,
+    pub lobby_id: String,
 }
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=user_answer)]
 pub struct UpdateUserAnswer {
-    pub answer: Option<String>,
+    pub answer_choice_id: Option<i32>,
+    pub question_id: Option<i32>,
+    pub lobby_participant_id: Option<i32>,
+    pub user_id: Option<i32>,
+    pub lobby_id: Option<String>,
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }
@@ -57,10 +69,10 @@ impl UserAnswer {
         insert_into(user_answer).values(item).get_result::<Self>(db)
     }
 
-    pub fn read(db: &mut Connection, param_user_id: i32, param_question_id: i32) -> QueryResult<Self> {
+    pub fn read(db: &mut Connection, param_id: i32) -> QueryResult<Self> {
         use crate::schema::user_answer::dsl::*;
 
-        user_answer.filter(user_id.eq(param_user_id)).filter(question_id.eq(param_question_id)).first::<Self>(db)
+        user_answer.filter(id.eq(param_id)).first::<Self>(db)
     }
 
     /// Paginates through the table where page is a 0-based index (i.e. page 0 is the first page)
@@ -81,16 +93,16 @@ impl UserAnswer {
         })
     }
 
-    pub fn update(db: &mut Connection, param_user_id: i32, param_question_id: i32, item: &UpdateUserAnswer) -> QueryResult<Self> {
+    pub fn update(db: &mut Connection, param_id: i32, item: &UpdateUserAnswer) -> QueryResult<Self> {
         use crate::schema::user_answer::dsl::*;
 
-        diesel::update(user_answer.filter(user_id.eq(param_user_id)).filter(question_id.eq(param_question_id))).set(item).get_result(db)
+        diesel::update(user_answer.filter(id.eq(param_id))).set(item).get_result(db)
     }
 
-    pub fn delete(db: &mut Connection, param_user_id: i32, param_question_id: i32) -> QueryResult<usize> {
+    pub fn delete(db: &mut Connection, param_id: i32) -> QueryResult<usize> {
         use crate::schema::user_answer::dsl::*;
 
-        diesel::delete(user_answer.filter(user_id.eq(param_user_id)).filter(question_id.eq(param_question_id))).execute(db)
+        diesel::delete(user_answer.filter(id.eq(param_id))).execute(db)
     }
 
 }

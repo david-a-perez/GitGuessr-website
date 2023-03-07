@@ -1,5 +1,6 @@
 -- This file should undo anything in `up.sql`
 DROP TABLE user_answer;
+DROP TABLE lobby_participant;
 DROP TABLE correct_answer;
 DROP TABLE answer_choice;
 DROP TABLE question;

@@ -1,9 +1,4 @@
-use crate::models::{
-    answer_choice::{AnswerChoice, CreateAnswerChoice},
-    correct_answer::{CorrectAnswer, CreateCorrectAnswer},
-    lobby::{CreateLobby, Lobby},
-    question::{CreateQuestion, Question},
-};
+use crate::models::lobby_participant::{CreateLobbyParticipant, LobbyParticipant};
 use actix_web::{
     error::{ErrorInternalServerError, ErrorNotFound},
     get, post,
@@ -11,6 +6,7 @@ use actix_web::{
     HttpResponse, Responder,
 };
 use create_rust_app::Database;
+use gitguessr_auth::Auth;
 
 #[tsync::tsync]
 #[derive(serde::Deserialize)]
@@ -24,7 +20,7 @@ async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Lobby::paginate(&mut conn, info.page, info.page_size)
+        LobbyParticipant::paginate(&mut conn, info.page, info.page_size)
     })
     .await
     .map(|result| match result {
@@ -34,11 +30,11 @@ async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl
 }
 
 #[get("/{id}")]
-async fn read(db: Data<Database>, item_id: Path<String>) -> impl Responder {
+async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Lobby::read(&mut conn, item_id.into_inner())
+        LobbyParticipant::read(&mut conn, item_id.into_inner())
     })
     .await
     .map(|result| match result {
@@ -48,50 +44,17 @@ async fn read(db: Data<Database>, item_id: Path<String>) -> impl Responder {
 }
 
 #[post("")]
-async fn create(db: Data<Database>, Json(item): Json<CreateLobby>) -> impl Responder {
+async fn create(
+    db: Data<Database>,
+    Json(mut item): Json<CreateLobbyParticipant>,
+    auth: Auth,
+) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        let lobby = Lobby::create(&mut conn, &item)?;
+        item.user_id = auth.user_id;
 
-        let question = Question::create(
-            &mut conn,
-            &CreateQuestion {
-                lobby_id: lobby.id.clone(),
-                question_num: 1,
-                question_text: "What is 1+1?".to_string(),
-                start_time: None,
-                end_time: None,
-            },
-        )?;
-
-        AnswerChoice::create(
-            &mut conn,
-            &CreateAnswerChoice {
-                lobby_id: lobby.id.clone(),
-                question_id: question.id,
-                answer: "1".to_string(),
-            },
-        )?;
-        let answer_choice = AnswerChoice::create(
-            &mut conn,
-            &CreateAnswerChoice {
-                lobby_id: lobby.id.clone(),
-                question_id: question.id,
-                answer: "2".to_string(),
-            },
-        )?;
-
-        CorrectAnswer::create(
-            &mut conn,
-            &CreateCorrectAnswer {
-                lobby_id: lobby.id.clone(),
-                question_id: question.id,
-                answer_choice_id: answer_choice.id,
-            },
-        )?;
-
-        Ok::<Lobby, diesel::result::Error>(lobby)
+        LobbyParticipant::create(&mut conn, &item)
     })
     .await
     .map(|result| match result {
@@ -103,13 +66,13 @@ async fn create(db: Data<Database>, Json(item): Json<CreateLobby>) -> impl Respo
 // #[put("/{id}")]
 // async fn update(
 //     db: Data<Database>,
-//     item_id: Path<String>,
-//     Json(item): Json<UpdateLobby>,
+//     item_id: Path<i32>,
+//     Json(item): Json<UpdateLobbyParticipant>,
 // ) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
 
-//         Lobby::update(&mut conn, item_id.into_inner(), &item)
+//         LobbyParticipant::update(&mut conn, item_id.into_inner(), &item)
 //     })
 //     .await
 //     .map(|result| match result {
@@ -119,11 +82,11 @@ async fn create(db: Data<Database>, Json(item): Json<CreateLobby>) -> impl Respo
 // }
 
 // #[delete("/{id}")]
-// async fn destroy(db: Data<Database>, item_id: Path<String>) -> impl Responder {
+// async fn destroy(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
 
-//         Lobby::delete(&mut conn, item_id.into_inner())
+//         LobbyParticipant::delete(&mut conn, item_id.into_inner())
 //     })
 //     .await
 //     .map(|result| match result {

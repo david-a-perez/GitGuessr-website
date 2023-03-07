@@ -14,7 +14,10 @@ type Connection = create_rust_app::Connection;
 pub struct Question {
     pub id: i32,
     pub lobby_id: String,
+    pub question_num: i32,
     pub question_text: String,
+    pub start_time: Option<chrono::DateTime<chrono::Utc>>,
+    pub end_time: Option<chrono::DateTime<chrono::Utc>>,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
@@ -24,7 +27,10 @@ pub struct Question {
 #[diesel(table_name=question)]
 pub struct CreateQuestion {
     pub lobby_id: String,
+    pub question_num: i32,
     pub question_text: String,
+    pub start_time: Option<chrono::DateTime<chrono::Utc>>,
+    pub end_time: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 #[tsync::tsync]
@@ -32,7 +38,10 @@ pub struct CreateQuestion {
 #[diesel(table_name=question)]
 pub struct UpdateQuestion {
     pub lobby_id: Option<String>,
+    pub question_num: Option<i32>,
     pub question_text: Option<String>,
+    pub start_time: Option<Option<chrono::DateTime<chrono::Utc>>>,
+    pub end_time: Option<Option<chrono::DateTime<chrono::Utc>>>,
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }

@@ -11,3 +11,4 @@ pub mod repository;
 pub mod todos;
 pub mod user_answer;
 pub mod answer_choice;
+pub mod lobby_participant;

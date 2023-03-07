@@ -1,4 +1,6 @@
+use diesel::{r2d2::{PooledConnection, ConnectionManager}, PgConnection};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use rand::distributions::{Alphanumeric, DistString};
 
 use crate::{
     mail, AccessTokenClaims, Auth, PaginationParams, Permission, Role, User, UserChangeset,
@@ -384,7 +386,11 @@ pub fn refresh(
     let mut db = db.pool.get().unwrap();
 
     if refresh_token_str.is_none() {
-        return Err((401, "Invalid session."));
+        if std::env::var("ANONYMOUS_USERS").map(|s| s == "1").unwrap_or(false) {
+            return register_anonymous(&mut db);
+        } else {
+            return Err((401, "Invalid session."));
+        }
     }
 
     let refresh_token_str = refresh_token_str.unwrap();
@@ -396,7 +402,11 @@ pub fn refresh(
     );
 
     if refresh_token.is_err() {
-        return Err((401, "Invalid token."));
+        if std::env::var("ANONYMOUS_USERS").map(|s| s == "1").unwrap_or(false) {
+            return register_anonymous(&mut db);
+        } else {
+            return Err((401, "Invalid token."));
+        }       
     }
 
     let refresh_token = refresh_token.unwrap();
@@ -406,13 +416,21 @@ pub fn refresh(
         .token_type
         .eq_ignore_ascii_case("refresh_token")
     {
-        return Err((401, "Invalid token."));
+        if std::env::var("ANONYMOUS_USERS").map(|s| s == "1").unwrap_or(false) {
+            return register_anonymous(&mut db);
+        } else {
+            return Err((401, "Invalid token."));
+        }
     }
 
     let session = UserSession::find_by_refresh_token(&mut db, refresh_token_str);
 
     if session.is_err() {
-        return Err((401, "Invalid session."));
+        if std::env::var("ANONYMOUS_USERS").map(|s| s == "1").unwrap_or(false) {
+            return register_anonymous(&mut db);
+        } else {
+            return Err((401, "Invalid session."));
+        }
     }
 
     let session = session.unwrap();
@@ -473,6 +491,88 @@ pub fn refresh(
     }
 
     Ok((access_token, refresh_token_str))
+}
+
+pub fn register_anonymous(
+    db: &mut PooledConnection<ConnectionManager<PgConnection>>
+) -> Result<(AccessToken, RefreshToken), (StatusCode, Message)> {
+    let username = Alphanumeric.sample_string(&mut rand::thread_rng(), 16);
+    let email = format!("{username}@anonymous.gitguessr.com");
+    let password = Alphanumeric.sample_string(&mut rand::thread_rng(), 16);
+    let salt = generate_salt();
+    let hash = argon2::hash_encoded(password.as_bytes(), &salt, &ARGON_CONFIG).unwrap();
+
+    let user = User::create(
+        db,
+        &UserChangeset {
+            activated: true,
+            email,
+            hash_password: hash,
+        },
+    )
+    .unwrap();
+
+    let permissions = Permission::fetch_all(db, user.id);
+    if permissions.is_err() {
+        println!("{:#?}", permissions.err());
+        return Err((500, "An internal server error occurred."));
+    }
+    let permissions = permissions.unwrap();
+
+    let roles = Role::fetch_all(db, user.id);
+    if roles.is_err() {
+        println!("{:#?}", roles.err());
+        return Err((500, "An internal server error occurred."));
+    }
+    let roles = roles.unwrap();
+
+    let access_token_duration = chrono::Duration::seconds(
+        /* 15 minutes */
+        15 * 60
+    );
+
+    let access_token_claims = AccessTokenClaims {
+        exp: (chrono::Utc::now() + access_token_duration).timestamp() as usize,
+        sub: user.id,
+        token_type: "access_token".to_string(),
+        roles,
+        permissions,
+    };
+
+    let refresh_token_claims = RefreshTokenClaims {
+        exp: (chrono::Utc::now() + chrono::Duration::hours(24)).timestamp() as usize,
+        sub: user.id,
+        token_type: "refresh_token".to_string(),
+    };
+
+    let access_token = encode(
+        &Header::default(),
+        &access_token_claims,
+        &EncodingKey::from_secret(std::env::var("SECRET_KEY").unwrap().as_ref()),
+    )
+    .unwrap();
+
+    let refresh_token = encode(
+        &Header::default(),
+        &refresh_token_claims,
+        &EncodingKey::from_secret(std::env::var("SECRET_KEY").unwrap().as_ref()),
+    )
+    .unwrap();
+
+    let user_session = UserSession::create(
+        db,
+        &UserSessionChangeset {
+            user_id: user.id,
+            refresh_token: refresh_token.clone(),
+            device: None,
+        },
+    );
+
+    if user_session.is_err() {
+        return Err((500, "Could not create a session."));
+    }
+
+    Ok((access_token, refresh_token))
 }
 
 /// /register

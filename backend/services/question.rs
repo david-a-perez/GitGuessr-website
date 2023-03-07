@@ -33,11 +33,18 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Question::read(&mut conn, item_id.into_inner())
+        let question = Question::read(&mut conn, item_id.into_inner())?;
+        if let Some(start_time) = question.start_time {
+            if start_time <= chrono::offset::Utc::now() {
+                return Ok(Some(question));
+            }
+        }
+        Ok::<Option<Question>, diesel::result::Error>(None)
     })
     .await
     .map(|result| match result {
-        Ok(result) => Ok(HttpResponse::Ok().json(result)),
+        Ok(Some(result)) => Ok(HttpResponse::Ok().json(result)),
+        Ok(None) => Ok(HttpResponse::Forbidden().finish()), // TODO: use error?
         Err(err) => Err(ErrorNotFound(err)),
     })
 }

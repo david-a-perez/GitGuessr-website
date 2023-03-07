@@ -27,11 +27,11 @@ async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl
     })
 }
 
-#[get("/{question_id}/{answer}")]
-async fn read(db: Data<Database>, question_id: Path<i32>, answer: Path<String>) -> impl Responder {
+#[get("/{id}")]
+async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
-        AnswerChoice::read(&mut conn, question_id.into_inner(), answer.into_inner())
+        AnswerChoice::read(&mut conn, item_id.into_inner())
     })
     .await
     .map(|result| match result {
@@ -53,19 +53,17 @@ async fn read(db: Data<Database>, question_id: Path<i32>, answer: Path<String>) 
 //     })
 // }
 
-// #[put("/{question_id}/{answer}")]
+// #[put("/{id}")]
 // async fn update(
 //     db: Data<Database>,
-//     question_id: Path<i32>,
-//     answer: Path<String>,
+//     item_id: Path<i32>,
 //     Json(item): Json<UpdateAnswerChoice>,
 // ) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
 //         AnswerChoice::update(
 //             &mut conn,
-//             question_id.into_inner(),
-//             answer.into_inner(),
+//             item_id.into_inner(),
 //             &item,
 //         )
 //     })
@@ -76,15 +74,14 @@ async fn read(db: Data<Database>, question_id: Path<i32>, answer: Path<String>) 
 //     })
 // }
 
-// #[delete("/{question_id}/{answer}")]
+// #[delete("/{id}")]
 // async fn destroy(
 //     db: Data<Database>,
-//     question_id: Path<i32>,
-//     answer: Path<String>,
+//     item_id: Path<i32>,
 // ) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
-//         AnswerChoice::delete(&mut conn, question_id.into_inner(), answer.into_inner())
+//         AnswerChoice::delete(&mut conn, item_id.into_inner())
 //     })
 //     .await
 //     .map(|result| match result {

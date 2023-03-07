@@ -10,9 +10,9 @@ type Connection = create_rust_app::Connection;
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset, Identifiable, Associations, Selectable)]
-#[diesel(table_name=git_guessr_game_format_config, primary_key(repository), belongs_to(Repository, foreign_key=repository))]
+#[diesel(table_name=git_guessr_game_format_config, primary_key(repository_id), belongs_to(Repository, foreign_key=repository_id))]
 pub struct GitGuessrGameFormatConfig {
-    pub repository: String,
+    pub repository_id: String,
     pub filenames: String,
     pub lines_shown: i32,
     pub allow_smaller_files: bool,
@@ -22,7 +22,7 @@ pub struct GitGuessrGameFormatConfig {
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=git_guessr_game_format_config)]
 pub struct CreateGitGuessrGameFormatConfig {
-    pub repository: String,
+    pub repository_id: String,
     pub filenames: String,
     pub lines_shown: i32,
     pub allow_smaller_files: bool,
@@ -56,10 +56,10 @@ impl GitGuessrGameFormatConfig {
         insert_into(git_guessr_game_format_config).values(item).get_result::<Self>(db)
     }
 
-    pub fn read(db: &mut Connection, param_repository: String) -> QueryResult<Self> {
+    pub fn read(db: &mut Connection, param_repository_id: String) -> QueryResult<Self> {
         use crate::schema::git_guessr_game_format_config::dsl::*;
 
-        git_guessr_game_format_config.filter(repository.eq(param_repository)).first::<Self>(db)
+        git_guessr_game_format_config.filter(repository_id.eq(param_repository_id)).first::<Self>(db)
     }
 
     /// Paginates through the table where page is a 0-based index (i.e. page 0 is the first page)
@@ -80,16 +80,16 @@ impl GitGuessrGameFormatConfig {
         })
     }
 
-    pub fn update(db: &mut Connection, param_repository: String, item: &UpdateGitGuessrGameFormatConfig) -> QueryResult<Self> {
+    pub fn update(db: &mut Connection, param_repository_id: String, item: &UpdateGitGuessrGameFormatConfig) -> QueryResult<Self> {
         use crate::schema::git_guessr_game_format_config::dsl::*;
 
-        diesel::update(git_guessr_game_format_config.filter(repository.eq(param_repository))).set(item).get_result(db)
+        diesel::update(git_guessr_game_format_config.filter(repository_id.eq(param_repository_id))).set(item).get_result(db)
     }
 
-    pub fn delete(db: &mut Connection, param_repository: String) -> QueryResult<usize> {
+    pub fn delete(db: &mut Connection, param_repository_id: String) -> QueryResult<usize> {
         use crate::schema::git_guessr_game_format_config::dsl::*;
 
-        diesel::delete(git_guessr_game_format_config.filter(repository.eq(param_repository))).execute(db)
+        diesel::delete(git_guessr_game_format_config.filter(repository_id.eq(param_repository_id))).execute(db)
     }
 
 }

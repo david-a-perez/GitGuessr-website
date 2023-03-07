@@ -1,4 +1,7 @@
-use crate::models::user_answer::{CreateUserAnswer, UserAnswer};
+use crate::models::{
+    question::Question,
+    user_answer::{CreateUserAnswer, UserAnswer},
+};
 use actix_web::{
     error::{ErrorInternalServerError, ErrorNotFound},
     get, post,
@@ -6,6 +9,7 @@ use actix_web::{
     HttpResponse, Responder,
 };
 use create_rust_app::Database;
+use gitguessr_auth::Auth;
 
 #[tsync::tsync]
 #[derive(serde::Deserialize)]
@@ -28,12 +32,12 @@ async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl
     })
 }
 
-#[get("/{user_id}/{question_id}")]
-async fn read(db: Data<Database>, user_id: Path<i32>, question_id: Path<i32>) -> impl Responder {
+#[get("/{id}")]
+async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        UserAnswer::read(&mut conn, user_id.into_inner(), question_id.into_inner())
+        UserAnswer::read(&mut conn, item_id.into_inner())
     })
     .await
     .map(|result| match result {
@@ -43,24 +47,39 @@ async fn read(db: Data<Database>, user_id: Path<i32>, question_id: Path<i32>) ->
 }
 
 #[post("")]
-async fn create(db: Data<Database>, Json(item): Json<CreateUserAnswer>) -> impl Responder {
+async fn create(
+    db: Data<Database>,
+    Json(mut item): Json<CreateUserAnswer>,
+    auth: Auth,
+) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        UserAnswer::create(&mut conn, &item)
+        item.user_id = auth.user_id;
+
+        let question = Question::read(&mut conn, item.question_id)?;
+        let curr_time = chrono::offset::Utc::now();
+        if let Some(start_time) = question.start_time {
+            if let Some(end_time) = question.end_time {
+                if start_time <= curr_time && curr_time <= end_time {
+                    return Ok(Some(UserAnswer::create(&mut conn, &item)?));
+                }
+            }
+        }
+        Ok::<Option<UserAnswer>, diesel::result::Error>(None)
     })
     .await
     .map(|result| match result {
-        Ok(result) => Ok(HttpResponse::Created().json(result)),
+        Ok(Some(result)) => Ok(HttpResponse::Created().json(result)),
+        Ok(None) => Ok(HttpResponse::Forbidden().finish()), // TODO: use error?
         Err(err) => Err(ErrorInternalServerError(err)),
     })
 }
 
-// #[put("/{user_id}/{question_id}")]
+// #[put("/{id}")]
 // async fn update(
 //     db: Data<Database>,
-//     user_id: Path<i32>,
-//     question_id: Path<i32>,
+//     item_id: Path<i32>,
 //     Json(item): Json<UpdateUserAnswer>,
 // ) -> impl Responder {
 //     actix_web::web::block(move || {
@@ -68,8 +87,7 @@ async fn create(db: Data<Database>, Json(item): Json<CreateUserAnswer>) -> impl 
 
 //         UserAnswer::update(
 //             &mut conn,
-//             user_id.into_inner(),
-//             question_id.into_inner(),
+//             item_id.into_inner(),
 //             &item,
 //         )
 //     })
@@ -80,12 +98,12 @@ async fn create(db: Data<Database>, Json(item): Json<CreateUserAnswer>) -> impl 
 //     })
 // }
 
-// #[delete("/{user_id}/{question_id}")]
-// async fn destroy(db: Data<Database>, user_id: Path<i32>, question_id: Path<i32>) -> impl Responder {
+// #[delete("/{id}")]
+// async fn destroy(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
 
-//         UserAnswer::delete(&mut conn, user_id.into_inner(), question_id.into_inner())
+//         UserAnswer::delete(&mut conn, item_id.into_inner())
 //     })
 //     .await
 //     .map(|result| match result {

@@ -1,19 +1,56 @@
 /* This file is generated and managed by tsync */
 
-interface CorrectAnswer {
-  question_id: number
+interface AnswerChoice {
+  id: number
   answer: string
+  question_id: number
+  lobby_id: string
+  created_at: Date
+  updated_at: Date
+}
+
+interface CreateAnswerChoice {
+  answer: string
+  question_id: number
+  lobby_id: string
+}
+
+interface UpdateAnswerChoice {
+  answer?: string
+  question_id?: number
+  lobby_id?: string
+  created_at?: Date
+  updated_at?: Date
+}
+
+interface PaginationResult<T> {
+  items: Array<T>
+  total_items: number
+  /** 0-based index */
+  page: number
+  page_size: number
+  num_pages: number
+}
+
+interface CorrectAnswer {
+  id: number
+  answer_choice_id: number
+  question_id: number
+  lobby_id: string
   created_at: Date
   updated_at: Date
 }
 
 interface CreateCorrectAnswer {
+  answer_choice_id: number
   question_id: number
-  answer: string
+  lobby_id: string
 }
 
 interface UpdateCorrectAnswer {
-  answer?: string
+  answer_choice_id?: number
+  question_id?: number
+  lobby_id?: string
   created_at?: Date
   updated_at?: Date
 }
@@ -28,14 +65,14 @@ interface PaginationResult<T> {
 }
 
 interface GitGuessrGameFormatConfig {
-  repository: string
+  repository_id: string
   filenames: string
   lines_shown: number
   allow_smaller_files: boolean
 }
 
 interface CreateGitGuessrGameFormatConfig {
-  repository: string
+  repository_id: string
   filenames: string
   lines_shown: number
   allow_smaller_files: boolean
@@ -59,16 +96,51 @@ interface PaginationResult<T> {
 interface Lobby {
   id: string
   repository: string
+  start_time?: Date
+  end_time?: Date
   created_at: Date
   updated_at: Date
 }
 
 interface CreateLobby {
   repository: string
+  start_time?: Date
+  end_time?: Date
 }
 
 interface UpdateLobby {
   repository?: string
+  start_time?: Date
+  end_time?: Date
+  created_at?: Date
+  updated_at?: Date
+}
+
+interface PaginationResult<T> {
+  items: Array<T>
+  total_items: number
+  /** 0-based index */
+  page: number
+  page_size: number
+  num_pages: number
+}
+
+interface LobbyParticipant {
+  id: number
+  user_id: number
+  lobby_id: string
+  created_at: Date
+  updated_at: Date
+}
+
+interface CreateLobbyParticipant {
+  user_id: number
+  lobby_id: string
+}
+
+interface UpdateLobbyParticipant {
+  user_id?: number
+  lobby_id?: string
   created_at?: Date
   updated_at?: Date
 }
@@ -83,12 +155,12 @@ interface PaginationResult<T> {
 }
 
 interface ObfuscatedGameFormatConfig {
-  repository: string
+  repository_id: string
   filenames: string
 }
 
 interface CreateObfuscatedGameFormatConfig {
-  repository: string
+  repository_id: string
   filenames: string
 }
 
@@ -108,19 +180,28 @@ interface PaginationResult<T> {
 interface Question {
   id: number
   lobby_id: string
+  question_num: number
   question_text: string
+  start_time?: Date
+  end_time?: Date
   created_at: Date
   updated_at: Date
 }
 
 interface CreateQuestion {
   lobby_id: string
+  question_num: number
   question_text: string
+  start_time?: Date
+  end_time?: Date
 }
 
 interface UpdateQuestion {
   lobby_id?: string
+  question_num?: number
   question_text?: string
+  start_time?: Date
+  end_time?: Date
   created_at?: Date
   updated_at?: Date
 }
@@ -184,21 +265,30 @@ interface PaginationResult<T> {
 }
 
 interface UserAnswer {
-  user_id: number
+  id: number
+  answer_choice_id: number
   question_id: number
-  answer: string
+  lobby_participant_id: number
+  user_id: number
+  lobby_id: string
   created_at: Date
   updated_at: Date
 }
 
 interface CreateUserAnswer {
-  user_id: number
+  answer_choice_id: number
   question_id: number
-  answer: string
+  lobby_participant_id: number
+  user_id: number
+  lobby_id: string
 }
 
 interface UpdateUserAnswer {
-  answer?: string
+  answer_choice_id?: number
+  question_id?: number
+  lobby_participant_id?: number
+  user_id?: number
+  lobby_id?: string
   created_at?: Date
   updated_at?: Date
 }
@@ -210,6 +300,16 @@ interface PaginationResult<T> {
   page: number
   page_size: number
   num_pages: number
+}
+
+interface PaginationParams {
+  page: number
+  page_size: number
+}
+
+interface PaginationParams {
+  page: number
+  page_size: number
 }
 
 interface PaginationParams {

@@ -4,13 +4,13 @@ CREATE TABLE repository (
     filename TEXT NOT NULL
 );
 CREATE TABLE git_guessr_game_format_config (
-    repository TEXT PRIMARY KEY REFERENCES repository(name),
+    repository_id TEXT PRIMARY KEY REFERENCES repository(name) ON DELETE CASCADE,
     filenames TEXT NOT NULL,
     lines_shown INTEGER NOT NULL,
     allow_smaller_files BOOLEAN NOT NULL
 );
 CREATE TABLE obfuscated_game_format_config (
-    repository TEXT PRIMARY KEY REFERENCES repository(name),
+    repository_id TEXT PRIMARY KEY REFERENCES repository(name) ON DELETE CASCADE,
     filenames TEXT NOT NULL
 );
 CREATE EXTENSION pgcrypto;
@@ -33,44 +33,74 @@ $$ LANGUAGE plpgsql VOLATILE;
 
 CREATE TABLE lobby (
     id TEXT PRIMARY KEY DEFAULT generate_uid(6),
-    -- id SERIAL PRIMARY KEY,
-    repository TEXT NOT NULL REFERENCES repository(name),
+    repository TEXT NOT NULL REFERENCES repository(name) ON DELETE CASCADE,
+    start_time TIMESTAMPTZ, --TODO: do we care when the game is started or only when questions start
+    end_time TIMESTAMPTZ, -- TODO: do we care when the game is ended or only when questions end
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 SELECT manage_updated_at('lobby');
 CREATE TABLE question (
-    id SERIAL PRIMARY KEY,
-    lobby_id TEXT NOT NULL REFERENCES lobby(id),
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    lobby_id TEXT NOT NULL REFERENCES lobby(id) ON DELETE CASCADE,
+    question_num INTEGER NOT NULL,
     question_text TEXT NOT NULL,
+    start_time TIMESTAMPTZ, -- TODO: if start_time has not started, set question_text to "Pending"
+    end_time TIMESTAMPTZ, -- TODO: if end_time has passed, don't allow submission
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (lobby_id, id),
+    UNIQUE (lobby_id, question_num)
 );
 SELECT manage_updated_at('question');
 CREATE TABLE answer_choice (
-    question_id SERIAL REFERENCES question(id),
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     answer TEXT NOT NULL,
+    question_id INTEGER NOT NULL,
+    lobby_id TEXT NOT NULL REFERENCES lobby(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (question_id, answer)
+    FOREIGN KEY (lobby_id, question_id) REFERENCES question (lobby_id, id) ON DELETE CASCADE,
+    UNIQUE (lobby_id, question_id, id),
+    UNIQUE (question_id, answer)
 );
 SELECT manage_updated_at('answer_choice');
 CREATE TABLE correct_answer (
-    question_id SERIAL REFERENCES question(id),
-    answer TEXT NOT NULL,
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    answer_choice_id INTEGER NOT NULL,
+    question_id INTEGER NOT NULL,
+    lobby_id TEXT NOT NULL REFERENCES lobby(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (question_id, answer) REFERENCES answer_choice (question_id, answer),
-    PRIMARY KEY (question_id)
+    FOREIGN KEY (lobby_id, question_id) REFERENCES question (lobby_id, id) ON DELETE CASCADE,
+    FOREIGN KEY (lobby_id, question_id, answer_choice_id) REFERENCES answer_choice (lobby_id, question_id, id) ON DELETE CASCADE,
+    UNIQUE (lobby_id, question_id, answer_choice_id, id),
+    UNIQUE (question_id)
 );
 SELECT manage_updated_at('correct_answer');
-CREATE TABLE user_answer (
-    user_id SERIAL NOT NULL REFERENCES users(id),
-    question_id SERIAL NOT NULL REFERENCES question(id),
-    answer TEXT NOT NULL,
+CREATE TABLE lobby_participant (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    lobby_id TEXT NOT NULL REFERENCES lobby(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (question_id, answer) REFERENCES answer_choice (question_id, answer),
-    PRIMARY KEY (user_id, question_id)
+    UNIQUE (lobby_id, user_id, id),
+    UNIQUE (lobby_id, user_id)
+);
+SELECT manage_updated_at('lobby_participant');
+CREATE TABLE user_answer (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    answer_choice_id INTEGER NOT NULL,
+    question_id INTEGER NOT NULL,
+    lobby_participant_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    lobby_id TEXT NOT NULL REFERENCES lobby(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (lobby_id, user_id, lobby_participant_id) REFERENCES lobby_participant (lobby_id, user_id, id) ON DELETE CASCADE,
+    FOREIGN KEY (lobby_id, question_id) REFERENCES question (lobby_id, id) ON DELETE CASCADE,
+    FOREIGN KEY (lobby_id, question_id, answer_choice_id) REFERENCES answer_choice (lobby_id, question_id, id) ON DELETE CASCADE,
+    UNIQUE (lobby_id, user_id, lobby_participant_id, question_id, answer_choice_id, id),
+    UNIQUE (user_id, answer_choice_id)
 );
 SELECT manage_updated_at('user_answer');

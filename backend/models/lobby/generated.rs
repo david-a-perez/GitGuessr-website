@@ -14,6 +14,8 @@ type Connection = create_rust_app::Connection;
 pub struct Lobby {
     pub id: String,
     pub repository: String,
+    pub start_time: Option<chrono::DateTime<chrono::Utc>>,
+    pub end_time: Option<chrono::DateTime<chrono::Utc>>,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
@@ -23,6 +25,8 @@ pub struct Lobby {
 #[diesel(table_name=lobby)]
 pub struct CreateLobby {
     pub repository: String,
+    pub start_time: Option<chrono::DateTime<chrono::Utc>>,
+    pub end_time: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 #[tsync::tsync]
@@ -30,6 +34,8 @@ pub struct CreateLobby {
 #[diesel(table_name=lobby)]
 pub struct UpdateLobby {
     pub repository: Option<String>,
+    pub start_time: Option<Option<chrono::DateTime<chrono::Utc>>>,
+    pub end_time: Option<Option<chrono::DateTime<chrono::Utc>>>,
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }
