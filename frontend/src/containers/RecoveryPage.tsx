@@ -11,7 +11,7 @@ export const RecoveryPage = () => {
   const recover = async () => {
     setProcessing(true)
     const response = await (
-      await fetch('/api/auth/forgot', {
+      await fetch('/auth_api/auth/forgot', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

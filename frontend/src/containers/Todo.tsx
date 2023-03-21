@@ -1,31 +1,8 @@
-import React, { useEffect, useState } from 'react'
-
-const TodoAPI = {
-  get: async (page: number, size: number) =>
-      await (await fetch(`/api/todos?page=${page}&page_size=${size}`)).json(),
-  create: async (todo: string) =>
-      await (
-          await fetch('/api/todos', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ text: todo }),
-          })
-      ).json(),
-  delete: async (id: number) =>
-      await fetch(`/api/todos/${id}`, { method: 'DELETE' }),
-  update: async (id: number, todo: string) =>
-      await fetch(`/api/todos/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: todo }),
-      }),
-}
+import { useEffect, useState } from 'react'
+import { useAuth } from '../hooks/useAuth'
 
 export const Todos = () => {
+  const auth = useAuth()
   const [text, setText] = useState<string>('')
   const [selectedTodo, editTodo] = useState<Todo | null>(null)
   const [todos, setTodos] = useState<PaginationResult<Todo>>()
@@ -34,6 +11,43 @@ export const Todos = () => {
   const [page, setPage] = useState<number>(0)
   const [numPages, setPages] = useState<number>(1)
   const [processing, setProcessing] = useState<boolean>(false)
+
+  const TodoAPI = {
+    get: async (page: number, size: number) =>
+      await (await fetch(`/api/todos?page=${page}&page_size=${size}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })).json(),
+    create: async (todo: string) =>
+      await (
+        await fetch('/api/todos', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+          body: JSON.stringify({ text: todo }),
+        })
+      ).json(),
+    delete: async (id: number) =>
+      await fetch(`/api/todos/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      }),
+    update: async (id: number, todo: string) =>
+      await fetch(`/api/todos/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+        body: JSON.stringify({ text: todo }),
+      }),
+  }
 
   const createTodo = async (todo: string) => {
     setProcessing(true)
@@ -68,11 +82,27 @@ export const Todos = () => {
   // fetch on page change
   useEffect(() => {
     setProcessing(true)
+    if (!auth.isAuthenticated) {
+      return
+    }
+
     TodoAPI.get(page, pageSize).then((todos) => {
       setTodos(todos)
       setProcessing(false)
     })
-  }, [page])
+  }, [auth.isAuthenticated, page])
+
+  // const [oldIsCheckingAuth, setOldIsCheckingAuth] = useState(auth.isCheckingAuth.current);
+
+  // // redirect to login
+  // useEffect(() => {
+  //   console.log([auth.isAuthenticated, oldIsCheckingAuth, auth.isCheckingAuth.current])
+  //   if (!auth.isAuthenticated && oldIsCheckingAuth && !auth.isCheckingAuth.current) {
+  //     navigate('/login')
+  //     return
+  //   }
+  //   setOldIsCheckingAuth(auth.isCheckingAuth.current)
+  // }, [auth.isAuthenticated, auth.isCheckingAuth.current])
 
   // update total number of pages
   useEffect(() => {

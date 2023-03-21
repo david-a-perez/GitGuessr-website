@@ -18,6 +18,8 @@ pub mod controller;
 mod endpoints;
 pub use endpoints::*;
 
+pub mod middleware;
+
 mod mail;
 mod permissions;
 mod schema;

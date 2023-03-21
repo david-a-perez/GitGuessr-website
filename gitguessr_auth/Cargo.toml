@@ -9,6 +9,7 @@ actix-web = "4.2.1"
 actix-http = "3.0.4"
 derive_more = "0.99.17"
 futures = "0.3.25"
+futures-util = "0.3.21"
 serde_json = "1.0.93"
 lazy_static = { version="1.4.0" }
 serde = { version = "1.0.152", features = ["derive"] }

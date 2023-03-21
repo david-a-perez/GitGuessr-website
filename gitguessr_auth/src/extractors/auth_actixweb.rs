@@ -1,5 +1,6 @@
 use crate::{permissions::Permission, AccessTokenClaims, ID};
 use actix_http::header::HeaderValue;
+use actix_http::HttpMessage;
 use actix_web::dev::Payload;
 use actix_web::error::ResponseError;
 use actix_web::http::StatusCode;
@@ -62,7 +63,7 @@ impl Auth {
 #[display(fmt = "Unauthorized, reason: {}", self.reason)]
 /// custom error type for Authorization related errors
 pub struct AuthError {
-    reason: String,
+    pub(crate) reason: String,
 }
 
 impl ResponseError for AuthError {
@@ -90,6 +91,10 @@ impl FromRequest for Auth {
 
     /// extracts [`Auth`] from the given [`req`](`HttpRequest`)
     fn from_request(req: &HttpRequest, _payload: &mut Payload) -> <Self as FromRequest>::Future {
+        if let Some(auth) = req.extensions().get::<Auth>() {
+            return ready(Ok(auth.clone()));
+        }
+
         let auth_header_opt: Option<&HeaderValue> = req.headers().get("Authorization");
 
         if auth_header_opt.is_none() {
@@ -135,10 +140,14 @@ impl FromRequest for Auth {
             HashSet::from_iter(access_token.claims.permissions.iter().cloned());
         let roles: HashSet<String> = HashSet::from_iter(access_token.claims.roles.iter().cloned());
 
-        ready(Ok(Auth {
+        let auth = Auth {
             user_id,
             roles,
             permissions,
-        }))
+        };
+
+        req.extensions_mut().insert(auth.clone());
+
+        ready(Ok(auth))
     }
 }

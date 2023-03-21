@@ -36,7 +36,7 @@ use create_rust_app::Mailer;
 /// Items are arranged in the database in such a way that the most recently added or updated items are last
 /// and are paginated accordingly
 #[cfg_attr(feature = "plugin_utoipa", utoipa::path(
-    context_path = "/api/auth",
+    context_path = "/auth_api/auth",
     params(PaginationParams),
     responses(
         (status = 200, description = "success, returns a json payload with all the sessions belonging to the authenticated user", body = UserSessionResponse),
@@ -72,7 +72,7 @@ async fn sessions(
 /// deletes the entry in the `user_session` with the specified [`item_id`](`ID`) from
 /// [`db`](`Database`) if it's owned by the User associated with [`auth`](`Auth`)
 #[cfg_attr(feature = "plugin_utoipa", utoipa::path(
-    context_path = "/api/auth",
+    context_path = "/auth_api/auth",
     responses(
         (status = 200, description = "Deleted", body = AuthMessageResponse),
         (status = 401, description = "User not authenticated"),
@@ -110,7 +110,7 @@ async fn destroy_session(
 /// destroys all entries in the `user_session` table in [`db`](`Database`) owned
 /// by the User associated with [`auth`](`Auth`)
 #[cfg_attr(feature = "plugin_utoipa", utoipa::path(
-    context_path = "/api/auth",
+    context_path = "/auth_api/auth",
     responses(
         (status = 200, description = "Deleted", body = AuthMessageResponse),
         (status = 401, description = "User not authenticated"),
@@ -139,7 +139,7 @@ async fn destroy_sessions(db: Data<Database>, auth: Auth) -> Result<HttpResponse
 /// creates a user session for the user associated with [`item`](`LoginInput`)
 /// in the request body (have the `content-type` header set to `application/json` and content that can be deserialized into [`LoginInput`])
 #[cfg_attr(feature = "plugin_utoipa", utoipa::path(
-    context_path = "/api/auth",
+    context_path = "/auth_api/auth",
     request_body(content = LoginInput, content_type = "application/json"),
     responses(
         (status = 200, description = "session created", body = AuthTokenResponse),
@@ -178,7 +178,7 @@ async fn login(db: Data<Database>, Json(item): Json<LoginInput>) -> Result<HttpR
 ///
 /// TODO: document that it creates a refresh_token
 #[cfg_attr(feature = "plugin_utoipa", utoipa::path(
-    context_path = "/api/auth",
+    context_path = "/auth_api/auth",
     responses(
         (status = 200, description = "deletes the \"refresh_token\" cookie"),
         (status = 401, description = "Invalid session.", body = AuthMessageResponse),
@@ -216,7 +216,7 @@ async fn logout(db: Data<Database>, req: HttpRequest) -> Result<HttpResponse, AW
 ///
 /// TODO: document that it needs a refresh_token cookie
 #[cfg_attr(feature = "plugin_utoipa", utoipa::path(
-    context_path = "/api/auth",
+    context_path = "/auth_api/auth",
     responses(
         (status = 200, description = "uses the \"refresh_token\" cookie to give the user a new session", body=AuthTokenResponse),
         (status = 401, description = "Invalid session.", body = AuthMessageResponse),
@@ -259,7 +259,7 @@ async fn refresh(db: Data<Database>, req: HttpRequest) -> Result<HttpResponse, A
 /// that contains a unique link that allows the recipient to activate the account associated with
 /// that email address
 #[cfg_attr(feature = "plugin_utoipa", utoipa::path(
-    context_path = "/api/auth",
+    context_path = "/auth_api/auth",
     request_body(content = RegisterInput, content_type = "application/json"),
     responses(
         (status = 200, description = "Success, sends an email to the user with a link that will let them activate their account", body=AuthMessageResponse),
@@ -289,7 +289,7 @@ async fn register(
 ///
 /// activates the account associated with the token in [`item`](`ActivationInput`)
 #[cfg_attr(feature = "plugin_utoipa", utoipa::path(
-    context_path = "/api/auth",
+    context_path = "/auth_api/auth",
     params(ActivationInput),
     responses(
         (status = 200, description = "Success, account associated with activation_token is activated", body=AuthMessageResponse),
@@ -327,7 +327,7 @@ async fn activate(
 /// of the account associated with that email address (or create a new account if there is
 /// no accound accosiated with the email address)
 #[cfg_attr(feature = "plugin_utoipa", utoipa::path(
-    context_path = "/api/auth",
+    context_path = "/auth_api/auth",
     request_body(content = ForgotInput, content_type = "application/json"),
     responses(
         (status = 200, description = "Success, password reset email is sent to users email", body=AuthMessageResponse),
@@ -359,7 +359,7 @@ async fn forgot_password(
 /// change the password of the User associated with [`auth`](`Auth`)
 /// from [`item.old_password`](`ChangeInput`) to [`item.new_password`](`ChangeInput`)
 #[cfg_attr(feature = "plugin_utoipa", utoipa::path(
-    context_path = "/api/auth",
+    context_path = "/auth_api/auth",
     request_body(content = ChangeInput, content_type = "application/json"),
     responses(
         (status = 200, description = "Success, password changed", body=AuthMessageResponse),
@@ -396,7 +396,7 @@ async fn change_password(
 ///
 /// requires auth, but doesn't match it to a user
 #[cfg_attr(feature = "plugin_utoipa", utoipa::path(
-    context_path = "/api/auth",
+    context_path = "/auth_api/auth",
     responses(
         (status = 200, description = "Success, API is running"),
     ),
@@ -414,7 +414,7 @@ async fn check(auth: Auth) -> HttpResponse {
 /// changes the password of the user associated with [`item.reset_token`](`ResetInput`)
 /// to [`item.new_password`](`ResetInput`)
 #[cfg_attr(feature = "plugin_utoipa", utoipa::path(
-    context_path = "/api/auth",
+    context_path = "/auth_api/auth",
     request_body(content = ResetInput, content_type = "application/json"),
     responses(
         (status = 200, description = "Password changed.", body=AuthMessageResponse),

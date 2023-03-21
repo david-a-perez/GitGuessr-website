@@ -23,7 +23,8 @@ diesel::table! {
 }
 
 diesel::table! {
-    git_guessr_game_format_config (repository_id) {
+    git_guessr_game_format_config (id) {
+        id -> Int4,
         repository_id -> Text,
         filenames -> Text,
         lines_shown -> Int4,
@@ -34,7 +35,9 @@ diesel::table! {
 diesel::table! {
     lobby (id) {
         id -> Text,
-        repository -> Text,
+        git_guessr_game_format_config_id -> Nullable<Int4>,
+        obfuscated_game_format_config_id -> Nullable<Int4>,
+        repository_id -> Text,
         start_time -> Nullable<Timestamptz>,
         end_time -> Nullable<Timestamptz>,
         created_at -> Timestamptz,
@@ -53,7 +56,8 @@ diesel::table! {
 }
 
 diesel::table! {
-    obfuscated_game_format_config (repository_id) {
+    obfuscated_game_format_config (id) {
+        id -> Int4,
         repository_id -> Text,
         filenames -> Text,
     }
@@ -153,7 +157,9 @@ diesel::joinable!(correct_answer -> answer_choice (answer_choice_id));
 diesel::joinable!(correct_answer -> lobby (lobby_id));
 diesel::joinable!(correct_answer -> question (question_id));
 diesel::joinable!(git_guessr_game_format_config -> repository (repository_id));
-diesel::joinable!(lobby -> repository (repository));
+diesel::joinable!(lobby -> git_guessr_game_format_config (git_guessr_game_format_config_id));
+diesel::joinable!(lobby -> obfuscated_game_format_config (obfuscated_game_format_config_id));
+diesel::joinable!(lobby -> repository (repository_id));
 diesel::joinable!(lobby_participant -> lobby (lobby_id));
 diesel::joinable!(lobby_participant -> users (user_id));
 diesel::joinable!(obfuscated_game_format_config -> repository (repository_id));

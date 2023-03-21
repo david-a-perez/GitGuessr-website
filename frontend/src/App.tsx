@@ -9,7 +9,11 @@ import React from 'react'
 import './App.css'
 import { Home } from './containers/Home'
 import { Todos } from './containers/Todo'
+import { CreateLobby } from './containers/CreateLobby2'
 import { Route, useNavigate, Routes } from 'react-router-dom'
+import { JoinLobby } from './containers/JoinLobby'
+import { WaitingRoom } from './containers/WaitingRoom'
+import { Question } from './containers/Question'
 
 const App = () => {
   useAuthCheck()
@@ -27,6 +31,12 @@ const App = () => {
           <a className="NavButton" onClick={() => navigate('/todos')}>Todos</a>
           {/* CRA: left-aligned nav buttons */}
           <a className="NavButton" onClick={() => navigate('/account')}>Account</a>
+          {auth.isAuthenticated &&
+            <>
+              <a className="NavButton" onClick={() => navigate('/create_lobby')}>Create Lobby</a>
+              <a className="NavButton" onClick={() => navigate('/join_lobby')}>Join Lobby</a>
+            </>}
+
         </div>
         <div>
           {/* CRA: right-aligned nav buttons */}
@@ -38,6 +48,11 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/todos" element={<Todos />} />
+          <Route path="/create_lobby" element={<CreateLobby />} />
+          <Route path="/join_lobby" element={<JoinLobby />} />
+          <Route path="/lobby/:lobby_id" element={<WaitingRoom />} />
+          <Route path="/question/:lobby_id/:question_num" element={<Question />} />
+
           {/* CRA: routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/recovery" element={<RecoveryPage />} />

@@ -4,16 +4,20 @@ use crate::diesel::*;
 use crate::schema::*;
 use diesel::QueryResult;
 use serde::{Deserialize, Serialize};
+use crate::models::git_guessr_game_format_config::GitGuessrGameFormatConfig;
+use crate::models::obfuscated_game_format_config::ObfuscatedGameFormatConfig;
 use crate::models::repository::Repository;
 
 type Connection = create_rust_app::Connection;
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset, Identifiable, Associations, Selectable)]
-#[diesel(table_name=lobby, primary_key(id), belongs_to(Repository, foreign_key=repository))]
+#[diesel(table_name=lobby, primary_key(id), belongs_to(GitGuessrGameFormatConfig, foreign_key=git_guessr_game_format_config_id) , belongs_to(ObfuscatedGameFormatConfig, foreign_key=obfuscated_game_format_config_id) , belongs_to(Repository, foreign_key=repository_id))]
 pub struct Lobby {
     pub id: String,
-    pub repository: String,
+    pub git_guessr_game_format_config_id: Option<i32>,
+    pub obfuscated_game_format_config_id: Option<i32>,
+    pub repository_id: String,
     pub start_time: Option<chrono::DateTime<chrono::Utc>>,
     pub end_time: Option<chrono::DateTime<chrono::Utc>>,
     pub created_at: chrono::DateTime<chrono::Utc>,
@@ -24,7 +28,9 @@ pub struct Lobby {
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=lobby)]
 pub struct CreateLobby {
-    pub repository: String,
+    pub git_guessr_game_format_config_id: Option<i32>,
+    pub obfuscated_game_format_config_id: Option<i32>,
+    pub repository_id: String,
     pub start_time: Option<chrono::DateTime<chrono::Utc>>,
     pub end_time: Option<chrono::DateTime<chrono::Utc>>,
 }
@@ -33,7 +39,9 @@ pub struct CreateLobby {
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=lobby)]
 pub struct UpdateLobby {
-    pub repository: Option<String>,
+    pub git_guessr_game_format_config_id: Option<Option<i32>>,
+    pub obfuscated_game_format_config_id: Option<Option<i32>>,
+    pub repository_id: Option<String>,
     pub start_time: Option<Option<chrono::DateTime<chrono::Utc>>>,
     pub end_time: Option<Option<chrono::DateTime<chrono::Utc>>>,
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,

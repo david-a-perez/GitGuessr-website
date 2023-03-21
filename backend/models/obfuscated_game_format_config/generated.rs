@@ -10,8 +10,9 @@ type Connection = create_rust_app::Connection;
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset, Identifiable, Associations, Selectable)]
-#[diesel(table_name=obfuscated_game_format_config, primary_key(repository_id), belongs_to(Repository, foreign_key=repository_id))]
+#[diesel(table_name=obfuscated_game_format_config, primary_key(id), belongs_to(Repository, foreign_key=repository_id))]
 pub struct ObfuscatedGameFormatConfig {
+    pub id: i32,
     pub repository_id: String,
     pub filenames: String,
 }
@@ -28,6 +29,7 @@ pub struct CreateObfuscatedGameFormatConfig {
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=obfuscated_game_format_config)]
 pub struct UpdateObfuscatedGameFormatConfig {
+    pub repository_id: Option<String>,
     pub filenames: Option<String>,
 }
 
@@ -50,10 +52,10 @@ impl ObfuscatedGameFormatConfig {
         insert_into(obfuscated_game_format_config).values(item).get_result::<Self>(db)
     }
 
-    pub fn read(db: &mut Connection, param_repository_id: String) -> QueryResult<Self> {
+    pub fn read(db: &mut Connection, param_id: i32) -> QueryResult<Self> {
         use crate::schema::obfuscated_game_format_config::dsl::*;
 
-        obfuscated_game_format_config.filter(repository_id.eq(param_repository_id)).first::<Self>(db)
+        obfuscated_game_format_config.filter(id.eq(param_id)).first::<Self>(db)
     }
 
     /// Paginates through the table where page is a 0-based index (i.e. page 0 is the first page)
@@ -74,16 +76,16 @@ impl ObfuscatedGameFormatConfig {
         })
     }
 
-    pub fn update(db: &mut Connection, param_repository_id: String, item: &UpdateObfuscatedGameFormatConfig) -> QueryResult<Self> {
+    pub fn update(db: &mut Connection, param_id: i32, item: &UpdateObfuscatedGameFormatConfig) -> QueryResult<Self> {
         use crate::schema::obfuscated_game_format_config::dsl::*;
 
-        diesel::update(obfuscated_game_format_config.filter(repository_id.eq(param_repository_id))).set(item).get_result(db)
+        diesel::update(obfuscated_game_format_config.filter(id.eq(param_id))).set(item).get_result(db)
     }
 
-    pub fn delete(db: &mut Connection, param_repository_id: String) -> QueryResult<usize> {
+    pub fn delete(db: &mut Connection, param_id: i32) -> QueryResult<usize> {
         use crate::schema::obfuscated_game_format_config::dsl::*;
 
-        diesel::delete(obfuscated_game_format_config.filter(repository_id.eq(param_repository_id))).execute(db)
+        diesel::delete(obfuscated_game_format_config.filter(id.eq(param_id))).execute(db)
     }
 
 }

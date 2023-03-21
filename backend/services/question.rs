@@ -1,4 +1,6 @@
-use crate::models::question::Question;
+use crate::models::{
+    answer_choice::AnswerChoice, correct_answer::CorrectAnswer, question::Question, user_answer::UserAnswer,
+};
 use actix_web::{
     error::{ErrorInternalServerError, ErrorNotFound},
     get,
@@ -6,6 +8,7 @@ use actix_web::{
     HttpResponse, Responder,
 };
 use create_rust_app::Database;
+use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, QueryResult};
 
 #[tsync::tsync]
 #[derive(serde::Deserialize)]
@@ -45,6 +48,89 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
     .map(|result| match result {
         Ok(Some(result)) => Ok(HttpResponse::Ok().json(result)),
         Ok(None) => Ok(HttpResponse::Forbidden().finish()), // TODO: use error?
+        Err(err) => Err(ErrorNotFound(err)),
+    })
+}
+
+#[tsync::tsync]
+#[derive(serde::Serialize)]
+struct FullQuestion {
+    question: Question,
+    answer_choices: Vec<AnswerChoice>,
+    correct_answer: Option<CorrectAnswer>,
+    user_answer: Option<UserAnswer>,
+}
+
+#[get("/{lobby_id}/{question_num}")]
+async fn read_by_lobby_and_question_num(
+    db: Data<Database>,
+    params: Path<(String, i32)>,
+) -> impl Responder {
+    actix_web::web::block(move || {
+        let (lobby_param, question_num_param) = params.into_inner();
+        let mut conn = db.get_connection();
+
+        let mut question = {
+            use crate::schema::question::dsl::*;
+
+            question
+                .filter(lobby_id.eq(lobby_param))
+                .filter(question_num.eq(question_num_param))
+                .first::<Question>(&mut conn)?
+        };
+
+        let mut answer_choices = {
+            use crate::schema::answer_choice::dsl::*;
+
+            answer_choice
+                .filter(question_id.eq(question.id))
+                .load::<AnswerChoice>(&mut conn)?
+        };
+
+        // Remove the text from the question and answer choices if the question hasn't started yet
+        let curr_time = chrono::offset::Utc::now();
+        match question.start_time {
+            Some(start_time) if curr_time >= start_time => {}
+            _ => {
+                question.question_text = String::new();
+                for answer_choice in &mut answer_choices {
+                    answer_choice.answer = String::new();
+                }
+            }
+        }
+
+        // Only show correct answer if the question has already ended
+        let correct_answer = match question.end_time {
+            Some(end_time) if curr_time >= end_time => Some({
+                use crate::schema::correct_answer::dsl::*;
+
+                correct_answer
+                    .filter(question_id.eq(question.id))
+                    .first::<CorrectAnswer>(&mut conn)?
+            }),
+            _ => None,
+        };
+
+        // Only show correct answer if the question has already ended
+        let user_answer = {
+            use crate::schema::user_answer::dsl::*;
+
+            user_answer
+                .filter(question_id.eq(question.id))
+                .first::<UserAnswer>(&mut conn)
+                .optional()?
+        };
+
+        QueryResult::Ok(FullQuestion {
+            question,
+            answer_choices,
+            correct_answer,
+            user_answer
+        })
+    })
+    .await
+    .map(|result| match result {
+        Ok(result) => Ok(HttpResponse::Ok().json(result)),
         Err(err) => Err(ErrorNotFound(err)),
     })
 }
@@ -96,7 +182,10 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 // }
 
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
-    scope.service(index).service(read)
+    scope
+        .service(index)
+        .service(read)
+        .service(read_by_lobby_and_question_num)
     // .service(create)
     // .service(update)
     // .service(destroy)

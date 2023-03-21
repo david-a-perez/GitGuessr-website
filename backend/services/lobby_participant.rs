@@ -7,6 +7,7 @@ use actix_web::{
 };
 use create_rust_app::Database;
 use gitguessr_auth::Auth;
+use serde::Deserialize;
 
 #[tsync::tsync]
 #[derive(serde::Deserialize)]
@@ -15,12 +16,61 @@ pub struct PaginationParams {
     pub page_size: i64,
 }
 
+#[tsync::tsync]
+#[derive(Deserialize)]
+struct LobbyParticipantFilters {
+    lobby_id: Option<String>,
+    user_id: Option<i32>
+}
+
 #[get("")]
-async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl Responder {
+async fn index(
+    db: Data<Database>,
+    Query(PaginationParams { page, page_size }): Query<PaginationParams>,
+    Query(filters): Query<LobbyParticipantFilters>,
+) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        LobbyParticipant::paginate(&mut conn, info.page, info.page_size)
+        {
+            use crate::diesel::ExpressionMethods;
+            use crate::diesel::QueryDsl;
+            use crate::diesel::QueryResult;
+            use crate::diesel::RunQueryDsl;
+            use crate::models::lobby_participant::PaginationResult;
+            use crate::schema::lobby_participant::dsl::*;
+
+            let page_size = if page_size < 1 { 1 } else { page_size };
+
+            let mut query = lobby_participant.into_boxed();
+            let mut count_query = lobby_participant.into_boxed();
+
+            if let Some(lobby) = filters.lobby_id {
+                query = query.filter(lobby_id.eq(lobby.clone()));
+                count_query = count_query.filter(lobby_id.eq(lobby));
+            }
+
+            if let Some(user) = filters.user_id {
+                query = query.filter(user_id.eq(user));
+                count_query = count_query.filter(user_id.eq(user));
+            }
+
+            let items = query
+                .limit(page_size)
+                .offset(page * page_size)
+                .load::<LobbyParticipant>(&mut conn)?;
+
+            let total_items = count_query.count().get_result(&mut conn)?;
+
+            QueryResult::Ok(PaginationResult {
+                items,
+                total_items,
+                page,
+                page_size,
+                /* ceiling division of integers */
+                num_pages: total_items / page_size + i64::from(total_items % page_size != 0),
+            })
+        }
     })
     .await
     .map(|result| match result {
@@ -42,6 +92,38 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
         Err(err) => Err(ErrorNotFound(err)),
     })
 }
+
+// #[get("/{lobby_id}")]
+// async fn read_by_lobby(
+//     db: Data<Database>,
+//     param: Path<String>,
+//     auth: Auth,
+// ) -> impl Responder {
+//     actix_web::web::block(move || {
+//         let lobby_param = param.into_inner();
+//         let mut conn = db.get_connection();
+
+//         let lobby_participant = {
+//             use crate::diesel::ExpressionMethods;
+//             use crate::diesel::QueryDsl;
+//             use crate::diesel::RunQueryDsl;
+//             use crate::schema::lobby_participant::dsl::*;
+
+//             lobby_participant
+//                 .filter(lobby_id.eq(lobby_param))
+//                 .filter(user_id.eq(auth.user_id))
+//                 .first::<LobbyParticipant>(&mut conn)?
+//         };
+
+//         QueryResult::Ok(None)
+//     })
+//     .await
+//     .map(|result| match result {
+//         Ok(Some(result)) => Ok(HttpResponse::Ok().json(result)),
+//         Ok(None) => Ok(HttpResponse::Forbidden().finish()), // TODO: use error?
+//         Err(err) => Err(ErrorNotFound(err)),
+//     })
+// }
 
 #[post("")]
 async fn create(

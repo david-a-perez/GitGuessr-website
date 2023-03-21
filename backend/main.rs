@@ -5,8 +5,7 @@ use actix_web::middleware::{Compress, Logger, NormalizePath};
 use actix_web::web::Data;
 use actix_web::{web, App, HttpServer};
 use diesel::connection::SimpleConnection;
-
-// use crate::models::lobby::{CreateLobby, Lobby};
+use gitguessr_auth::middleware::RequireAuth;
 
 mod mail;
 mod models;
@@ -33,30 +32,31 @@ async fn main() -> std::io::Result<()> {
         app = app.app_data(Data::new(app_data.database.clone()));
         app = app.app_data(Data::new(app_data.mailer.clone()));
 
-        let mut api_scope = web::scope("/api");
-        api_scope = api_scope.service(services::answer_choice::endpoints(web::scope(
-            "/answer_choice",
-        )));
-        api_scope = api_scope.service(services::correct_answer::endpoints(web::scope(
-            "/correct_answer",
-        )));
-        api_scope = api_scope.service(services::git_guessr_game_format_config::endpoints(
-            web::scope("/git_guessr_game_format_config"),
-        ));
-        api_scope = api_scope.service(services::lobby::endpoints(web::scope("/lobby")));
-        api_scope = api_scope.service(services::lobby_participant::endpoints(web::scope(
-            "/lobby_participant",
-        )));
-        api_scope = api_scope.service(services::obfuscated_game_format_config::endpoints(
-            web::scope("/obfuscated_game_format_config"),
-        ));
-        api_scope = api_scope.service(services::question::endpoints(web::scope("/question")));
-        api_scope = api_scope.service(services::repository::endpoints(web::scope("/repository")));
-        api_scope = api_scope.service(services::todo::endpoints(web::scope("/todos")));
-        api_scope = api_scope.service(services::user_answer::endpoints(web::scope(
-            "/user_answers",
-        )));
-        api_scope = api_scope.service(gitguessr_auth::endpoints(web::scope("/auth")));
+        let api_scope = web::scope("/api")
+            .wrap(RequireAuth)
+            .service(services::answer_choice::endpoints(web::scope(
+                "/answer_choice",
+            )))
+            .service(services::correct_answer::endpoints(web::scope(
+                "/correct_answer",
+            )))
+            .service(services::git_guessr_game_format_config::endpoints(
+                web::scope("/git_guessr_game_format_config"),
+            ))
+            .service(services::lobby::endpoints(web::scope("/lobby")))
+            .service(services::lobby_participant::endpoints(web::scope(
+                "/lobby_participant",
+            )))
+            .service(services::obfuscated_game_format_config::endpoints(
+                web::scope("/obfuscated_game_format_config"),
+            ))
+            .service(services::question::endpoints(web::scope("/question")))
+            .service(services::repository::endpoints(web::scope("/repository")))
+            .service(services::todo::endpoints(web::scope("/todos")))
+            .service(services::user_answer::endpoints(web::scope("/user_answer")));
+
+        let auth_scope =
+            web::scope("/auth_api").service(gitguessr_auth::endpoints(web::scope("/auth")));
 
         // #[cfg(debug_assertions)]
         // {
@@ -68,6 +68,7 @@ async fn main() -> std::io::Result<()> {
         // }
 
         app = app.service(api_scope);
+        app = app.service(auth_scope);
         app = app.default_service(web::get().to(create_rust_app::render_views));
         app
     })

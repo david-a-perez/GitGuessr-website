@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
@@ -23,7 +23,7 @@ export const AccountPage = () => {
   const deleteSession = async (id: number) => {
     setDeleting(true)
 
-    const response = await fetch(`/api/auth/sessions/${id}`, {
+    const response = await fetch(`/auth_api/auth/sessions/${id}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
@@ -43,7 +43,7 @@ export const AccountPage = () => {
   const deleteAllSessions = async () => {
     setDeleting(true)
 
-    const response = await fetch(`/api/auth/sessions`, {
+    const response = await fetch(`/auth_api/auth/sessions`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
@@ -68,7 +68,7 @@ export const AccountPage = () => {
     }
 
     const sessions = await (
-      await fetch(`/api/auth/sessions?page=${page}&page_size=${pageSize}`, {
+      await fetch(`/auth_api/auth/sessions?page=${page}&page_size=${pageSize}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${auth.accessToken}`,
@@ -87,7 +87,7 @@ export const AccountPage = () => {
   const changePassword = async () => {
     setProcessing(true)
     const response = await (
-      await fetch('/api/auth/change', {
+      await fetch('/auth_api/auth/change', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -4,14 +4,20 @@ CREATE TABLE repository (
     filename TEXT NOT NULL
 );
 CREATE TABLE git_guessr_game_format_config (
-    repository_id TEXT PRIMARY KEY REFERENCES repository(name) ON DELETE CASCADE,
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    repository_id TEXT NOT NULL REFERENCES repository(name) ON DELETE CASCADE,
     filenames TEXT NOT NULL,
     lines_shown INTEGER NOT NULL,
-    allow_smaller_files BOOLEAN NOT NULL
+    allow_smaller_files BOOLEAN NOT NULL,
+    UNIQUE (repository_id, id),
+    UNIQUE (repository_id)
 );
 CREATE TABLE obfuscated_game_format_config (
-    repository_id TEXT PRIMARY KEY REFERENCES repository(name) ON DELETE CASCADE,
-    filenames TEXT NOT NULL
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    repository_id TEXT NOT NULL REFERENCES repository(name) ON DELETE CASCADE,
+    filenames TEXT NOT NULL,
+    UNIQUE (repository_id, id),
+    UNIQUE (repository_id)
 );
 CREATE EXTENSION pgcrypto;
 
@@ -33,11 +39,17 @@ $$ LANGUAGE plpgsql VOLATILE;
 
 CREATE TABLE lobby (
     id TEXT PRIMARY KEY DEFAULT generate_uid(6),
-    repository TEXT NOT NULL REFERENCES repository(name) ON DELETE CASCADE,
+    git_guessr_game_format_config_id INTEGER,
+    obfuscated_game_format_config_id INTEGER,
+    repository_id TEXT NOT NULL REFERENCES repository(name) ON DELETE CASCADE,
+
     start_time TIMESTAMPTZ, --TODO: do we care when the game is started or only when questions start
     end_time TIMESTAMPTZ, -- TODO: do we care when the game is ended or only when questions end
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (repository_id, git_guessr_game_format_config_id) REFERENCES git_guessr_game_format_config (repository_id, id) ON DELETE CASCADE,
+    FOREIGN KEY (repository_id, obfuscated_game_format_config_id) REFERENCES obfuscated_game_format_config (repository_id, id) ON DELETE CASCADE,
+    CONSTRAINT chk_only_one_is_not_null CHECK (num_nonnulls(git_guessr_game_format_config_id, obfuscated_game_format_config_id) = 1)
 );
 SELECT manage_updated_at('lobby');
 CREATE TABLE question (
@@ -101,6 +113,6 @@ CREATE TABLE user_answer (
     FOREIGN KEY (lobby_id, question_id) REFERENCES question (lobby_id, id) ON DELETE CASCADE,
     FOREIGN KEY (lobby_id, question_id, answer_choice_id) REFERENCES answer_choice (lobby_id, question_id, id) ON DELETE CASCADE,
     UNIQUE (lobby_id, user_id, lobby_participant_id, question_id, answer_choice_id, id),
-    UNIQUE (user_id, answer_choice_id)
+    UNIQUE (user_id, question_id)
 );
 SELECT manage_updated_at('user_answer');

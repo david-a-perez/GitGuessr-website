@@ -65,6 +65,7 @@ interface PaginationResult<T> {
 }
 
 interface GitGuessrGameFormatConfig {
+  id: number
   repository_id: string
   filenames: string
   lines_shown: number
@@ -79,6 +80,7 @@ interface CreateGitGuessrGameFormatConfig {
 }
 
 interface UpdateGitGuessrGameFormatConfig {
+  repository_id?: string
   filenames?: string
   lines_shown?: number
   allow_smaller_files?: boolean
@@ -95,7 +97,9 @@ interface PaginationResult<T> {
 
 interface Lobby {
   id: string
-  repository: string
+  git_guessr_game_format_config_id?: number
+  obfuscated_game_format_config_id?: number
+  repository_id: string
   start_time?: Date
   end_time?: Date
   created_at: Date
@@ -103,13 +107,17 @@ interface Lobby {
 }
 
 interface CreateLobby {
-  repository: string
+  git_guessr_game_format_config_id?: number
+  obfuscated_game_format_config_id?: number
+  repository_id: string
   start_time?: Date
   end_time?: Date
 }
 
 interface UpdateLobby {
-  repository?: string
+  git_guessr_game_format_config_id?: number
+  obfuscated_game_format_config_id?: number
+  repository_id?: string
   start_time?: Date
   end_time?: Date
   created_at?: Date
@@ -155,6 +163,7 @@ interface PaginationResult<T> {
 }
 
 interface ObfuscatedGameFormatConfig {
+  id: number
   repository_id: string
   filenames: string
 }
@@ -165,6 +174,7 @@ interface CreateObfuscatedGameFormatConfig {
 }
 
 interface UpdateObfuscatedGameFormatConfig {
+  repository_id?: string
   filenames?: string
 }
 
@@ -317,9 +327,16 @@ interface PaginationParams {
   page_size: number
 }
 
-interface PaginationParams {
-  page: number
-  page_size: number
+interface LobbyFilters {
+  repository_id?: string
+}
+
+interface FullLobby {
+  lobby: Lobby
+}
+
+interface StartLobby {
+  start_time?: Date
 }
 
 interface PaginationParams {
@@ -327,14 +344,21 @@ interface PaginationParams {
   page_size: number
 }
 
-interface PaginationParams {
-  page: number
-  page_size: number
+interface LobbyParticipantFilters {
+  lobby_id?: string
+  user_id?: number
 }
 
 interface PaginationParams {
   page: number
   page_size: number
+}
+
+interface FullQuestion {
+  question: Question
+  answer_choices: Array<AnswerChoice>
+  correct_answer?: CorrectAnswer
+  user_answer?: UserAnswer
 }
 
 interface PaginationParams {

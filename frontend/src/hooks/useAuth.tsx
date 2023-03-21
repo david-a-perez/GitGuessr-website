@@ -1,4 +1,5 @@
 import React, { createContext, MutableRefObject, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const MILLISECONDS_UNTIL_EXPIRY_CHECK = 10 * 1000 // check expiry every 10 seconds
 const REMAINING_TOKEN_EXPIRY_TIME_ALLOWED = 60 * 1000 // 1 minute before token should be refreshed
@@ -78,11 +79,20 @@ export const AuthProvider = (props: AuthWrapperProps) => {
   )
 }
 
-export const useAuth = () => {
+export interface Auth {
+  accessToken: string | undefined;
+  session: Session | undefined;
+  isCheckingAuth: React.MutableRefObject<boolean>;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<boolean>;
+}
+
+export const useAuth: () => Auth = () => {
   const context = useContext(Context)
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    const response = await fetch('/api/auth/login', {
+    const response = await fetch('/auth_api/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -112,7 +122,7 @@ export const useAuth = () => {
   }
 
   const logout = async (): Promise<boolean> => {
-    const response = await fetch('/api/auth/logout', {
+    const response = await fetch('/auth_api/auth/logout', {
       method: 'POST',
     })
 
@@ -137,6 +147,8 @@ export const useAuth = () => {
 
 export const useAuthCheck = () => {
   const context = useContext(Context)
+  const location = useLocation()
+  const navigate = useNavigate()
   const { isCheckingAuth } = context
 
   const refreshIfNecessary = useCallback(async () => {
@@ -158,7 +170,7 @@ export const useAuthCheck = () => {
 
     if (!context.accessToken || isExpiringSoon()) {
       // console.log('Restoring session')
-      const response = await fetch('/api/auth/refresh', {
+      const response = await fetch('/auth_api/auth/refresh', {
         method: 'POST',
       })
 
@@ -177,6 +189,13 @@ export const useAuthCheck = () => {
           hasPermission: permissions.hasPermission,
         })
       } else {
+        if (!['/', '/login', '/recovery', '/reset', '/activate', '/register'].includes(location.pathname)) {
+          navigate('/login', {
+            state: {
+              from: `${location.pathname}${location.search}`
+            }
+          })
+        }
         context.setAccessToken(undefined)
         context.setSession(undefined)
       }

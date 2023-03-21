@@ -16,7 +16,7 @@ export const ResetPage = () => {
     setProcessing(true)
     try {
       const response = await (
-        await fetch('/api/auth/reset', {
+        await fetch('/auth_api/auth/reset', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

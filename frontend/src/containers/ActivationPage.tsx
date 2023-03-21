@@ -13,7 +13,7 @@ export const ActivationPage = () => {
   const activate = async () => {
     setProcessing(true)
     const response = await fetch(
-      `/api/auth/activate?activation_token=${activationToken}`,
+      `/auth_api/auth/activate?activation_token=${activationToken}`,
       {
         headers: {
           'Content-Type': 'application/json',

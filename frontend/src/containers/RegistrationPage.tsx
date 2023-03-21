@@ -12,7 +12,7 @@ export const RegistrationPage = () => {
   const register = async () => {
     setProcessing(true)
     const response = (
-      await fetch('/api/auth/register', {
+      await fetch('/auth_api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
