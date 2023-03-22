@@ -1,23 +1,6 @@
-import { Button } from 'react-bootstrap'
-import { useAuth } from '../hooks/useAuth'
-import { useNavigate } from 'react-router-dom'
+import React from 'react'
 
 export const Home = () => {
-  const auth = useAuth()
-  const navigate = useNavigate()
-
-  if(!auth.isAuthenticated)
-  {
-    return (
-      <div>
-        <br />
-        <h1 className='font-monospace'>Welcome to GITGUESSR</h1>
-        <br />
-        <br />
-        <h2>Login or Sign Up to Play!</h2>
-      </div>
-    )
-  }
 
   return (
     <div>
@@ -26,24 +9,17 @@ export const Home = () => {
         <div className='outer-container'>
           <div className='row'>
             <div className='col'>
-              <div className='inner-container'>
-                <div className='row'>
-                  <div className='column'>
-                    <Button className='mb-3 btn-lg' variant='light' onClick={() => navigate('/repos')}>Single Player</Button>
-                  </div>
-                  <div className='column'></div>
-                </div>
-                <div className='row'>
-                  <div className='column'>
-                    <Button className='mb-3 btn-lg' variant='light' onClick={() => navigate('/create_lobby')}>Create Lobby</Button>
-                  </div>
-                  <div className='column'></div>
-                </div>
-                <div className='row'>
-                  <div className='column'>
-                    <Button className='mb-3 btn-lg' variant='light' onClick={() => navigate('/join_lobby')}>Join Lobby</Button>
-                  </div>
-                  <div className='column'></div>
+              <div className="card h-80">
+                <h5 className="card-header">About</h5>
+                <div className="card-body">
+                  <p className="card-text">
+                    GitGuessr is designed to help you learn a new codebase, or stay up to date on one you 
+                    already use. The goal of this project is to create a tool that is both secure enough and 
+                    flexible enough to be useful in industry applications. To learn more about GitGuessr or 
+                    to clone the repository and use it for your team, visit 
+                    our <a href="https://github.com/david-a-perez/GitGuessr-website" target="_blank">github page
+                    </a>.
+                  </p>
                 </div>
               </div>
             </div>
@@ -52,7 +28,6 @@ export const Home = () => {
             </div>
           </div>
         </div>
-        
       </div>
     </div>
   )
