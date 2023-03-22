@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLobbyAPI } from '../apis/lobby'
 import { useLobbyParticipantAPI } from '../apis/lobby_participant'
 import { useAuth } from '../hooks/useAuth'
+import { Button } from 'react-bootstrap'
 
 export const JoinLobby = () => {
   const auth = useAuth()
@@ -65,46 +66,86 @@ export const JoinLobby = () => {
 
   return (
     <div style={{ display: 'flex', flexFlow: 'column', textAlign: 'left' }}>
-      <h1>Lobbies</h1>
+      <div className="mb-4 mt-4 text-center">
+        <h1>Lobbies</h1>
+      </div>
       {(!lobbies || lobbies.total_items === 0) && "No lobbies"}
-      {lobbies?.items.map((lobby) =>
-        lobby.id === selectedLobby?.id ? (
-          <div className="Form">
-            <div style={{ flex: 1 }}>
-              {lobby.id} {lobby.repository_id} {lobby.git_guessr_game_format_config_id && "Git Guessr"} {lobby.obfuscated_game_format_config_id && "Obfuscated"}
-            </div>
-          </div>
-        ) : (
-          <div className="Form">
-            <div style={{ flex: 1 }} onClick={() => setSelectedLobby(lobby)}>
-              {lobby.id} {lobby.repository_id} {lobby.git_guessr_game_format_config_id && "Git Guessr"} {lobby.obfuscated_game_format_config_id && "Obfuscated"}
-            </div>
-          </div>
-        )
-      )}
+      <table className='table table-striped'>
+        <thead>
+          <tr>
+            <th scope="col">Lobby ID</th>
+            <th scope="col">Repository</th>
+            <th scope="col">Game Mode</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {lobbies?.items.map((lobby) =>
+            lobby.id === selectedLobby?.id ? (
+              <tr>
+                <td>{lobby.id}</td>
+                <td>{lobby.repository_id}</td>
+                {lobby.git_guessr_game_format_config_id && <td>GitGuessr</td>}
+                {lobby.obfuscated_game_format_config_id && <td>Obfuscated</td>}
+                <td>
+                  <Button 
+                    variant="success" 
+                    disabled={processing} 
+                    onClick={() => {
+                      setSelectedLobby(lobby);}}
+                    >Select
+                  </Button>
+                </td>
+              </tr>
+            ) : (
+              <tr>
+                <td>{lobby.id}</td>
+                <td>{lobby.repository_id}</td>
+                {lobby.git_guessr_game_format_config_id && <td>GitGuessr</td>}
+                {lobby.obfuscated_game_format_config_id && <td>Obfuscated</td>}
+                <td>
+                  <Button 
+                    variant="success" 
+                    disabled={processing} 
+                    onClick={() => {
+                      setSelectedLobby(lobby);}}
+                    >Select
+                  </Button>
+                </td>
+              </tr>
+            )
+          )}
+        </tbody>
+      </table>
       {selectedLobby && (
         <div className="Form">
-          <div style={{ display: 'flex' }}>
-            <button
+          <div className="text-center">
+            <Button
+              variant="primary"
               disabled={processing}
               style={{ height: '40px' }}
               onClick={() => createLobbyParticipant()}
             >
               Join Lobby
-            </button>
+            </Button>
           </div>
         </div>
       )}
       <div className="Form">
         <div style={{ display: 'flex' }}>
-          <button disabled={processing || page === 0} onClick={() => setPage(page - 1)}>{`<<`}</button>
+          <Button 
+            variant="secondary"
+            disabled={processing || page === 0} 
+            onClick={() => setPage(page - 1)}
+            >{`<<`}</Button>
           <span style={{ flex: 1, textAlign: 'center' }}>
             Page {page + 1} of {numPages}
           </span>
-          <button
+          <Button
+            variant="secondary"
             disabled={processing || page === numPages - 1}
             onClick={() => setPage(page + 1)}
-          >{`>>`}</button>
+          >{`>>`}</Button>
         </div>
       </div>
     </div>

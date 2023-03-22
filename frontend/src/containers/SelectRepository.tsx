@@ -1,5 +1,6 @@
 import React from 'react'
 import { useEffect, useState } from 'react'
+import { Button } from 'react-bootstrap'
 import { useLobbyAPI } from '../apis/lobby'
 import { useRepositoryAPI } from '../apis/repository'
 import { useAuth } from '../hooks/useAuth'
@@ -29,26 +30,27 @@ export const SelectRepository = ({setRepository}: { setRepository: React.Dispatc
   }, [repositories])
 
   return (
-    <div style={{ display: 'flex', flexFlow: 'column', textAlign: 'left' }}>
-      <h1>Repositories</h1>
+    <div style={{ display: "flex", flexFlow: "column", textAlign: "left" }}>
+      <div className='mb-4 mt-4 text-center'>
+        <h1>Select a Repository</h1>
+      </div>
       {(!repositories || repositories.total_items === 0) && "No repositories"}
-      {repositories?.items.map((repository) =>
-          <div key={repository.name} className="Form">
-            <div style={{ flex: 1 }} onClick={() => setRepository(repository)}>
-              {repository.name}
+      <div className='container'>
+        <div className='row row-cols-1 row-cols-md-3 g-4'>
+          {repositories?.items.map((repository) =>
+            <div key={repository.name} className="col">
+              <div className="card">
+                <div className="card-body">
+                  <h4 className="card-title">{repository.name}</h4>
+                  <p className="card-text">A brief description of the repository</p>
+                  <a href="#" className="card-link">Repo Link</a>
+                  <br />
+                  <br />
+                  <Button variant='success' onClick={() => setRepository(repository)}>Select</Button>
+                </div>
+              </div>
             </div>
-          </div>
-      )}
-      <div className="Form">
-        <div style={{ display: 'flex' }}>
-          <button disabled={page === 0} onClick={() => setPage(page - 1)}>{`<<`}</button>
-          <span style={{ flex: 1, textAlign: 'center' }}>
-            Page {page + 1} of {numPages}
-          </span>
-          <button
-            disabled={page === numPages - 1}
-            onClick={() => setPage(page + 1)}
-          >{`>>`}</button>
+          )}
         </div>
       </div>
     </div>

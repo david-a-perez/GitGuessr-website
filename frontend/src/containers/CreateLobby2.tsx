@@ -5,6 +5,7 @@ import { useLobbyParticipantAPI } from '../apis/lobby_participant'
 import { useAuth } from '../hooks/useAuth'
 import { SelectGameFormat } from './SelectGameFormat'
 import { SelectRepository } from './SelectRepository'
+import { Button } from 'react-bootstrap'
 
 export const CreateLobby = () => {
   const auth = useAuth()
@@ -34,26 +35,38 @@ export const CreateLobby = () => {
     {
       repository && gameFormat && (
         <>
-          <button
-            disabled={processing || !auth.isAuthenticated}
-            onClick={async () => {
-              setProcessing(true)
-              const lobby = await LobbyAPI.create({
-                repository_id: repository.name,
-                ...gameFormat
-              })
-              LobbyParticipantAPI.create({
-                user_id: 0,
-                lobby_id: lobby.id,
-              })
-              navigate(`/lobby/${lobby.id}`)
-              setProcessing(false)
-            }}>Create Lobby</button>
-          <button
-            onClick={() => {
-              setGameFormat(null)
-            }}
-          >Back</button>
+          <br />
+          <br />
+          <div className="card w-50 mx-auto">
+            <div className="card-body">
+              <h4 className="card-title">Custom Lobby</h4>
+              <p className="card-text">
+                Repository: {repository.name}<br />
+              </p>
+              <Button 
+                variant="secondary"
+                onClick={() => {
+                  setGameFormat(null)
+                }}
+              >Back</Button>
+              <Button 
+                variant="success"
+                disabled={processing || !auth.isAuthenticated}
+                onClick={async () => {
+                  setProcessing(true)
+                  const lobby = await LobbyAPI.create({
+                    repository_id: repository.name,
+                    ...gameFormat
+                  })
+                  LobbyParticipantAPI.create({
+                    user_id: 0,
+                    lobby_id: lobby.id,
+                  })
+                  navigate(`/lobby/${lobby.id}`)
+                  setProcessing(false)
+              }}>Create Lobby</Button>
+            </div>
+          </div>
         </>
       )
     }

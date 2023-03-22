@@ -5,8 +5,9 @@ import { ActivationPage } from './containers/ActivationPage'
 import { RegistrationPage } from './containers/RegistrationPage'
 import { RecoveryPage } from './containers/RecoveryPage'
 import { ResetPage } from './containers/ResetPage'
-import React from 'react'
+import { SelectRepository } from './containers/SelectRepository'
 import './App.css'
+import 'bootstrap/dist/css/bootstrap.css'
 import { Home } from './containers/Home'
 import { Todos } from './containers/Todo'
 import { CreateLobby } from './containers/CreateLobby2'
@@ -25,42 +26,50 @@ const App = () => {
   // @ts-ignore
   return (
     <div className="App">
-      <div className="App-nav-header">
-        <div style={{ display: 'flex', flex: 1 }}>
-          <a className="NavButton" onClick={() => navigate('/')}>Home</a>
-          <a className="NavButton" onClick={() => navigate('/todos')}>Todos</a>
-          {/* CRA: left-aligned nav buttons */}
-          <a className="NavButton" onClick={() => navigate('/account')}>Account</a>
-          {auth.isAuthenticated &&
-            <>
-              <a className="NavButton" onClick={() => navigate('/create_lobby')}>Create Lobby</a>
-              <a className="NavButton" onClick={() => navigate('/join_lobby')}>Join Lobby</a>
-            </>}
-
+      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div className="container-fluid">
+          <span className="navbar-brand">
+            <img src="https://user-images.githubusercontent.com/46609460/220524085-2e913612-03a5-431e-a326-013cd66d10bf.png" alt="" width="60" height="40" />
+          </span>
+          <div className="collapse navbar-collapse" id="navbarNav">
+            <ul className="navbar-nav">
+              <li className="nav-item">
+                <a className="nav-link active" href='/'>Home</a>
+              </li>
+              <li>
+                { auth.isAuthenticated &&
+                <a className="nav-link active" href="/create_lobby">Create Lobby</a>
+                }
+              </li>
+              <li>
+                { auth.isAuthenticated &&
+                <a className="nav-link active" href="/join_lobby">Join Lobby</a>
+                }
+              </li>
+              <li className="nav-item">
+                { auth.isAuthenticated && <a className="nav-link active" href="/account">Account</a> }
+                { !auth.isAuthenticated && <a className="nav-link active" href="/login">Login/Sign-Up</a> }
+              </li>
+            </ul>
+          </div>
         </div>
-        <div>
-          {/* CRA: right-aligned nav buttons */}
-          { auth.isAuthenticated && <a className="NavButton" onClick={() => auth.logout()}>Logout</a> }
-          { !auth.isAuthenticated && <a className="NavButton" onClick={() => navigate('/login')}>Login/Register</a> }
-        </div>
-      </div>
+      </nav>
       <div style={{ margin: '0 auto', maxWidth: '800px' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/todos" element={<Todos />} />
           <Route path="/create_lobby" element={<CreateLobby />} />
+          {/*<Route path="/select_repo" element={<SelectRepository />} />*/}
           <Route path="/join_lobby" element={<JoinLobby />} />
           <Route path="/lobby/:lobby_id" element={<WaitingRoom />} />
           <Route path="/question/:lobby_id/:question_num" element={<Question />} />
-
           {/* CRA: routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/recovery" element={<RecoveryPage />} />
-            <Route path="/reset" element={<ResetPage />} />
-            <Route path="/activate" element={<ActivationPage />} />
-            <Route path="/register" element={<RegistrationPage />} />
-            <Route path="/account" element={<AccountPage />} />
-    
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/recovery" element={<RecoveryPage />} />
+          <Route path="/reset" element={<ResetPage />} />
+          <Route path="/activate" element={<ActivationPage />} />
+          <Route path="/register" element={<RegistrationPage />} />
+          <Route path="/account" element={<AccountPage />} />  
         </Routes>
       </div>
     </div>

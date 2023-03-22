@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import { useLobbyAPI } from '../apis/lobby'
 import { useLobbyParticipantAPI } from '../apis/lobby_participant'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { useQuestionAPI } from '../apis/question';
-import Countdown from 'react-countdown';
+import { useQuestionAPI } from '../apis/question'
+import { Button } from 'react-bootstrap'
+import Countdown from 'react-countdown'
 
 export const WaitingRoom = () => {
   const { lobby_id } = useParams()
@@ -54,46 +55,59 @@ export const WaitingRoom = () => {
 
   return (
     <div style={{ display: 'flex', flexFlow: 'column', textAlign: 'left' }}>
-      <h1>Lobbies</h1>
+      <div className="mb-4 mt-4 text-center">
+        <h1>Watiting Room</h1>
+      </div>
       {(!lobbyParticipants || lobbyParticipants.total_items === 0) && "No lobby participants"}
-      {lobbyParticipants?.items.map((lobbyParticipant) =>
-        <div key={lobbyParticipant.id} className="Form">
-          <div style={{ flex: 1 }}>
-            {lobbyParticipant.user_id}
-          </div>
-        </div>
-      )}
+      <table className='table table-striped'>
+        <thead>
+          <tr>
+            <th scope='col'>User ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lobbyParticipants?.items.map((lobbyParticipant) =>
+            <tr key={lobbyParticipant.id}>
+              <td>{lobbyParticipant.user_id}</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
       <div className="Form">
         <div style={{ display: 'flex' }}>
-          <button disabled={page === 0} onClick={() => setPage(page - 1)}>{`<<`}</button>
+          <Button 
+            variant="secondary"
+            disabled={page === 0} 
+            onClick={() => setPage(page - 1)}
+            >{`<<`}</Button>
           <span style={{ flex: 1, textAlign: 'center' }}>
             Page {page + 1} of {numPages}
           </span>
-          <button
+          <Button
+            variant="secondary"
             disabled={page === numPages - 1}
             onClick={() => setPage(page + 1)}
-          >{`>>`}</button>
+          >{`>>`}</Button>
         </div>
       </div>
       {lobby_id &&
-        <button
-          disabled={!lobbyParticipants || lobbyParticipants.total_items === 0 || !!lobby?.start_time}
-          onClick={async () => {
-            setLobby(await LobbyAPI.start(lobby_id, { start_time: new Date(Date.now() + 10000) }))
-            // navigate(`/question/${lobby_id}/1`)
-          }}>
-          Start
-        </button>}
-
+        <div className='text-center'>
+          <Button
+            variant='success'
+            disabled={!lobbyParticipants || lobbyParticipants.total_items === 0 || !!lobby?.start_time}
+            onClick={async () => {
+              setLobby(await LobbyAPI.start(lobby_id, { start_time: new Date(Date.now() + 10000) }))
+              // navigate(`/question/${lobby_id}/1`)
+            }}>
+            Start
+          </Button>
+        </div>}
 {
   lobby?.start_time &&
   <Countdown date={lobby?.start_time}>
           <Navigate to={`/question/${lobby_id}/1`}/>
         </Countdown>
 }
-        
-
-
     </div >
   )
 }
