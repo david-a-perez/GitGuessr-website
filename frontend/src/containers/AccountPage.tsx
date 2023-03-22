@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { Button } from 'react-bootstrap'
 
 export const AccountPage = () => {
   const auth = useAuth()
@@ -112,6 +113,10 @@ export const AccountPage = () => {
       {auth.isAuthenticated && (
         <div>
           User # {auth.session?.userId}
+          <div className='mb-2 mt-2'>
+            <br />
+            <Button onClick={auth.logout}>Log Out</Button>
+          </div>
           <div className="Form" style={{ textAlign: 'left' }}>
             <h1>Permissions</h1>
             <pre>
