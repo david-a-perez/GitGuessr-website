@@ -71,7 +71,7 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
       </div>
       <br />
       <div className="text-center">
-        <Button variant="secondary"
+        <Button variant="danger"
           onClick={() => {
             setRepository(null)
             setGameFormat(null)

@@ -37,14 +37,14 @@ export const CreateLobby = () => {
         <>
           <br />
           <br />
-          <div className="card w-50 mx-auto">
+          <div className="card w-50 mx-auto bg-light">
             <div className="card-body">
               <h4 className="card-title">Custom Lobby</h4>
               <p className="card-text">
                 Repository: {repository.name}<br />
               </p>
               <Button 
-                variant="secondary"
+                variant="danger"
                 onClick={() => {
                   setGameFormat(null)
                 }}
