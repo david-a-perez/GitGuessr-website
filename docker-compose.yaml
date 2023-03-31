@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   db:
-    image: postgres:14.6-alpine
+    image: postgres:alpine
     container_name: postgres-container
     environment:
       - POSTGRES_USER=$DATABASE_USER
