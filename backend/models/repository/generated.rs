@@ -14,6 +14,8 @@ type Connection = create_rust_app::Connection;
 pub struct Repository {
     pub name: String,
     pub filename: String,
+    pub url: String,
+    pub description: String,
 }
 
 #[tsync::tsync]
@@ -22,6 +24,8 @@ pub struct Repository {
 pub struct CreateRepository {
     pub name: String,
     pub filename: String,
+    pub url: String,
+    pub description: String,
 }
 
 #[tsync::tsync]
@@ -29,6 +33,8 @@ pub struct CreateRepository {
 #[diesel(table_name=repository)]
 pub struct UpdateRepository {
     pub filename: Option<String>,
+    pub url: Option<String>,
+    pub description: Option<String>,
 }
 
 #[tsync::tsync]

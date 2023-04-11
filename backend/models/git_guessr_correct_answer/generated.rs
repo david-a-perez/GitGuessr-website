@@ -4,15 +4,15 @@ use crate::diesel::*;
 use crate::schema::*;
 use diesel::QueryResult;
 use serde::{Deserialize, Serialize};
+use crate::models::git_guessr_question::GitGuessrQuestion;
 use crate::models::lobby::Lobby;
-use crate::models::question::Question;
 
 type Connection = create_rust_app::Connection;
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset, Identifiable, Associations, Selectable)]
-#[diesel(table_name=answer_choice, primary_key(id), belongs_to(Lobby, foreign_key=lobby_id) , belongs_to(Question, foreign_key=question_id))]
-pub struct AnswerChoice {
+#[diesel(table_name=git_guessr_correct_answer, primary_key(id), belongs_to(GitGuessrQuestion, foreign_key=question_id) , belongs_to(Lobby, foreign_key=lobby_id))]
+pub struct GitGuessrCorrectAnswer {
     pub id: i32,
     pub answer: String,
     pub question_id: i32,
@@ -23,8 +23,8 @@ pub struct AnswerChoice {
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
-#[diesel(table_name=answer_choice)]
-pub struct CreateAnswerChoice {
+#[diesel(table_name=git_guessr_correct_answer)]
+pub struct CreateGitGuessrCorrectAnswer {
     pub answer: String,
     pub question_id: i32,
     pub lobby_id: String,
@@ -32,8 +32,8 @@ pub struct CreateAnswerChoice {
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
-#[diesel(table_name=answer_choice)]
-pub struct UpdateAnswerChoice {
+#[diesel(table_name=git_guessr_correct_answer)]
+pub struct UpdateGitGuessrCorrectAnswer {
     pub answer: Option<String>,
     pub question_id: Option<i32>,
     pub lobby_id: Option<String>,
@@ -52,27 +52,27 @@ pub struct PaginationResult<T> {
     pub num_pages: i64,
 }
 
-impl AnswerChoice {
+impl GitGuessrCorrectAnswer {
 
-    pub fn create(db: &mut Connection, item: &CreateAnswerChoice) -> QueryResult<Self> {
-        use crate::schema::answer_choice::dsl::*;
+    pub fn create(db: &mut Connection, item: &CreateGitGuessrCorrectAnswer) -> QueryResult<Self> {
+        use crate::schema::git_guessr_correct_answer::dsl::*;
 
-        insert_into(answer_choice).values(item).get_result::<Self>(db)
+        insert_into(git_guessr_correct_answer).values(item).get_result::<Self>(db)
     }
 
     pub fn read(db: &mut Connection, param_id: i32) -> QueryResult<Self> {
-        use crate::schema::answer_choice::dsl::*;
+        use crate::schema::git_guessr_correct_answer::dsl::*;
 
-        answer_choice.filter(id.eq(param_id)).first::<Self>(db)
+        git_guessr_correct_answer.filter(id.eq(param_id)).first::<Self>(db)
     }
 
     /// Paginates through the table where page is a 0-based index (i.e. page 0 is the first page)
     pub fn paginate(db: &mut Connection, page: i64, page_size: i64) -> QueryResult<PaginationResult<Self>> {
-        use crate::schema::answer_choice::dsl::*;
+        use crate::schema::git_guessr_correct_answer::dsl::*;
 
         let page_size = if page_size < 1 { 1 } else { page_size };
-        let total_items = answer_choice.count().get_result(db)?;
-        let items = answer_choice.limit(page_size).offset(page * page_size).load::<Self>(db)?;
+        let total_items = git_guessr_correct_answer.count().get_result(db)?;
+        let items = git_guessr_correct_answer.limit(page_size).offset(page * page_size).load::<Self>(db)?;
 
         Ok(PaginationResult {
             items,
@@ -84,16 +84,16 @@ impl AnswerChoice {
         })
     }
 
-    pub fn update(db: &mut Connection, param_id: i32, item: &UpdateAnswerChoice) -> QueryResult<Self> {
-        use crate::schema::answer_choice::dsl::*;
+    pub fn update(db: &mut Connection, param_id: i32, item: &UpdateGitGuessrCorrectAnswer) -> QueryResult<Self> {
+        use crate::schema::git_guessr_correct_answer::dsl::*;
 
-        diesel::update(answer_choice.filter(id.eq(param_id))).set(item).get_result(db)
+        diesel::update(git_guessr_correct_answer.filter(id.eq(param_id))).set(item).get_result(db)
     }
 
     pub fn delete(db: &mut Connection, param_id: i32) -> QueryResult<usize> {
-        use crate::schema::answer_choice::dsl::*;
+        use crate::schema::git_guessr_correct_answer::dsl::*;
 
-        diesel::delete(answer_choice.filter(id.eq(param_id))).execute(db)
+        diesel::delete(git_guessr_correct_answer.filter(id.eq(param_id))).execute(db)
     }
 
 }

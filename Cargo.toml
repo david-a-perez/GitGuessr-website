@@ -33,9 +33,12 @@ create-rust-app = {version="9", default-features = false, features=["plugin_cont
 serde_json = "1.0.79"
 tsync = "1"
 gitguessr_auth = { path = "gitguessr_auth" }
-gix = "0.42.0"
+gix = "0.43.1"
 tree-sitter = "0.20.9"
 anyhow = "1.0.69"
+rand = "0.8.5"
+thiserror = "1.0.40"
+regex = "1.7.3"
 
 [dependencies.chrono]
 features = ["serde"]
@@ -53,9 +56,6 @@ version = "1.0.133"
 [dependencies.tokio]
 features = ["full"]
 version = "1"
-
-[patch.crates-io]
-watchexec = { git = "https://github.com/david-a-perez/watchexec", branch = "switch-to-gix-config" }
 
 [package]
 default-run = "git_guessr"

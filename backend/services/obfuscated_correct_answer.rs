@@ -1,4 +1,4 @@
-use crate::models::correct_answer::CorrectAnswer;
+use crate::models::obfuscated_correct_answer::ObfuscatedCorrectAnswer;
 use actix_web::{
     error::ErrorNotFound,
     get,
@@ -18,7 +18,7 @@ pub struct PaginationParams {
 async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
-        CorrectAnswer::paginate(&mut conn, info.page, info.page_size)
+        ObfuscatedCorrectAnswer::paginate(&mut conn, info.page, info.page_size)
     })
     .await
     .map(|result| match result {
@@ -32,7 +32,7 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        CorrectAnswer::read(&mut conn, item_id.into_inner())
+        ObfuscatedCorrectAnswer::read(&mut conn, item_id.into_inner())
     })
     .await
     .map(|result| match result {
@@ -46,7 +46,7 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
 
-//         CorrectAnswer::create(&mut conn, &item)
+//         ObfuscatedCorrectAnswer::create(&mut conn, &item)
 //     })
 //     .await
 //     .map(|result| match result {
@@ -64,7 +64,7 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
 
-//         CorrectAnswer::update(&mut conn, item_id.into_inner(), &item)
+//         ObfuscatedCorrectAnswer::update(&mut conn, item_id.into_inner(), &item)
 //     })
 //     .await
 //     .map(|result| match result {
@@ -78,7 +78,7 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
 
-//         CorrectAnswer::delete(&mut conn, item_id.into_inner())
+//         ObfuscatedCorrectAnswer::delete(&mut conn, item_id.into_inner())
 //     })
 //     .await
 //     .map(|result| match result {

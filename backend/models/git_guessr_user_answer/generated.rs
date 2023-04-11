@@ -4,19 +4,22 @@ use crate::diesel::*;
 use crate::schema::*;
 use diesel::QueryResult;
 use serde::{Deserialize, Serialize};
-use crate::models::answer_choice::AnswerChoice;
+use crate::models::git_guessr_question::GitGuessrQuestion;
 use crate::models::lobby::Lobby;
-use crate::models::question::Question;
+use crate::models::lobby_participant::LobbyParticipant;
+use crate::models::users::User;
 
 type Connection = create_rust_app::Connection;
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset, Identifiable, Associations, Selectable)]
-#[diesel(table_name=correct_answer, primary_key(id), belongs_to(AnswerChoice, foreign_key=answer_choice_id) , belongs_to(Lobby, foreign_key=lobby_id) , belongs_to(Question, foreign_key=question_id))]
-pub struct CorrectAnswer {
+#[diesel(table_name=git_guessr_user_answer, primary_key(id), belongs_to(GitGuessrQuestion, foreign_key=question_id) , belongs_to(Lobby, foreign_key=lobby_id) , belongs_to(LobbyParticipant, foreign_key=lobby_participant_id) , belongs_to(User, foreign_key=user_id))]
+pub struct GitGuessrUserAnswer {
     pub id: i32,
-    pub answer_choice_id: i32,
+    pub answer: String,
     pub question_id: i32,
+    pub lobby_participant_id: i32,
+    pub user_id: i32,
     pub lobby_id: String,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
@@ -24,19 +27,23 @@ pub struct CorrectAnswer {
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
-#[diesel(table_name=correct_answer)]
-pub struct CreateCorrectAnswer {
-    pub answer_choice_id: i32,
+#[diesel(table_name=git_guessr_user_answer)]
+pub struct CreateGitGuessrUserAnswer {
+    pub answer: String,
     pub question_id: i32,
+    pub lobby_participant_id: i32,
+    pub user_id: i32,
     pub lobby_id: String,
 }
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
-#[diesel(table_name=correct_answer)]
-pub struct UpdateCorrectAnswer {
-    pub answer_choice_id: Option<i32>,
+#[diesel(table_name=git_guessr_user_answer)]
+pub struct UpdateGitGuessrUserAnswer {
+    pub answer: Option<String>,
     pub question_id: Option<i32>,
+    pub lobby_participant_id: Option<i32>,
+    pub user_id: Option<i32>,
     pub lobby_id: Option<String>,
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -53,27 +60,27 @@ pub struct PaginationResult<T> {
     pub num_pages: i64,
 }
 
-impl CorrectAnswer {
+impl GitGuessrUserAnswer {
 
-    pub fn create(db: &mut Connection, item: &CreateCorrectAnswer) -> QueryResult<Self> {
-        use crate::schema::correct_answer::dsl::*;
+    pub fn create(db: &mut Connection, item: &CreateGitGuessrUserAnswer) -> QueryResult<Self> {
+        use crate::schema::git_guessr_user_answer::dsl::*;
 
-        insert_into(correct_answer).values(item).get_result::<Self>(db)
+        insert_into(git_guessr_user_answer).values(item).get_result::<Self>(db)
     }
 
     pub fn read(db: &mut Connection, param_id: i32) -> QueryResult<Self> {
-        use crate::schema::correct_answer::dsl::*;
+        use crate::schema::git_guessr_user_answer::dsl::*;
 
-        correct_answer.filter(id.eq(param_id)).first::<Self>(db)
+        git_guessr_user_answer.filter(id.eq(param_id)).first::<Self>(db)
     }
 
     /// Paginates through the table where page is a 0-based index (i.e. page 0 is the first page)
     pub fn paginate(db: &mut Connection, page: i64, page_size: i64) -> QueryResult<PaginationResult<Self>> {
-        use crate::schema::correct_answer::dsl::*;
+        use crate::schema::git_guessr_user_answer::dsl::*;
 
         let page_size = if page_size < 1 { 1 } else { page_size };
-        let total_items = correct_answer.count().get_result(db)?;
-        let items = correct_answer.limit(page_size).offset(page * page_size).load::<Self>(db)?;
+        let total_items = git_guessr_user_answer.count().get_result(db)?;
+        let items = git_guessr_user_answer.limit(page_size).offset(page * page_size).load::<Self>(db)?;
 
         Ok(PaginationResult {
             items,
@@ -85,16 +92,16 @@ impl CorrectAnswer {
         })
     }
 
-    pub fn update(db: &mut Connection, param_id: i32, item: &UpdateCorrectAnswer) -> QueryResult<Self> {
-        use crate::schema::correct_answer::dsl::*;
+    pub fn update(db: &mut Connection, param_id: i32, item: &UpdateGitGuessrUserAnswer) -> QueryResult<Self> {
+        use crate::schema::git_guessr_user_answer::dsl::*;
 
-        diesel::update(correct_answer.filter(id.eq(param_id))).set(item).get_result(db)
+        diesel::update(git_guessr_user_answer.filter(id.eq(param_id))).set(item).get_result(db)
     }
 
     pub fn delete(db: &mut Connection, param_id: i32) -> QueryResult<usize> {
-        use crate::schema::correct_answer::dsl::*;
+        use crate::schema::git_guessr_user_answer::dsl::*;
 
-        diesel::delete(correct_answer.filter(id.eq(param_id))).execute(db)
+        diesel::delete(git_guessr_user_answer.filter(id.eq(param_id))).execute(db)
     }
 
 }

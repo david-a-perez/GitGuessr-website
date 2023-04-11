@@ -7,6 +7,7 @@ use actix_web::{web, App, HttpServer};
 use diesel::connection::SimpleConnection;
 use gitguessr_auth::middleware::RequireAuth;
 
+mod gitguessr;
 mod mail;
 mod models;
 mod schema;
@@ -34,26 +35,42 @@ async fn main() -> std::io::Result<()> {
 
         let api_scope = web::scope("/api")
             .wrap(RequireAuth)
-            .service(services::answer_choice::endpoints(web::scope(
-                "/answer_choice",
-            )))
-            .service(services::correct_answer::endpoints(web::scope(
-                "/correct_answer",
+            .service(services::git_guessr_correct_answer::endpoints(web::scope(
+                "/git_guessr_correct_answer",
             )))
             .service(services::git_guessr_game_format_config::endpoints(
                 web::scope("/git_guessr_game_format_config"),
             ))
+            .service(services::git_guessr_paths::endpoints(web::scope(
+                "/git_guessr_paths",
+            )))
+            .service(services::git_guessr_question::endpoints(web::scope(
+                "/git_guessr_question",
+            )))
+            .service(services::git_guessr_user_answer::endpoints(web::scope(
+                "/git_guessr_user_answer",
+            )))
             .service(services::lobby::endpoints(web::scope("/lobby")))
             .service(services::lobby_participant::endpoints(web::scope(
                 "/lobby_participant",
             )))
+            .service(services::obfuscated_answer_choice::endpoints(web::scope(
+                "/obfuscated_answer_choice",
+            )))
+            .service(services::obfuscated_correct_answer::endpoints(web::scope(
+                "/obfuscated_correct_answer",
+            )))
             .service(services::obfuscated_game_format_config::endpoints(
                 web::scope("/obfuscated_game_format_config"),
             ))
-            .service(services::question::endpoints(web::scope("/question")))
+            .service(services::obfuscated_question::endpoints(web::scope(
+                "/obfuscated_question",
+            )))
+            .service(services::obfuscated_user_answer::endpoints(web::scope(
+                "/obfuscated_user_answer",
+            )))
             .service(services::repository::endpoints(web::scope("/repository")))
-            .service(services::todo::endpoints(web::scope("/todos")))
-            .service(services::user_answer::endpoints(web::scope("/user_answer")));
+            .service(services::todo::endpoints(web::scope("/todos")));
 
         let auth_scope =
             web::scope("/auth_api").service(gitguessr_auth::endpoints(web::scope("/auth")));

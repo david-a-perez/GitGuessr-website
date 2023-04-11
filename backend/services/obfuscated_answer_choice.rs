@@ -1,4 +1,4 @@
-use crate::models::answer_choice::AnswerChoice;
+use crate::models::obfuscated_answer_choice::ObfuscatedAnswerChoice;
 use actix_web::{
     error::ErrorNotFound,
     get,
@@ -18,7 +18,7 @@ pub struct PaginationParams {
 async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
-        AnswerChoice::paginate(&mut conn, info.page, info.page_size)
+        ObfuscatedAnswerChoice::paginate(&mut conn, info.page, info.page_size)
     })
     .await
     .map(|result| match result {
@@ -31,7 +31,7 @@ async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl
 async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
-        AnswerChoice::read(&mut conn, item_id.into_inner())
+        ObfuscatedAnswerChoice::read(&mut conn, item_id.into_inner())
     })
     .await
     .map(|result| match result {
@@ -44,7 +44,7 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 // async fn create(db: Data<Database>, Json(item): Json<CreateAnswerChoice>) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
-//         AnswerChoice::create(&mut conn, &item)
+//         ObfuscatedAnswerChoice::create(&mut conn, &item)
 //     })
 //     .await
 //     .map(|result| match result {
@@ -61,7 +61,7 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 // ) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
-//         AnswerChoice::update(
+//         ObfuscatedAnswerChoice::update(
 //             &mut conn,
 //             item_id.into_inner(),
 //             &item,
@@ -81,7 +81,7 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 // ) -> impl Responder {
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
-//         AnswerChoice::delete(&mut conn, item_id.into_inner())
+//         ObfuscatedAnswerChoice::delete(&mut conn, item_id.into_inner())
 //     })
 //     .await
 //     .map(|result| match result {

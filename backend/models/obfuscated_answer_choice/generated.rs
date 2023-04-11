@@ -4,23 +4,18 @@ use crate::diesel::*;
 use crate::schema::*;
 use diesel::QueryResult;
 use serde::{Deserialize, Serialize};
-use crate::models::answer_choice::AnswerChoice;
 use crate::models::lobby::Lobby;
-use crate::models::lobby_participant::LobbyParticipant;
-use crate::models::question::Question;
-use crate::models::users::User;
+use crate::models::obfuscated_question::ObfuscatedQuestion;
 
 type Connection = create_rust_app::Connection;
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset, Identifiable, Associations, Selectable)]
-#[diesel(table_name=user_answer, primary_key(id), belongs_to(AnswerChoice, foreign_key=answer_choice_id) , belongs_to(Lobby, foreign_key=lobby_id) , belongs_to(LobbyParticipant, foreign_key=lobby_participant_id) , belongs_to(Question, foreign_key=question_id) , belongs_to(User, foreign_key=user_id))]
-pub struct UserAnswer {
+#[diesel(table_name=obfuscated_answer_choice, primary_key(id), belongs_to(Lobby, foreign_key=lobby_id) , belongs_to(ObfuscatedQuestion, foreign_key=question_id))]
+pub struct ObfuscatedAnswerChoice {
     pub id: i32,
-    pub answer_choice_id: i32,
+    pub answer: String,
     pub question_id: i32,
-    pub lobby_participant_id: i32,
-    pub user_id: i32,
     pub lobby_id: String,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
@@ -28,23 +23,19 @@ pub struct UserAnswer {
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
-#[diesel(table_name=user_answer)]
-pub struct CreateUserAnswer {
-    pub answer_choice_id: i32,
+#[diesel(table_name=obfuscated_answer_choice)]
+pub struct CreateObfuscatedAnswerChoice {
+    pub answer: String,
     pub question_id: i32,
-    pub lobby_participant_id: i32,
-    pub user_id: i32,
     pub lobby_id: String,
 }
 
 #[tsync::tsync]
 #[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
-#[diesel(table_name=user_answer)]
-pub struct UpdateUserAnswer {
-    pub answer_choice_id: Option<i32>,
+#[diesel(table_name=obfuscated_answer_choice)]
+pub struct UpdateObfuscatedAnswerChoice {
+    pub answer: Option<String>,
     pub question_id: Option<i32>,
-    pub lobby_participant_id: Option<i32>,
-    pub user_id: Option<i32>,
     pub lobby_id: Option<String>,
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -61,27 +52,27 @@ pub struct PaginationResult<T> {
     pub num_pages: i64,
 }
 
-impl UserAnswer {
+impl ObfuscatedAnswerChoice {
 
-    pub fn create(db: &mut Connection, item: &CreateUserAnswer) -> QueryResult<Self> {
-        use crate::schema::user_answer::dsl::*;
+    pub fn create(db: &mut Connection, item: &CreateObfuscatedAnswerChoice) -> QueryResult<Self> {
+        use crate::schema::obfuscated_answer_choice::dsl::*;
 
-        insert_into(user_answer).values(item).get_result::<Self>(db)
+        insert_into(obfuscated_answer_choice).values(item).get_result::<Self>(db)
     }
 
     pub fn read(db: &mut Connection, param_id: i32) -> QueryResult<Self> {
-        use crate::schema::user_answer::dsl::*;
+        use crate::schema::obfuscated_answer_choice::dsl::*;
 
-        user_answer.filter(id.eq(param_id)).first::<Self>(db)
+        obfuscated_answer_choice.filter(id.eq(param_id)).first::<Self>(db)
     }
 
     /// Paginates through the table where page is a 0-based index (i.e. page 0 is the first page)
     pub fn paginate(db: &mut Connection, page: i64, page_size: i64) -> QueryResult<PaginationResult<Self>> {
-        use crate::schema::user_answer::dsl::*;
+        use crate::schema::obfuscated_answer_choice::dsl::*;
 
         let page_size = if page_size < 1 { 1 } else { page_size };
-        let total_items = user_answer.count().get_result(db)?;
-        let items = user_answer.limit(page_size).offset(page * page_size).load::<Self>(db)?;
+        let total_items = obfuscated_answer_choice.count().get_result(db)?;
+        let items = obfuscated_answer_choice.limit(page_size).offset(page * page_size).load::<Self>(db)?;
 
         Ok(PaginationResult {
             items,
@@ -93,16 +84,16 @@ impl UserAnswer {
         })
     }
 
-    pub fn update(db: &mut Connection, param_id: i32, item: &UpdateUserAnswer) -> QueryResult<Self> {
-        use crate::schema::user_answer::dsl::*;
+    pub fn update(db: &mut Connection, param_id: i32, item: &UpdateObfuscatedAnswerChoice) -> QueryResult<Self> {
+        use crate::schema::obfuscated_answer_choice::dsl::*;
 
-        diesel::update(user_answer.filter(id.eq(param_id))).set(item).get_result(db)
+        diesel::update(obfuscated_answer_choice.filter(id.eq(param_id))).set(item).get_result(db)
     }
 
     pub fn delete(db: &mut Connection, param_id: i32) -> QueryResult<usize> {
-        use crate::schema::user_answer::dsl::*;
+        use crate::schema::obfuscated_answer_choice::dsl::*;
 
-        diesel::delete(user_answer.filter(id.eq(param_id))).execute(db)
+        diesel::delete(obfuscated_answer_choice.filter(id.eq(param_id))).execute(db)
     }
 
 }

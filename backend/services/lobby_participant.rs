@@ -20,7 +20,7 @@ pub struct PaginationParams {
 #[derive(Deserialize)]
 struct LobbyParticipantFilters {
     lobby_id: Option<String>,
-    user_id: Option<i32>
+    user_id: Option<i32>,
 }
 
 #[get("")]

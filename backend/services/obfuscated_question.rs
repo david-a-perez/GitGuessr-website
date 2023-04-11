@@ -1,5 +1,7 @@
 use crate::models::{
-    answer_choice::AnswerChoice, correct_answer::CorrectAnswer, question::Question, user_answer::UserAnswer,
+    obfuscated_answer_choice::ObfuscatedAnswerChoice,
+    obfuscated_correct_answer::ObfuscatedCorrectAnswer, obfuscated_question::ObfuscatedQuestion,
+    obfuscated_user_answer::ObfuscatedUserAnswer,
 };
 use actix_web::{
     error::{ErrorInternalServerError, ErrorNotFound},
@@ -8,7 +10,7 @@ use actix_web::{
     HttpResponse, Responder,
 };
 use create_rust_app::Database;
-use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, QueryResult};
+use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, QueryResult, RunQueryDsl};
 
 #[tsync::tsync]
 #[derive(serde::Deserialize)]
@@ -22,7 +24,7 @@ async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        Question::paginate(&mut conn, info.page, info.page_size)
+        ObfuscatedQuestion::paginate(&mut conn, info.page, info.page_size)
     })
     .await
     .map(|result| match result {
@@ -36,13 +38,13 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        let question = Question::read(&mut conn, item_id.into_inner())?;
+        let question = ObfuscatedQuestion::read(&mut conn, item_id.into_inner())?;
         if let Some(start_time) = question.start_time {
             if start_time <= chrono::offset::Utc::now() {
                 return Ok(Some(question));
             }
         }
-        Ok::<Option<Question>, diesel::result::Error>(None)
+        Ok::<Option<ObfuscatedQuestion>, diesel::result::Error>(None)
     })
     .await
     .map(|result| match result {
@@ -55,10 +57,10 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 #[tsync::tsync]
 #[derive(serde::Serialize)]
 struct FullQuestion {
-    question: Question,
-    answer_choices: Vec<AnswerChoice>,
-    correct_answer: Option<CorrectAnswer>,
-    user_answer: Option<UserAnswer>,
+    question: ObfuscatedQuestion,
+    answer_choices: Vec<ObfuscatedAnswerChoice>,
+    correct_answer: Option<ObfuscatedCorrectAnswer>,
+    user_answer: Option<ObfuscatedUserAnswer>,
 }
 
 #[get("/{lobby_id}/{question_num}")]
@@ -71,20 +73,20 @@ async fn read_by_lobby_and_question_num(
         let mut conn = db.get_connection();
 
         let mut question = {
-            use crate::schema::question::dsl::*;
+            use crate::schema::obfuscated_question::dsl::*;
 
-            question
+            obfuscated_question
                 .filter(lobby_id.eq(lobby_param))
                 .filter(question_num.eq(question_num_param))
-                .first::<Question>(&mut conn)?
+                .first::<ObfuscatedQuestion>(&mut conn)?
         };
 
         let mut answer_choices = {
-            use crate::schema::answer_choice::dsl::*;
+            use crate::schema::obfuscated_answer_choice::dsl::*;
 
-            answer_choice
+            obfuscated_answer_choice
                 .filter(question_id.eq(question.id))
-                .load::<AnswerChoice>(&mut conn)?
+                .load::<ObfuscatedAnswerChoice>(&mut conn)?
         };
 
         // Remove the text from the question and answer choices if the question hasn't started yet
@@ -102,22 +104,22 @@ async fn read_by_lobby_and_question_num(
         // Only show correct answer if the question has already ended
         let correct_answer = match question.end_time {
             Some(end_time) if curr_time >= end_time => Some({
-                use crate::schema::correct_answer::dsl::*;
+                use crate::schema::obfuscated_correct_answer::dsl::*;
 
-                correct_answer
+                obfuscated_correct_answer
                     .filter(question_id.eq(question.id))
-                    .first::<CorrectAnswer>(&mut conn)?
+                    .first::<ObfuscatedCorrectAnswer>(&mut conn)?
             }),
             _ => None,
         };
 
         // Only show correct answer if the question has already ended
         let user_answer = {
-            use crate::schema::user_answer::dsl::*;
+            use crate::schema::obfuscated_user_answer::dsl::*;
 
-            user_answer
+            obfuscated_user_answer
                 .filter(question_id.eq(question.id))
-                .first::<UserAnswer>(&mut conn)
+                .first::<ObfuscatedUserAnswer>(&mut conn)
                 .optional()?
         };
 
@@ -125,7 +127,7 @@ async fn read_by_lobby_and_question_num(
             question,
             answer_choices,
             correct_answer,
-            user_answer
+            user_answer,
         })
     })
     .await
@@ -140,7 +142,7 @@ async fn read_by_lobby_and_question_num(
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
 
-//         Question::create(&mut conn, &item)
+//         ObfuscatedQuestion::create(&mut conn, &item)
 //     })
 //     .await
 //     .map(|result| match result {
@@ -158,7 +160,7 @@ async fn read_by_lobby_and_question_num(
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
 
-//         Question::update(&mut conn, item_id.into_inner(), &item)
+//         ObfuscatedQuestion::update(&mut conn, item_id.into_inner(), &item)
 //     })
 //     .await
 //     .map(|result| match result {
@@ -172,7 +174,7 @@ async fn read_by_lobby_and_question_num(
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
 
-//         Question::delete(&mut conn, item_id.into_inner())
+//         ObfuscatedQuestion::delete(&mut conn, item_id.into_inner())
 //     })
 //     .await
 //     .map(|result| match result {

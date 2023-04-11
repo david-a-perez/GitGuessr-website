@@ -1,10 +1,21 @@
-use crate::models::{
-    answer_choice::{AnswerChoice, CreateAnswerChoice},
-    correct_answer::{CorrectAnswer, CreateCorrectAnswer},
-    lobby::{CreateLobby, Lobby},
-    lobby_participant::LobbyParticipant,
-    question::{CreateQuestion, Question},
-    user_answer::UserAnswer,
+use crate::{
+    gitguessr::{
+        get_all_file_entries, get_random_entries, get_snippet_from_file, get_text_from_entry,
+        FilteredRecorder, GitGuessrError,
+    },
+    models::{
+        git_guessr_correct_answer::{CreateGitGuessrCorrectAnswer, GitGuessrCorrectAnswer},
+        git_guessr_game_format_config::GitGuessrGameFormatConfig,
+        git_guessr_question::{CreateGitGuessrQuestion, GitGuessrQuestion},
+        git_guessr_user_answer::GitGuessrUserAnswer,
+        lobby::{CreateLobby, Lobby},
+        lobby_participant::LobbyParticipant,
+        obfuscated_answer_choice::{CreateObfuscatedAnswerChoice, ObfuscatedAnswerChoice},
+        obfuscated_correct_answer::{CreateObfuscatedCorrectAnswer, ObfuscatedCorrectAnswer},
+        obfuscated_question::{CreateObfuscatedQuestion, ObfuscatedQuestion},
+        obfuscated_user_answer::ObfuscatedUserAnswer,
+        repository::Repository,
+    },
 };
 use actix_web::{
     error::{ErrorInternalServerError, ErrorNotFound},
@@ -20,6 +31,7 @@ use diesel::{
 };
 use gitguessr_auth::Auth;
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 #[tsync::tsync]
 #[derive(serde::Deserialize)]
@@ -32,6 +44,15 @@ pub struct PaginationParams {
 #[derive(Deserialize)]
 struct LobbyFilters {
     repository_id: Option<String>,
+}
+
+#[derive(Error, Debug)]
+enum LobbyError {
+    #[error("GitGuessr Error: {0}")]
+    GitGuessr(#[from] crate::gitguessr::GitGuessrError),
+
+    #[error("Diesel Error: {0}")]
+    Diesel(#[from] diesel::result::Error),
 }
 
 #[get("")]
@@ -98,60 +119,92 @@ async fn read(db: Data<Database>, item_id: Path<String>, auth: Auth) -> impl Res
     let lobby_id = item_id.into_inner();
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
-        // let l/*: Vec<(
-        //     Lobby,
-        //     LobbyParticipant,
-        //     Question,
-        //     CorrectAnswer,
-        //     Option<UserAnswer>,
-        // )> */ = {
-        //     use crate::schema::{correct_answer, lobby, lobby_participant, question, user_answer};
+        let l/*: Vec<(
+            Lobby,
+            LobbyParticipant,
+            ObfuscatedQuestion,
+            ObfuscatedCorrectAnswer,
+            Option<ObfuscatedUserAnswer>,
+        )> */ = {
+            use crate::schema::{obfuscated_correct_answer, lobby, lobby_participant, obfuscated_question, obfuscated_user_answer, git_guessr_correct_answer, git_guessr_question, git_guessr_user_answer};
 
-        //     let all_lobby_participants = lobby_participant::table
-        //         .filter(lobby_participant::lobby_id.eq(&lobby_id))
-        //         .select(LobbyParticipant::as_select())
-        //         .load(&mut conn)?;
+            // let all_lobby_participants = lobby_participant::table
+            //     .filter(lobby_participant::lobby_id.eq(&lobby_id))
+            //     .select(LobbyParticipant::as_select())
+            //     .load(&mut conn)?;
 
-        //     let all_data = lobby::table
-        //         .inner_join(lobby_participant::table)
-        //         .inner_join(
-        //             question::table
-        //                 .inner_join(correct_answer::table)
-        //                 .left_join(user_answer::table),
-        //         )
-        //         .filter(
-        //             lobby::id
-        //                 .eq(&lobby_id)
-        //                 .and(lobby_participant::user_id.eq(auth.user_id)),
-        //         )
-        //         .select((
-        //             Lobby::as_select(),
-        //             LobbyParticipant::as_select(),
-        //             Question::as_select(),
-        //             CorrectAnswer::as_select(),
-        //             Option::<UserAnswer>::as_select(),
-        //         ))
-        //         .load::<(
-        //             Lobby,
-        //             LobbyParticipant,
-        //             Question,
-        //             CorrectAnswer,
-        //             Option<UserAnswer>,
-        //         )>(&mut conn)?;
-        //     all_data.grouped_by(&all_participants)
-        //     .into_iter()
-        //     .zip(lobby_participant::table)
-        //      .map(|(question_data, participant)| (participant, question_data.into_iter().map(|(_, book)| book).collect()))
-        // };
-        // l.group_by(|a, b| a.0.id == b.0.id && a.1.id == b.1.id).map(
-        //     |(lobby, lobby_participant, question, correct_answer, user_answer)| correct_answer,
-        // );
+            // // all_lobby_participants
 
-        // println!("{}", l);
+            let the_lobby = lobby::table.filter(lobby::id.eq(lobby_id)).first::<Lobby>(&mut conn)?;
 
-        // QueryResult::Ok(l)
+            let a = ObfuscatedQuestion::belonging_to(&the_lobby)
+                .inner_join(obfuscated_correct_answer::table)
+                .left_join(obfuscated_user_answer::table)
+                .select((
+                    ObfuscatedQuestion::as_select(),
+                    ObfuscatedCorrectAnswer::as_select(),
+                    Option::<ObfuscatedUserAnswer>::as_select())).load::<(
+                        ObfuscatedQuestion,
+                        ObfuscatedCorrectAnswer,
+                        Option<ObfuscatedUserAnswer>,
+                        // ObfuscatedUserAnswer,
+                    )>(&mut conn)?;
 
-        Lobby::read(&mut conn, lobby_id)
+            let b = GitGuessrQuestion::belonging_to(&the_lobby)
+                    .inner_join(git_guessr_correct_answer::table)
+                    .left_join(git_guessr_user_answer::table)
+                    .select((
+                        GitGuessrQuestion::as_select(),
+                        GitGuessrCorrectAnswer::as_select(),
+                        Option::<GitGuessrUserAnswer>::as_select()))
+                    .load::<(
+                            GitGuessrQuestion,
+                            GitGuessrCorrectAnswer,
+                            Option<GitGuessrUserAnswer>,
+                            // ObfuscatedUserAnswer,
+                        )>(&mut conn)?;
+
+            // println!("{a}");
+            // println!("{b}");
+
+            // let all_data = lobby::table
+            //     .inner_join(lobby_participant::table)
+            //     .inner_join(
+            //         question::table
+            //             .inner_join(correct_answer::table)
+            //             // .inner_join(user_answer::table),
+            //             .left_join(user_answer::table),
+            //     )
+            //     .filter(
+            //         lobby::id
+            //             .eq(&lobby_id)
+            //             .and(lobby_participant::user_id.eq(auth.user_id)),
+            //     )
+            //     .select((
+            //         Lobby::as_select(),
+            //         LobbyParticipant::as_select(),
+            //         ObfuscatedQuestion::as_select(),
+            //         ObfuscatedCorrectAnswer::as_select(),
+            //         Option::<ObfuscatedUserAnswer>::as_select(),
+            //         // ObfuscatedUserAnswer::as_select(),
+            //     ))
+            //     .load::<(
+            //         Lobby,
+            //         LobbyParticipant,
+            //         ObfuscatedQuestion,
+            //         ObfuscatedCorrectAnswer,
+            //         Option<ObfuscatedUserAnswer>,
+            //         // ObfuscatedUserAnswer,
+            //     )>(&mut conn)?;
+            //     all_data.grouped_by()
+            a
+        };
+
+        println!("{:?}", l);
+
+        QueryResult::Ok(l)
+
+        // Lobby::read(&mut conn, lobby_id)
     })
     .await
     .map(|result| match result {
@@ -166,46 +219,88 @@ async fn create(db: Data<Database>, Json(item): Json<CreateLobby>) -> impl Respo
         let mut conn = db.get_connection();
 
         let lobby = Lobby::create(&mut conn, &item)?;
-        for i in 1..5 {
-            let question = Question::create(
-                &mut conn,
-                &CreateQuestion {
-                    lobby_id: lobby.id.clone(),
-                    question_num: i,
-                    question_text: format!("What is {i} + {i}?"),
-                    start_time: None,
-                    end_time: None,
-                },
-            )?;
 
-            AnswerChoice::create(
-                &mut conn,
-                &CreateAnswerChoice {
-                    lobby_id: lobby.id.clone(),
-                    question_id: question.id,
-                    answer: i.to_string(),
-                },
-            )?;
-            let answer_choice = AnswerChoice::create(
-                &mut conn,
-                &CreateAnswerChoice {
-                    lobby_id: lobby.id.clone(),
-                    question_id: question.id,
-                    answer: (i * 2).to_string(),
-                },
-            )?;
+        if let Some(git_guessr_game_format_config_id) = lobby.git_guessr_game_format_config_id {
+            let config =
+                GitGuessrGameFormatConfig::read(&mut conn, git_guessr_game_format_config_id)?;
+            let repository = Repository::read(&mut conn, lobby.repository_id.clone())?;
 
-            CorrectAnswer::create(
-                &mut conn,
-                &CreateCorrectAnswer {
-                    lobby_id: lobby.id.clone(),
-                    question_id: question.id,
-                    answer_choice_id: answer_choice.id,
-                },
-            )?;
+            let repo = gix::open(repository.filename).map_err(GitGuessrError::from)?;
+
+            let entries = get_all_file_entries(&repo, FilteredRecorder::new(&config.filenames)?)?;
+
+            let chosen_entries: Vec<_> = get_random_entries(&entries, 5);
+
+            for (i, entry) in chosen_entries.into_iter().enumerate() {
+                let blob = get_text_from_entry(&repo, entry)?;
+                let snippet = get_snippet_from_file(
+                    entry.filepath.as_ref(),
+                    &blob.data,
+                    config.lines_shown as usize,
+                )?;
+
+                let question = GitGuessrQuestion::create(
+                    &mut conn,
+                    &CreateGitGuessrQuestion {
+                        lobby_id: lobby.id.clone(),
+                        question_num: i as i32,
+                        question_text: snippet.join("\n"),
+                        start_time: None,
+                        end_time: None,
+                    },
+                )?;
+
+                GitGuessrCorrectAnswer::create(
+                    &mut conn,
+                    &CreateGitGuessrCorrectAnswer {
+                        lobby_id: lobby.id.clone(),
+                        question_id: question.id,
+                        answer: entry.filepath.to_string(),
+                    },
+                )?;
+            }
         }
+        // for i in 1..5 {
+        //     let question = ObfuscatedQuestion::create(
+        //         &mut conn,
+        //         &CreateObfuscatedQuestion {
+        //             lobby_id: lobby.id.clone(),
+        //             question_num: i,
+        //             question_text: format!("What is {i} + {i}?"),
+        //             big_answer_choices: false,
+        //             start_time: None,
+        //             end_time: None,
+        //         },
+        //     )?;
 
-        Ok::<Lobby, diesel::result::Error>(lobby)
+        //     ObfuscatedAnswerChoice::create(
+        //         &mut conn,
+        //         &CreateObfuscatedAnswerChoice {
+        //             lobby_id: lobby.id.clone(),
+        //             question_id: question.id,
+        //             answer: i.to_string(),
+        //         },
+        //     )?;
+        //     let answer_choice = ObfuscatedAnswerChoice::create(
+        //         &mut conn,
+        //         &CreateObfuscatedAnswerChoice {
+        //             lobby_id: lobby.id.clone(),
+        //             question_id: question.id,
+        //             answer: (i * 2).to_string(),
+        //         },
+        //     )?;
+
+        //     ObfuscatedCorrectAnswer::create(
+        //         &mut conn,
+        //         &CreateObfuscatedCorrectAnswer {
+        //             lobby_id: lobby.id.clone(),
+        //             question_id: question.id,
+        //             answer_choice_id: answer_choice.id,
+        //         },
+        //     )?;
+        // }
+
+        Ok::<Lobby, LobbyError>(lobby)
     })
     .await
     .map(|result| match result {
@@ -240,13 +335,13 @@ async fn update(
             use crate::diesel::NullableExpressionMethods;
             use crate::diesel::QueryDsl;
             use crate::diesel::RunQueryDsl;
-            use crate::schema::question::dsl::*;
+            use crate::schema::obfuscated_question::dsl::*;
 
             println!(
                 "{}",
                 debug_query::<Pg, _>(
                     &diesel::update(
-                        question.filter(
+                        obfuscated_question.filter(
                             lobby_id
                                 .eq(lobby_id_param.clone())
                                 .and(start_time.is_null()),
@@ -265,7 +360,7 @@ async fn update(
             );
 
             diesel::update(
-                question.filter(
+                obfuscated_question.filter(
                     lobby_id
                         .eq(lobby_id_param.clone())
                         .and(start_time.is_null()),
@@ -281,7 +376,7 @@ async fn update(
                 .nullable()),
             ))
             // .set(start_time.eq(new_start_time + question_num.seconds() + 10.seconds()))
-            .get_result::<Question>(&mut conn)?;
+            .get_result::<ObfuscatedQuestion>(&mut conn)?;
         }
 
         {

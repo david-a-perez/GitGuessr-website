@@ -1,6 +1,6 @@
 use crate::models::{
-    question::Question,
-    user_answer::{CreateUserAnswer, UserAnswer},
+    git_guessr_question::GitGuessrQuestion,
+    git_guessr_user_answer::{CreateGitGuessrUserAnswer, GitGuessrUserAnswer},
 };
 use actix_web::{
     error::{ErrorInternalServerError, ErrorNotFound},
@@ -23,7 +23,7 @@ async fn index(db: Data<Database>, Query(info): Query<PaginationParams>) -> impl
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        UserAnswer::paginate(&mut conn, info.page, info.page_size)
+        GitGuessrUserAnswer::paginate(&mut conn, info.page, info.page_size)
     })
     .await
     .map(|result| match result {
@@ -37,7 +37,7 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        UserAnswer::read(&mut conn, item_id.into_inner())
+        GitGuessrUserAnswer::read(&mut conn, item_id.into_inner())
     })
     .await
     .map(|result| match result {
@@ -49,7 +49,7 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 #[post("")]
 async fn create(
     db: Data<Database>,
-    Json(mut item): Json<CreateUserAnswer>,
+    Json(mut item): Json<CreateGitGuessrUserAnswer>,
     auth: Auth,
 ) -> impl Responder {
     actix_web::web::block(move || {
@@ -57,16 +57,16 @@ async fn create(
 
         item.user_id = auth.user_id;
 
-        let question = Question::read(&mut conn, item.question_id)?;
+        let question = GitGuessrQuestion::read(&mut conn, item.question_id)?;
         let curr_time = chrono::offset::Utc::now();
         if let Some(start_time) = question.start_time {
             if let Some(end_time) = question.end_time {
                 if start_time <= curr_time && curr_time <= end_time {
-                    return Ok(Some(UserAnswer::create(&mut conn, &item)?));
+                    return Ok(Some(GitGuessrUserAnswer::create(&mut conn, &item)?));
                 }
             }
         }
-        Ok::<Option<UserAnswer>, diesel::result::Error>(None)
+        Ok::<Option<GitGuessrUserAnswer>, diesel::result::Error>(None)
     })
     .await
     .map(|result| match result {
@@ -85,7 +85,7 @@ async fn create(
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
 
-//         UserAnswer::update(
+//         GitGuessrUserAnswer::update(
 //             &mut conn,
 //             item_id.into_inner(),
 //             &item,
@@ -103,7 +103,7 @@ async fn create(
 //     actix_web::web::block(move || {
 //         let mut conn = db.get_connection();
 
-//         UserAnswer::delete(&mut conn, item_id.into_inner())
+//         GitGuessrUserAnswer::delete(&mut conn, item_id.into_inner())
 //     })
 //     .await
 //     .map(|result| match result {
