@@ -1,28 +1,27 @@
 import { useEffect, useState } from 'react'
 import Countdown from 'react-countdown'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { useAnswerChoiceAPI } from '../apis/obfuscated_answer_choice'
 import { useLobbyAPI } from '../apis/lobby'
 import { useLobbyParticipantAPI } from '../apis/lobby_participant'
-import { useQuestionAPI } from '../apis/obfuscated_question'
-import { useUserAnswerAPI } from '../apis/obfuscated_user_answer'
+import { useGitGuessrQuestionAPI } from '../apis/git_guessr_question'
+//import { useUserAnswerAPI } from '../apis/git_guessr_user_answer'
 import { useAuth } from '../hooks/useAuth'
 import { useAsyncEffect } from 'use-async-effect'
+import { Button, Breadcrumb } from 'react-bootstrap'
 
 export const GitGuessrQuestion = () => {
   const auth = useAuth()
   const { lobby_id, question_num } = useParams()
   const navigate = useNavigate()
-  const [checked, setChecked] = useState<number | null>(null)
+  const [path, setPath] = useState<string[]>([])
   const [processing, setProcessing] = useState<boolean>(false)
   const [question, setQuestion] = useState<FullGitGuessrQuestion | null>(null)
   const [nextQuestion, setNextQuestion] = useState<FullGitGuessrQuestion | null>(null)
 
   const [lobbyParticipant, setLobbyParticipant] = useState<LobbyParticipant | null>(null)
 
-  const QuestionAPI = useQuestionAPI(auth)
-  const AnswerChoiceAPI = useAnswerChoiceAPI(auth)
-  const UserAnswerAPI = useUserAnswerAPI(auth)
+  const QuestionAPI = useGitGuessrQuestionAPI(auth)
+  //const UserAnswerAPI = useUserAnswerAPI(auth)
   const LobbyParticipantAPI = useLobbyParticipantAPI(auth)
 
   useAsyncEffect(async isMounted => {
@@ -65,7 +64,7 @@ export const GitGuessrQuestion = () => {
     if (!lobbyParticipant || !lobby_id || !question) {
       return
     }
-
+/*
     UserAnswerAPI.create({
       lobby_participant_id: lobbyParticipant.id,
       user_id: lobbyParticipant.user_id,
@@ -73,6 +72,7 @@ export const GitGuessrQuestion = () => {
       question_id: question.question.id,
       answer: path,
     })
+    */
   }
 
   return (
@@ -112,9 +112,7 @@ export const GitGuessrQuestion = () => {
               <div className="card-body text-success">
                 <pre>
                   <code>
-                    This is an example of some code I could put 
-                    for(let i=0; i!=10; i++)
-                        func(i);
+                    {}
                   </code>
                 </pre>
               </div>
@@ -127,8 +125,22 @@ export const GitGuessrQuestion = () => {
                 {question?.question.question_text}
               </div>
               <div className="card-body">
-
-              </div>     
+                <Breadcrumb>
+                    {path.map(folder =>
+                        <Breadcrumb.Item key={folder}>{folder}</Breadcrumb.Item>
+                    )}
+                </Breadcrumb>
+              </div>    
+              <div style={{alignContent:'left', paddingBottom:'10px'}}>
+                <Button variant='danger' size='sm'>back</Button>
+              </div>
+              <div className="card-footer">
+                <Button
+                    variant="success"
+                >
+                    Submit
+                </Button>
+              </div> 
             </div>
           </div>
         </div>
