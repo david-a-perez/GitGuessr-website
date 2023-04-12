@@ -47,7 +47,7 @@ pub struct PathQuery {
     pub path: String,
 }
 
-#[get("/{lobby_id}/")]
+#[get("/{lobby_id}")]
 async fn read(db: Data<Database>, params: Path<String>, Query(info): Query<PathQuery>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
