@@ -110,30 +110,30 @@ export const ObfuscatedQuestion = () => {
             <div className="card border-dark mb-3 h-100 w-100">
               <div className="card-header bg-transparent border-dark">CODE SNIPPET</div>
               <div className="card-body text-success">
-                <pre>
+                <pre style={{textAlign:'left'}}>
                   <code>
-                    This is an example of some code I could put 
-                    for(let i=0; i!=10; i++)
-                        func(i);
+                    {question?.question.question_text}
                   </code>
                 </pre>
               </div>
             </div>
           </div>
-          <div className="col-xl">
+          <div className="col-xl" style={{height:'60vh'}}>
             <div className="card border-dark mb-3 h-100 w-100">
               <div className="card-header bg-transparent border-dark">
                 {!question && "No question"}
-                {question?.question.question_text}
+                What is the identity of the ANSWER keyword?
               </div>
               <div className="card-body">
                 {question?.answer_choices.map(answerChoice =>
-                <div key={answerChoice.id} className="Form">
-                  <button type="button" className={question.correct_answer?.answer_choice_id == answerChoice.id ? "btn btn-success" : question.correct_answer?.answer_choice_id != answerChoice.id && question.user_answer?.answer_choice_id == answerChoice.id ? "btn btn-danger" : checked==answerChoice.id ? "btn btn-secondary" : "btn btn-outline-secondary"} 
-                  onClick={() => {
-                    submitUserAnswer(answerChoice);
-                    setChecked(answerChoice.id);}
-                  }
+                <div key={answerChoice.id} style={{paddingTop:'20px'}}>
+                  <button type="button" 
+                    className={question.correct_answer?.answer_choice_id == answerChoice.id ? "btn btn-success" : question.correct_answer?.answer_choice_id != answerChoice.id && question.user_answer?.answer_choice_id == answerChoice.id ? "btn btn-danger" : checked==answerChoice.id ? "btn btn-secondary" : "btn btn-outline-secondary"} 
+                    onClick={() => {
+                      submitUserAnswer(answerChoice);
+                      setChecked(answerChoice.id);}
+                    }
+                    style={{width:'100%'}}
                   >
                     {answerChoice.answer} {answerChoice.id === question.correct_answer?.answer_choice_id && "Correct Answer"}
                   </button>

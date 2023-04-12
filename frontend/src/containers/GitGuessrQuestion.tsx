@@ -107,12 +107,12 @@ export const GitGuessrQuestion = () => {
       <div className="container-fluid">
         <div className="row">
           <div className="col-xl">
-            <div className="card border-dark mb-3 h-100 w-100">
+            <div className="card border-dark mb-3 h-100 w-100" style={{maxHeight:'80vh', overflowY:'scroll'}}>
               <div className="card-header bg-transparent border-dark">CODE SNIPPET</div>
               <div className="card-body text-success">
-                <pre>
+                <pre style={{textAlign:'left'}}>
                   <code>
-                    {}
+                    {question?.question.question_text}
                   </code>
                 </pre>
               </div>
@@ -122,7 +122,7 @@ export const GitGuessrQuestion = () => {
             <div className="card border-dark mb-3 h-100 w-100">
               <div className="card-header bg-transparent border-dark">
                 {!question && "No question"}
-                {question?.question.question_text}
+                Which file contains the code snippet?
               </div>
               <div className="card-body">
                 <Breadcrumb>
