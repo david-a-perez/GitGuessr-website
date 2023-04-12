@@ -26,7 +26,7 @@ export const RegistrationPage = () => {
   }
 
   return (
-    <div className="Form" style={{ textAlign: 'left' }}>
+    <div className="Form" style={{ textAlign: 'left', paddingLeft: '10%', paddingRight: '10%' }}>
       <h1>Registration</h1>
       <br />
       <div style={{ display: 'flex', flexFlow: 'column' }}>

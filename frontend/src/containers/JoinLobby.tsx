@@ -65,7 +65,7 @@ export const JoinLobby = () => {
   }, [lobbies])
 
   return (
-    <div style={{ display: 'flex', flexFlow: 'column', textAlign: 'left' }}>
+    <div style={{ display: 'flex', flexFlow: 'column', textAlign: 'left', paddingLeft: '10%', paddingRight: '10%' }}>
       <div className="mb-4 mt-4 text-center">
         <h1>Lobbies</h1>
       </div>

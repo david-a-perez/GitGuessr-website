@@ -107,7 +107,7 @@ export const AccountPage = () => {
   }
 
   return (
-    <div style={{ textAlign: 'left' }}>
+    <div style={{ textAlign: 'left', paddingLeft: '10%', paddingRight: '10%' }}>
       <h1>Account</h1>
       <br />
       {auth.isAuthenticated && (

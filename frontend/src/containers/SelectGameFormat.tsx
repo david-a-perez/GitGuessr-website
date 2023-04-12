@@ -57,7 +57,13 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
           </div>
           <div className="col">
             <div className="card h-80">
-              <img src={reactLogo} className="card-img-top" alt="..." />
+              <img 
+                src="https://user-images.githubusercontent.com/46609460/231286336-006c81ba-e855-47e8-9536-6558d412b309.png" 
+                className="card-img-top" 
+                alt="..." 
+                width="250"
+                height="300"
+              />
               <div className="card-body">
                 <h5 className="card-title">Obfuscated</h5>
                 <p className="card-text">This is placeholder text for obfuscated game.</p>

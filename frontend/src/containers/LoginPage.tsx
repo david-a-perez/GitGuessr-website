@@ -13,6 +13,7 @@ export const LoginPage = () => {
     setProcessing(true)
     await auth.login(email, password)
     setProcessing(false)
+
   }
 
   if (auth.isAuthenticated) {
@@ -21,7 +22,7 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className="Form" style={{ textAlign: 'left' }}>
+    <div className="Form" style={{ textAlign: 'left', paddingLeft: '10%', paddingRight: '10%' }}>
       <h1>Login</h1>
       <br />
       <div style={{ display: 'flex', flexFlow: 'column' }}>

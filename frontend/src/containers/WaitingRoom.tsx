@@ -4,7 +4,7 @@ import { useLobbyAPI } from '../apis/lobby'
 import { useLobbyParticipantAPI } from '../apis/lobby_participant'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { useQuestionAPI } from '../apis/question'
+import { useQuestionAPI } from '../apis/obfuscated_question'
 import { Button } from 'react-bootstrap'
 import Countdown from 'react-countdown'
 
@@ -54,7 +54,7 @@ export const WaitingRoom = () => {
   }, [lobbyParticipants])
 
   return (
-    <div style={{ display: 'flex', flexFlow: 'column', textAlign: 'left' }}>
+    <div style={{ display: 'flex', flexFlow: 'column', textAlign: 'left', paddingLeft: '10%', paddingRight: '10%' }}>
       <div className="mb-4 mt-4 text-center">
         <h1>Watiting Room</h1>
       </div>
@@ -102,12 +102,11 @@ export const WaitingRoom = () => {
             Start
           </Button>
         </div>}
-{
-  lobby?.start_time &&
-  <Countdown date={lobby?.start_time}>
-          <Navigate to={`/question/${lobby_id}/1`}/>
+      {lobby?.start_time &&
+        <Countdown date={lobby?.start_time}>
+          <Navigate to={`/obfuscated_question/${lobby_id}/1`}/>
         </Countdown>
-}
+      }
     </div >
   )
 }
