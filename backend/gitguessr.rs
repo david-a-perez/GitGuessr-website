@@ -235,11 +235,14 @@ pub fn get_paths_at_path<'a>(repo: &'a Repository, path: &str) -> Result<Tree<'a
         .unwrap()
         .peel_to_tree()?;
 
-    let current_dir = root
-        .lookup_entry_by_path(path)?
-        .unwrap()
-        .object()?
-        .peel_to_tree()?;
+    let current_dir = if !path.is_empty() {
+        root.lookup_entry_by_path(&path)?
+            .unwrap()
+            .object()?
+            .peel_to_tree()?
+    } else {
+        root
+    };
 
     Ok(current_dir)
 }

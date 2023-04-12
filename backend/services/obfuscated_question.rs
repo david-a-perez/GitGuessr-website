@@ -9,6 +9,7 @@ use actix_web::{
     web::{Data, Path, Query},
     HttpResponse, Responder,
 };
+use chrono::Duration;
 use create_rust_app::Database;
 use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, QueryResult, RunQueryDsl};
 
@@ -92,7 +93,7 @@ async fn read_by_lobby_and_question_num(
         // Remove the text from the question and answer choices if the question hasn't started yet
         let curr_time = chrono::offset::Utc::now();
         match question.start_time {
-            Some(start_time) if curr_time >= start_time => {}
+            Some(start_time) if curr_time + Duration::milliseconds(500) >= start_time => {}
             _ => {
                 question.question_text = String::new();
                 for answer_choice in &mut answer_choices {
@@ -103,7 +104,7 @@ async fn read_by_lobby_and_question_num(
 
         // Only show correct answer if the question has already ended
         let correct_answer = match question.end_time {
-            Some(end_time) if curr_time >= end_time => Some({
+            Some(end_time) if curr_time + Duration::milliseconds(500) >= end_time => Some({
                 use crate::schema::obfuscated_correct_answer::dsl::*;
 
                 obfuscated_correct_answer

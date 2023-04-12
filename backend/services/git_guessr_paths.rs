@@ -1,7 +1,7 @@
 use actix_web::{
     error::ErrorInternalServerError,
     get,
-    web::{Data, Path},
+    web::{Data, Path, Query},
     HttpResponse, Responder,
 };
 use create_rust_app::Database;
@@ -41,18 +41,24 @@ enum PathError {
     Diesel(#[from] diesel::result::Error),
 }
 
-#[get("/{lobby_id}/{path}")]
-async fn read(db: Data<Database>, params: Path<(String, String)>) -> impl Responder {
+#[tsync::tsync]
+#[derive(serde::Deserialize)]
+pub struct PathQuery {
+    pub path: String,
+}
+
+#[get("/{lobby_id}/")]
+async fn read(db: Data<Database>, params: Path<String>, Query(info): Query<PathQuery>) -> impl Responder {
     actix_web::web::block(move || {
         let mut conn = db.get_connection();
 
-        let lobby = Lobby::read(&mut conn, params.0.clone())?;
+        let lobby = Lobby::read(&mut conn, params.clone())?;
 
         let repository = Repository::read(&mut conn, lobby.repository_id.clone())?;
 
         let repo = gix::open(repository.filename).map_err(GitGuessrError::from)?;
 
-        let entries = get_paths_at_path(&repo, &params.0)?
+        let entries = get_paths_at_path(&repo, &info.path)?
             .iter()
             .map(|entry| -> Result<Entry, GitGuessrError> {
                 let entry = entry?;
