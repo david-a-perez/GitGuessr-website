@@ -42,8 +42,8 @@ export const SelectRepository = ({setRepository}: { setRepository: React.Dispatc
               <div className="card">
                 <div className="card-body">
                   <h4 className="card-title">{repository.name}</h4>
-                  <p className="card-text">A brief description of the repository</p>
-                  <a href="#" className="card-link">Repo Link</a>
+                  <p className="card-text">{repository.description}</p>
+                  <a href={repository.url} className="card-link">Repo Link</a>
                   <br />
                   <br />
                   <Button variant='success' onClick={() => setRepository(repository)}>Select</Button>
