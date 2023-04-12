@@ -24,6 +24,15 @@ services:
       POSTGRES_USER: $DATABASE_USER
       POSTGRES_PASSWORD: $DATABASE_PASSWORD
       POSTGRES_HOST: 'postgres-container'
+  website:
+    profiles:
+      - production
+    container_name: website-container
+    build: .
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
 volumes:
   db:
     driver: local

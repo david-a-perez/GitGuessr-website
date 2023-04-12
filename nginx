@@ -1,0 +1,16 @@
+server_tokens off;
+access_log /var/log/nginx/gitguessr.access.log;
+error_log /var/log/nginx/gitguessr.error.log info;
+
+server {
+    listen 80;
+    server_name gitguessr.dev;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_redirect off;
+    }
+}
