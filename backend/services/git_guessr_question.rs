@@ -55,7 +55,7 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 
 #[tsync::tsync]
 #[derive(serde::Serialize)]
-struct FullQuestion {
+struct FullGitGuessrQuestion {
     question: GitGuessrQuestion,
     correct_answer: Option<GitGuessrCorrectAnswer>,
     user_answer: Option<GitGuessrUserAnswer>,
@@ -110,7 +110,7 @@ async fn read_by_lobby_and_question_num(
                 .optional()?
         };
 
-        QueryResult::Ok(FullQuestion {
+        QueryResult::Ok(FullGitGuessrQuestion {
             question,
             correct_answer,
             user_answer,

@@ -56,7 +56,7 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
 
 #[tsync::tsync]
 #[derive(serde::Serialize)]
-struct FullQuestion {
+struct FullObfuscatedQuestion {
     question: ObfuscatedQuestion,
     answer_choices: Vec<ObfuscatedAnswerChoice>,
     correct_answer: Option<ObfuscatedCorrectAnswer>,
@@ -123,7 +123,7 @@ async fn read_by_lobby_and_question_num(
                 .optional()?
         };
 
-        QueryResult::Ok(FullQuestion {
+        QueryResult::Ok(FullObfuscatedQuestion {
             question,
             answer_choices,
             correct_answer,
