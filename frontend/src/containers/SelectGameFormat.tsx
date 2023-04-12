@@ -44,11 +44,17 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
       <div className="container">
         <div className="row row-cols-1 row-cols-md-3 g-4">
           <div className="col">
-            <div className="card h-80">
-              <img src={reactLogo} className="card-img-top" alt="..." />
+            <div className="card">
+              <img 
+                src='https://user-images.githubusercontent.com/46609460/231556799-5e282848-2488-4472-b44e-b10adece3e47.png'
+                className="card-img-top" 
+                alt="..." 
+                width="250"
+                height="300"
+              />
               <div className="card-body">
                 <h5 className="card-title">Git Guessr</h5>
-                <p className="card-text">This is placeholder text for the git guessr game.</p>
+                <p className="card-text">This is placeholder text for the GG game.</p>
                 <Button variant="success" onClick={() => setGameFormat({
                 git_guessr_game_format_config_id: gitGuessrGameFormatConfigId
                 })}>Select</Button>
@@ -56,7 +62,7 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
             </div>
           </div>
           <div className="col">
-            <div className="card h-80">
+            <div className="card">
               <img 
                 src="https://user-images.githubusercontent.com/46609460/231286336-006c81ba-e855-47e8-9536-6558d412b309.png" 
                 className="card-img-top" 
@@ -75,8 +81,7 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
           </div>
         </div>
       </div>
-      <br />
-      <div className="text-center">
+      <div className="text-center" style={{paddingTop:'10px'}}>
         <Button variant="danger"
           onClick={() => {
             setRepository(null)

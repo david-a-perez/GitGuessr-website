@@ -51,9 +51,11 @@ export const Home = () => {
               <Carousel>
                 <Carousel.Item>
                   <img
-                    className="d-block w-100"
-                    src={reactLogo}
+                    className="d-block"
+                    src='https://user-images.githubusercontent.com/46609460/231556799-5e282848-2488-4472-b44e-b10adece3e47.png'
                     alt="First slide"
+                    height="350px"
+                    width="300px"
                   />
                 </Carousel.Item>
                 <Carousel.Item>
