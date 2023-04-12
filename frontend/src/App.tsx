@@ -15,6 +15,7 @@ import { Route, useNavigate, Routes } from 'react-router-dom'
 import { JoinLobby } from './containers/JoinLobby'
 import { WaitingRoom } from './containers/WaitingRoom'
 import { ObfuscatedQuestion } from './containers/ObfuscatedQuestion'
+import { GitGuessrQuestion } from './containers/GitGuessrQuestion'
 
 const App = () => {
   useAuthCheck()
@@ -68,6 +69,7 @@ const App = () => {
           <Route path="/join_lobby" element={<JoinLobby />} />
           <Route path="/lobby/:lobby_id" element={<WaitingRoom />} />
           <Route path="/obfuscated_question/:lobby_id/:question_num" element={<ObfuscatedQuestion />} />
+          <Route path="/git_guessr_question/:lobby_id/:question_num" element={<GitGuessrQuestion />} />
           {/* CRA: routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/recovery" element={<RecoveryPage />} />

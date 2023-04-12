@@ -104,7 +104,7 @@ export const WaitingRoom = () => {
         </div>}
       {lobby?.start_time &&
         <Countdown date={lobby?.start_time}>
-          <Navigate to={`/obfuscated_question/${lobby_id}/1`}/>
+            <Navigate to={lobby?.git_guessr_game_format_config_id != null ? `/git_guessr_question/${lobby_id}/1` : `/obfuscated_question/${lobby_id}/1`}/>        
         </Countdown>
       }
     </div >
