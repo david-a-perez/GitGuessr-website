@@ -453,7 +453,7 @@ interface PaginationParams {
   page_size: number;
 }
 
-interface FullQuestion {
+interface FullGitGuessrQuestion {
   question: GitGuessrQuestion;
   correct_answer?: GitGuessrCorrectAnswer;
   user_answer?: GitGuessrUserAnswer;
@@ -506,7 +506,7 @@ interface PaginationParams {
   page_size: number;
 }
 
-interface FullQuestion {
+interface FullObfuscatedQuestion {
   question: ObfuscatedQuestion;
   answer_choices: Array<ObfuscatedAnswerChoice>;
   correct_answer?: ObfuscatedCorrectAnswer;
