@@ -144,7 +144,7 @@ export const GitGuessrQuestion = () => {
               console.log("2x Complete" + nextQuestion?.question.question_num)
               setQuestion(null)
               setNextQuestion(null)
-              navigate(`/obfuscated_question/${lobby_id}/${nextQuestion?.question.question_num}`)
+              navigate(`/git_guessr_question/${lobby_id}/${nextQuestion?.question.question_num}`)
             }} />
         </div>
       }
