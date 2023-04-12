@@ -16,7 +16,7 @@ export const useLobbyAPI = (auth: Auth) => ({
       },
     })).json()
   }, [auth]),
-  get: useCallback(async (id: string) =>
+  get: useCallback(async (id: string): Promise<FullLobby> =>
     await (await fetch(`/api/lobby/${id}`, {
       method: 'GET',
       headers: {

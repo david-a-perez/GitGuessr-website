@@ -4,7 +4,6 @@ import { useLobbyAPI } from '../apis/lobby'
 import { useLobbyParticipantAPI } from '../apis/lobby_participant'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { useQuestionAPI } from '../apis/obfuscated_question'
 import { Button } from 'react-bootstrap'
 import Countdown from 'react-countdown'
 
@@ -19,9 +18,6 @@ export const WaitingRoom = () => {
   const [lobbyParticipants, setLobbyParticipants] = useState<PaginationResult<LobbyParticipant>>()
   const LobbyAPI = useLobbyAPI(auth)
   const LobbyParticipantAPI = useLobbyParticipantAPI(auth)
-  const QuestionAPI = useQuestionAPI(auth)
-
-
 
   // fetch on page change
   useEffect(() => {
@@ -30,7 +26,7 @@ export const WaitingRoom = () => {
     }
 
     LobbyAPI.get(lobby_id).then((lobby) => {
-      setLobby(lobby)
+      setLobby(lobby.lobby)
     })
 
     LobbyParticipantAPI.index(page, pageSize, {
@@ -45,7 +41,14 @@ export const WaitingRoom = () => {
       setLobbyParticipants(lobbyParticipants)
     }), 1000)
 
-    return () => clearInterval(interval)
+    const interval2 = setInterval(() => LobbyAPI.get(lobby_id).then((lobby) => {
+      setLobby(lobby.lobby)
+    }), 1000)
+
+    return () => {
+      clearInterval(interval)
+      clearInterval(interval2)
+    }
   }, [auth.isAuthenticated, page])
 
   // update total number of pages
@@ -97,14 +100,16 @@ export const WaitingRoom = () => {
             disabled={!lobbyParticipants || lobbyParticipants.total_items === 0 || !!lobby?.start_time}
             onClick={async () => {
               setLobby(await LobbyAPI.start(lobby_id, { start_time: new Date(Date.now() + 10000) }))
-              // navigate(`/question/${lobby_id}/1`)
             }}>
             Start
           </Button>
         </div>}
       {lobby?.start_time &&
         <Countdown date={lobby?.start_time}>
-          <Navigate to={`/obfuscated_question/${lobby_id}/1`}/>
+          <>
+          {(lobby?.git_guessr_game_format_config_id) && (<Navigate to={`/git_guessr_question/${lobby_id}/1`}/>)}
+          {(lobby?.obfuscated_game_format_config_id) && (<Navigate to={`/obfuscated_question/${lobby_id}/1`}/>)}
+          </>
         </Countdown>
       }
     </div >

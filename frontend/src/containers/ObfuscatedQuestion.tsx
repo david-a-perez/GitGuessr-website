@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import Countdown from 'react-countdown'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { useAnswerChoiceAPI } from '../apis/obfuscated_answer_choice'
+import { useObfuscatedAnswerChoiceAPI } from '../apis/obfuscated_answer_choice'
 import { useLobbyAPI } from '../apis/lobby'
 import { useLobbyParticipantAPI } from '../apis/lobby_participant'
-import { useQuestionAPI } from '../apis/obfuscated_question'
-import { useUserAnswerAPI } from '../apis/obfuscated_user_answer'
+import { useObfuscatedQuestionAPI } from '../apis/obfuscated_question'
+import { useObfuscatedUserAnswerAPI } from '../apis/obfuscated_user_answer'
 import { useAuth } from '../hooks/useAuth'
 import { useAsyncEffect } from 'use-async-effect'
 
@@ -20,9 +20,9 @@ export const ObfuscatedQuestion = () => {
 
   const [lobbyParticipant, setLobbyParticipant] = useState<LobbyParticipant | null>(null)
 
-  const QuestionAPI = useQuestionAPI(auth)
-  const AnswerChoiceAPI = useAnswerChoiceAPI(auth)
-  const UserAnswerAPI = useUserAnswerAPI(auth)
+  const ObfuscatedQuestionAPI = useObfuscatedQuestionAPI(auth)
+  const ObfuscatedAnswerChoiceAPI = useObfuscatedAnswerChoiceAPI(auth)
+  const ObfuscatedUserAnswerAPI = useObfuscatedUserAnswerAPI(auth)
   const LobbyParticipantAPI = useLobbyParticipantAPI(auth)
 
   useAsyncEffect(async isMounted => {
@@ -50,11 +50,11 @@ export const ObfuscatedQuestion = () => {
     if (!auth.isAuthenticated || !lobby_id || !question_num) {
       return
     }
-    const question = await QuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num))
+    const question = await ObfuscatedQuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num))
     if (!isMounted()) return
     setQuestion(question)
     setProcessing(false)
-    const nextQuestion = await QuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num) + 1)
+    const nextQuestion = await ObfuscatedQuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num) + 1)
     if (!isMounted()) return
     setNextQuestion(nextQuestion)
   }, [auth.isAuthenticated, lobby_id, question_num])
@@ -66,7 +66,7 @@ export const ObfuscatedQuestion = () => {
       return
     }
 
-    UserAnswerAPI.create({
+    ObfuscatedUserAnswerAPI.create({
       lobby_participant_id: lobbyParticipant.id,
       user_id: lobbyParticipant.user_id,
       lobby_id,
@@ -94,7 +94,7 @@ export const ObfuscatedQuestion = () => {
               onComplete={() => {
                 console.log("Completed countdown")
                 setProcessing(true)
-                QuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num)).then((question) => {
+                ObfuscatedQuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num)).then((question) => {
                   setQuestion(question)
                   setProcessing(false)
                 })

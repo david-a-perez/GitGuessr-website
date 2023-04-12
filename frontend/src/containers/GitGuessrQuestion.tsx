@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import Countdown from 'react-countdown'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { useAnswerChoiceAPI } from '../apis/obfuscated_answer_choice'
 import { useLobbyAPI } from '../apis/lobby'
 import { useLobbyParticipantAPI } from '../apis/lobby_participant'
-import { useQuestionAPI } from '../apis/obfuscated_question'
-import { useUserAnswerAPI } from '../apis/obfuscated_user_answer'
+import { useGitGuessrQuestionAPI } from '../apis/git_guessr_question'
+import { useGitGuessrUserAnswerAPI } from '../apis/git_guessr_user_answer'
 import { useAuth } from '../hooks/useAuth'
 import { useAsyncEffect } from 'use-async-effect'
 
@@ -20,9 +19,8 @@ export const GitGuessrQuestion = () => {
 
   const [lobbyParticipant, setLobbyParticipant] = useState<LobbyParticipant | null>(null)
 
-  const QuestionAPI = useQuestionAPI(auth)
-  const AnswerChoiceAPI = useAnswerChoiceAPI(auth)
-  const UserAnswerAPI = useUserAnswerAPI(auth)
+  const QuestionAPI = useGitGuessrQuestionAPI(auth)
+  const UserAnswerAPI = useGitGuessrUserAnswerAPI(auth)
   const LobbyParticipantAPI = useLobbyParticipantAPI(auth)
 
   useAsyncEffect(async isMounted => {
