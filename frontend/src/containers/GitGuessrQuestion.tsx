@@ -3,6 +3,7 @@ import Countdown from 'react-countdown'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useLobbyAPI } from '../apis/lobby'
 import { useLobbyParticipantAPI } from '../apis/lobby_participant'
+import { useGitGuessrPathAPI } from '../apis/git_guessr_paths'
 import { useGitGuessrQuestionAPI } from '../apis/git_guessr_question'
 import { useGitGuessrUserAnswerAPI } from '../apis/git_guessr_user_answer'
 import { useAuth } from '../hooks/useAuth'
@@ -14,6 +15,7 @@ export const GitGuessrQuestion = () => {
   const { lobby_id, question_num } = useParams()
   const navigate = useNavigate()
   const [path, setPath] = useState<string[]>([])
+  const [pathContents, setPathContents] = useState<Directory | null>(null)
   const [processing, setProcessing] = useState<boolean>(false)
   const [question, setQuestion] = useState<FullGitGuessrQuestion | null>(null)
   const [nextQuestion, setNextQuestion] = useState<FullGitGuessrQuestion | null>(null)
@@ -23,6 +25,7 @@ export const GitGuessrQuestion = () => {
   const QuestionAPI = useGitGuessrQuestionAPI(auth)
   const UserAnswerAPI = useGitGuessrUserAnswerAPI(auth)
   const LobbyParticipantAPI = useLobbyParticipantAPI(auth)
+  const PathAPI = useGitGuessrPathAPI(auth)
 
   useAsyncEffect(async isMounted => {
     setProcessing(true)
@@ -74,6 +77,26 @@ export const GitGuessrQuestion = () => {
     })
     
   }
+
+  useAsyncEffect(async isMounted => {
+    setProcessing(true)
+
+    if (!auth.isAuthenticated || !lobby_id || !question_num) {
+      return
+    }
+
+    const pathContents = await PathAPI.getByLobbyAndPath(
+      lobby_id,
+      path.join('/')
+    )
+
+    if (!isMounted()) {
+      return
+    }
+
+    setPathContents(pathContents)
+
+  }, [auth.isAuthenticated, lobby_id, path])
 
   return (
     <div>
@@ -130,6 +153,9 @@ export const GitGuessrQuestion = () => {
                         <Breadcrumb.Item key={folder}>{folder}</Breadcrumb.Item>
                     )}
                 </Breadcrumb>
+                {pathContents?.entries.map(dir => 
+                    <div key={dir.filename}>{dir.filename} + {dir.is_directory}</div>    
+                )}
               </div>    
               <div style={{alignContent:'left', paddingBottom:'10px'}}>
                 <Button variant='danger' size='sm'>back</Button>
