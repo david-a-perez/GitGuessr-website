@@ -39,6 +39,9 @@ anyhow = "1.0.69"
 rand = "0.8.5"
 thiserror = "1.0.40"
 regex = "1.7.3"
+tree-sitter-loader = "0.20.0"
+tree-sitter-python = "0.20.2"
+tree-sitter-rust = "0.20.3"
 
 [dependencies.chrono]
 features = ["serde"]

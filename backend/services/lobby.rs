@@ -355,7 +355,7 @@ async fn update(
                     - 10.seconds())
                 .nullable()),
             ))
-            .get_result::<GitGuessrQuestion>(&mut conn)?;
+            .execute(&mut conn)?;
         }
 
         {
@@ -382,7 +382,7 @@ async fn update(
                     - 10.seconds())
                 .nullable()),
             ))
-            .get_result::<ObfuscatedQuestion>(&mut conn)?;
+            .execute(&mut conn)?;
         }
 
         {

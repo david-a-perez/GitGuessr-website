@@ -10,6 +10,7 @@ use gitguessr_auth::middleware::RequireAuth;
 mod gitguessr;
 mod mail;
 mod models;
+mod obfuscated;
 mod schema;
 mod services;
 
