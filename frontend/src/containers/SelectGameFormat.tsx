@@ -45,10 +45,10 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
         <div className="row row-cols-1 row-cols-md-3 g-4">
           <div className="col">
             <div className="card">
-              <img 
+              <img
                 src='https://user-images.githubusercontent.com/46609460/231556799-5e282848-2488-4472-b44e-b10adece3e47.png'
-                className="card-img-top" 
-                alt="..." 
+                className="card-img-top"
+                alt="..."
                 width="250"
                 height="300"
               />
@@ -56,17 +56,17 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
                 <h5 className="card-title">Git Guessr</h5>
                 <p className="card-text">This is placeholder text for the GG game.</p>
                 <Button variant="success" onClick={() => setGameFormat({
-                git_guessr_game_format_config_id: gitGuessrGameFormatConfigId
+                  git_guessr_game_format_config_id: gitGuessrGameFormatConfigId
                 })}>Select</Button>
               </div>
             </div>
           </div>
           <div className="col">
             <div className="card">
-              <img 
-                src="https://user-images.githubusercontent.com/46609460/231286336-006c81ba-e855-47e8-9536-6558d412b309.png" 
-                className="card-img-top" 
-                alt="..." 
+              <img
+                src="https://user-images.githubusercontent.com/46609460/231286336-006c81ba-e855-47e8-9536-6558d412b309.png"
+                className="card-img-top"
+                alt="..."
                 width="250"
                 height="300"
               />
@@ -74,14 +74,14 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
                 <h5 className="card-title">Obfuscated</h5>
                 <p className="card-text">This is placeholder text for obfuscated game.</p>
                 <Button variant="success" onClick={() => setGameFormat({
-                obfuscated_game_format_config_id: obfuscatedGameFormatConfigId
+                  obfuscated_game_format_config_id: obfuscatedGameFormatConfigId
                 })}>Select</Button>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div className="text-center" style={{paddingTop:'10px'}}>
+      <div className="text-center" style={{ paddingTop: '10px' }}>
         <Button variant="danger"
           onClick={() => {
             setRepository(null)
