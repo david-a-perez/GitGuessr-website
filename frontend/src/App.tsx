@@ -14,7 +14,7 @@ import { CreateLobby } from './containers/CreateLobby2'
 import { Route, useNavigate, Routes } from 'react-router-dom'
 import { JoinLobby } from './containers/JoinLobby'
 import { WaitingRoom } from './containers/WaitingRoom'
-import { Question } from './containers/Question'
+import { ObfuscatedQuestion } from './containers/ObfuscatedQuestion'
 
 const App = () => {
   useAuthCheck()
@@ -29,7 +29,12 @@ const App = () => {
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
         <div className="container-fluid">
           <span className="navbar-brand">
-            <img src="https://user-images.githubusercontent.com/46609460/220524085-2e913612-03a5-431e-a326-013cd66d10bf.png" alt="" width="60" height="40" />
+            <img 
+              src="https://user-images.githubusercontent.com/46609460/231286372-f3968e6c-b5c3-4e11-a1aa-22f76541830c.png" 
+              alt="" 
+              width="50" 
+              height="40" 
+            />
           </span>
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav">
@@ -54,7 +59,7 @@ const App = () => {
           </div>
         </div>
       </nav>
-      <div style={{ margin: '0 auto', maxWidth: '800px' }}>
+      <div style={{ margin: '0 auto' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/todos" element={<Todos />} />
@@ -62,7 +67,7 @@ const App = () => {
           {/*<Route path="/select_repo" element={<SelectRepository />} />*/}
           <Route path="/join_lobby" element={<JoinLobby />} />
           <Route path="/lobby/:lobby_id" element={<WaitingRoom />} />
-          <Route path="/question/:lobby_id/:question_num" element={<Question />} />
+          <Route path="/obfuscated_question/:lobby_id/:question_num" element={<ObfuscatedQuestion />} />
           {/* CRA: routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/recovery" element={<RecoveryPage />} />
