@@ -3,9 +3,9 @@ VALUES ('GitOxide', '../GitGuessr-data/gitoxide', 'https://github.com/Byron/gito
     ('Tree-sitter', '../GitGuessr-data/tree-sitter', 'https://github.com/tree-sitter/tree-sitter', 'An incremental parsing system for programming tools') ON CONFLICT (name) DO
 UPDATE
 SET filename = EXCLUDED.filename;
-INSERT INTO obfuscated_game_format_config(repository_id, filenames)
-VALUES ('GitOxide', '.rs$'),
-    ('Tree-sitter', '.rs$') ON CONFLICT (repository_id) DO
+INSERT INTO obfuscated_game_format_config(repository_id, language, filenames)
+VALUES ('GitOxide', 'rust', '.rs$'),
+    ('Tree-sitter', 'rust', '.rs$') ON CONFLICT (repository_id) DO
 UPDATE
 SET filenames = EXCLUDED.filenames;
 INSERT INTO git_guessr_game_format_config(

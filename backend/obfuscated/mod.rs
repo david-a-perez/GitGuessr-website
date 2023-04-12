@@ -1,5 +1,5 @@
 // #![feature(byte_slice_trim_ascii)]
-use std::{borrow::Cow, collections::HashMap, str::{FromStr, Utf8Error}, num::{ParseFloatError, ParseIntError}};
+use std::{borrow::Cow, collections::HashMap, str::{FromStr, Utf8Error}, num::{ParseFloatError, ParseIntError}, string::FromUtf8Error};
 
 // use anyhow::{Context, Result};
 use rand::{seq::SliceRandom, Rng, distributions::WeightedError};
@@ -68,8 +68,11 @@ pub enum ObfuscatedError {
     #[error("Answer not found")]
     AnswerNotFound,
 
-    #[error("Answer not found: {0}")]
-    FromUtf8(#[from] Utf8Error),
+    #[error("Utf8Error: {0}")]
+    Utf8Error(#[from] Utf8Error),
+
+    #[error("FromUtf8Error: {0}")]
+    FromUtf8Error(#[from] FromUtf8Error),
 }
 
 type Result<T> = std::result::Result<T, ObfuscatedError>;
@@ -135,7 +138,12 @@ impl ObfuscatorLanguage {
     }
 }
 
-pub fn obfuscate(language: &str, text: &[u8]) -> Result<Vec<u8>> {
+pub struct ObfuscatedQuestionData {
+    pub text: String,
+    pub answer: String,
+}
+
+pub fn obfuscate(language: &str, text: &[u8], num: usize) -> Result<Vec<ObfuscatedQuestionData>> {
     let language = language.parse::<ObfuscatorLanguage>()?;
 
     let mut parser = Parser::new();
@@ -174,12 +182,12 @@ pub fn obfuscate(language: &str, text: &[u8]) -> Result<Vec<u8>> {
         .collect::<Result<Vec<_>>>()?;
 
     let selected_questions: Vec<_> = questions
-        .choose_multiple_weighted(&mut rand::thread_rng(), 3, |question_match| {
+        .choose_multiple_weighted(&mut rand::thread_rng(), num, |question_match| {
             question_match.weight
         })?
         .collect();
 
-    for query_match in selected_questions {
+    Ok(selected_questions.into_iter().map(|query_match| -> Result<ObfuscatedQuestionData> {
         let node = query_match.question;
 
         let mut tree_text = Vec::new();
@@ -240,8 +248,6 @@ pub fn obfuscate(language: &str, text: &[u8]) -> Result<Vec<u8>> {
             answer_string
         };
 
-        println!("{answer}");
-
         'matches: loop {
             let mut captures =
                 cursor.captures(&obfuscators_query, tree.root_node(), tree_text.as_slice());
@@ -282,11 +288,14 @@ pub fn obfuscate(language: &str, text: &[u8]) -> Result<Vec<u8>> {
                 }
             }
             break 'matches;
-        }
-        println!("{}", std::str::from_utf8(&tree_text)?);
+        };
+
+        Ok(ObfuscatedQuestionData {
+            text: String::from_utf8(tree_text)?,
+            answer,
+        })
+        // println!("{}", std::str::from_utf8(&tree_text)?);
         // println!("{}", tree.root_node().to_sexp());
         // println!("{}", std::str::from_utf8(&text[node.byte_range()])?);
-    }
-
-    Ok(vec![])
+    }).collect::<Result<Vec<_>>>()?)
 }

@@ -5,7 +5,7 @@ use gix::{
     objs::{tree::EntryRef, Kind},
     open,
     traverse::tree::{
-        recorder::{self},
+        recorder::{self, Location},
         visit::Action,
     },
     Object, Repository, Tree,
@@ -88,8 +88,6 @@ type Result<T> = std::result::Result<T, GitGuessrError>;
 pub struct FilteredRecorder {
     path_deque: VecDeque<BString>,
     path: BString,
-    /// How to track the location.
-    location: Option<recorder::Location>,
     /// The observed entries.
     pub records: Vec<recorder::Entry>,
     filter: Regex,
@@ -100,7 +98,6 @@ impl FilteredRecorder {
         Ok(Self {
             path_deque: VecDeque::default(),
             path: BString::default(),
-            location: None,
             records: Vec::default(),
             filter: Regex::new(regex)?,
         })
@@ -124,15 +121,6 @@ impl FilteredRecorder {
     }
 }
 
-/// Builder
-impl FilteredRecorder {
-    /// Obtain a copy of the currently tracked, full path of the entry.
-    pub fn track_location(mut self, location: Option<recorder::Location>) -> Self {
-        self.location = location;
-        self
-    }
-}
-
 /// Access
 impl FilteredRecorder {
     /// Obtain a copy of the currently tracked, full path of the entry.
@@ -148,38 +136,23 @@ impl FilteredRecorder {
 
 impl gix::traverse::tree::Visit for FilteredRecorder {
     fn pop_front_tracked_path_and_set_current(&mut self) {
-        if let Some(recorder::Location::Path) = self.location {
-            self.path = self
-                .path_deque
-                .pop_front()
-                .expect("every call is matched with push_tracked_path_component");
-        }
+        self.path = self
+            .path_deque
+            .pop_front()
+            .expect("every call is matched with push_tracked_path_component");
     }
 
     fn push_back_tracked_path_component(&mut self, component: &BStr) {
-        if let Some(recorder::Location::Path) = self.location {
-            self.push_element(component);
-            self.path_deque.push_back(self.path.clone());
-        }
+        self.push_element(component);
+        self.path_deque.push_back(self.path.clone());
     }
 
     fn push_path_component(&mut self, component: &BStr) {
-        match self.location {
-            None => {}
-            Some(recorder::Location::Path) => {
-                self.push_element(component);
-            }
-            Some(recorder::Location::FileName) => {
-                self.path.clear();
-                self.path.extend_from_slice(component);
-            }
-        }
+        self.push_element(component);
     }
 
     fn pop_path_component(&mut self) {
-        if let Some(recorder::Location::Path) = self.location {
-            self.pop_element()
-        }
+        self.pop_element()
     }
 
     fn visit_tree(&mut self, entry: &EntryRef<'_>) -> Action {
@@ -187,7 +160,7 @@ impl gix::traverse::tree::Visit for FilteredRecorder {
     }
 
     fn visit_nontree(&mut self, entry: &EntryRef<'_>) -> Action {
-        if self.filter.is_match(&self.path()) {
+        if self.filter.is_match(self.path()) {
             self.records.push(recorder::Entry {
                 mode: entry.mode,
                 filepath: self.path_clone(),
