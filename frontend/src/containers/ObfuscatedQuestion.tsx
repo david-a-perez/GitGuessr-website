@@ -107,7 +107,7 @@ export const ObfuscatedQuestion = () => {
       <div className="container-fluid">
         <div className="row">
           <div className="col-xl">
-            <div className="card border-dark mb-3 h-100 w-100">
+            <div className="card border-dark mb-3 h-100 w-100" style={{maxHeight:'80vh', overflowY:'scroll'}}>
               <div className="card-header bg-transparent border-dark">CODE SNIPPET</div>
               <div className="card-body text-success">
                 <pre style={{textAlign:'left'}}>
@@ -135,7 +135,7 @@ export const ObfuscatedQuestion = () => {
                     }
                     style={{width:'100%'}}
                   >
-                    {answerChoice.answer} {answerChoice.id === question.correct_answer?.answer_choice_id && "Correct Answer"}
+                    {answerChoice.answer}
                   </button>
                 </div>
                 )}

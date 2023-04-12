@@ -64,7 +64,7 @@ export const GitGuessrQuestion = () => {
     if (!lobbyParticipant || !lobby_id || !question) {
       return
     }
-/*
+
     UserAnswerAPI.create({
       lobby_participant_id: lobbyParticipant.id,
       user_id: lobbyParticipant.user_id,
@@ -72,7 +72,7 @@ export const GitGuessrQuestion = () => {
       question_id: question.question.id,
       answer: path,
     })
-    */
+    
   }
 
   return (
