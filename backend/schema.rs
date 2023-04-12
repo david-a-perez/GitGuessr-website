@@ -96,6 +96,7 @@ diesel::table! {
     obfuscated_game_format_config (id) {
         id -> Int4,
         repository_id -> Text,
+        language -> Text,
         filenames -> Text,
     }
 }

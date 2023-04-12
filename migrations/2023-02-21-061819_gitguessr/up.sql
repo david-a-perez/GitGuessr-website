@@ -17,6 +17,7 @@ CREATE TABLE git_guessr_game_format_config (
 CREATE TABLE obfuscated_game_format_config (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     repository_id TEXT NOT NULL REFERENCES repository(name) ON DELETE CASCADE,
+    language TEXT NOT NULL,
     filenames TEXT NOT NULL,
     UNIQUE (repository_id, id),
     UNIQUE (repository_id)

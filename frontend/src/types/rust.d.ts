@@ -273,16 +273,19 @@ interface PaginationResult<T> {
 interface ObfuscatedGameFormatConfig {
   id: number;
   repository_id: string;
+  language: string;
   filenames: string;
 }
 
 interface CreateObfuscatedGameFormatConfig {
   repository_id: string;
+  language: string;
   filenames: string;
 }
 
 interface UpdateObfuscatedGameFormatConfig {
   repository_id?: string;
+  language?: string;
   filenames?: string;
 }
 
@@ -473,8 +476,21 @@ interface LobbyFilters {
   repository_id?: string;
 }
 
+interface FullObfuscatedQuestions {
+  question: ObfuscatedQuestion;
+  answer_choices: Array<ObfuscatedAnswerChoice>;
+  user_answer?: ObfuscatedUserAnswer;
+}
+
+interface FullGitGuessrQuestions {
+  question: GitGuessrQuestion;
+  user_answer?: GitGuessrUserAnswer;
+}
+
 interface FullLobby {
   lobby: Lobby;
+  full_obfuscated_questions: Array<FullObfuscatedQuestions>;
+  full_git_guessr_questions: Array<FullGitGuessrQuestions>;
 }
 
 interface StartLobby {

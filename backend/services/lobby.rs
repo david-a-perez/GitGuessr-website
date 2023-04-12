@@ -1,3 +1,5 @@
+use std::{str::Utf8Error, string::FromUtf8Error};
+
 use crate::{
     gitguessr::{
         get_all_file_entries, get_random_entries, get_snippet_from_file, get_text_from_entry,
@@ -17,6 +19,7 @@ use crate::{
         obfuscated_user_answer::ObfuscatedUserAnswer,
         repository::Repository,
     },
+    obfuscated::{obfuscate, ObfuscatedError},
 };
 use actix_web::{
     error::{ErrorInternalServerError, ErrorNotFound},
@@ -51,6 +54,9 @@ struct LobbyFilters {
 enum LobbyError {
     #[error("GitGuessr Error: {0}")]
     GitGuessr(#[from] crate::gitguessr::GitGuessrError),
+
+    #[error("Obfuscated Error: {0}")]
+    Obfuscated(#[from] crate::obfuscated::ObfuscatedError),
 
     #[error("Diesel Error: {0}")]
     Diesel(#[from] diesel::result::Error),
@@ -261,42 +267,60 @@ async fn create(db: Data<Database>, Json(item): Json<CreateLobby>) -> impl Respo
             let config =
                 ObfuscatedGameFormatConfig::read(&mut conn, obfuscated_game_format_config_id)?;
 
+            let repository = Repository::read(&mut conn, lobby.repository_id.clone())?;
+
+            let repo = gix::open(repository.filename).map_err(GitGuessrError::from)?;
+
+            let entries = get_all_file_entries(&repo, FilteredRecorder::new(&config.filenames)?)?;
+
+            let chosen_entries: Vec<_> = get_random_entries(&entries, 5);
+
+            let full_text = chosen_entries
+                .into_iter()
+                .map(|entry| {
+                    get_text_from_entry(&repo, entry)
+                        .map(|object| object.data.clone())
+                        .map(|bytes| String::from_utf8(bytes))
+                })
+                .collect::<Result<Result<Vec<_>, FromUtf8Error>, GitGuessrError>>()?
+                .map_err(ObfuscatedError::FromUtf8Error)?
+                .join("\n");
+
             for i in 1..5 {
+                let question_data = obfuscate(&config.language, &full_text.as_bytes(), 4)?;
+
                 let question = ObfuscatedQuestion::create(
                     &mut conn,
                     &CreateObfuscatedQuestion {
                         lobby_id: lobby.id.clone(),
                         question_num: i,
-                        question_text: format!("What is {i} + {i}?"),
+                        question_text: question_data[0].text.clone(),
                         big_answer_choices: false,
                         start_time: None,
                         end_time: None,
                     },
                 )?;
 
-                ObfuscatedAnswerChoice::create(
-                    &mut conn,
-                    &CreateObfuscatedAnswerChoice {
-                        lobby_id: lobby.id.clone(),
-                        question_id: question.id,
-                        answer: i.to_string(),
-                    },
-                )?;
-                let answer_choice = ObfuscatedAnswerChoice::create(
-                    &mut conn,
-                    &CreateObfuscatedAnswerChoice {
-                        lobby_id: lobby.id.clone(),
-                        question_id: question.id,
-                        answer: (i * 2).to_string(),
-                    },
-                )?;
+                let answer_choices = question_data
+                    .into_iter()
+                    .map(|data| {
+                        ObfuscatedAnswerChoice::create(
+                            &mut conn,
+                            &CreateObfuscatedAnswerChoice {
+                                lobby_id: lobby.id.clone(),
+                                question_id: question.id,
+                                answer: data.answer,
+                            },
+                        )
+                    })
+                    .collect::<Result<Vec<_>, diesel::result::Error>>()?;
 
                 ObfuscatedCorrectAnswer::create(
                     &mut conn,
                     &CreateObfuscatedCorrectAnswer {
                         lobby_id: lobby.id.clone(),
                         question_id: question.id,
-                        answer_choice_id: answer_choice.id,
+                        answer_choice_id: answer_choices[0].id,
                     },
                 )?;
             }

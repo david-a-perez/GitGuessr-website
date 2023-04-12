@@ -14,6 +14,7 @@ type Connection = create_rust_app::Connection;
 pub struct ObfuscatedGameFormatConfig {
     pub id: i32,
     pub repository_id: String,
+    pub language: String,
     pub filenames: String,
 }
 
@@ -22,6 +23,7 @@ pub struct ObfuscatedGameFormatConfig {
 #[diesel(table_name=obfuscated_game_format_config)]
 pub struct CreateObfuscatedGameFormatConfig {
     pub repository_id: String,
+    pub language: String,
     pub filenames: String,
 }
 
@@ -30,6 +32,7 @@ pub struct CreateObfuscatedGameFormatConfig {
 #[diesel(table_name=obfuscated_game_format_config)]
 pub struct UpdateObfuscatedGameFormatConfig {
     pub repository_id: Option<String>,
+    pub language: Option<String>,
     pub filenames: Option<String>,
 }
 
