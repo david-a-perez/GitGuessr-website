@@ -451,6 +451,10 @@ interface Directory {
   entries: Array<Entry>;
 }
 
+interface PathQuery {
+  path: string;
+}
+
 interface PaginationParams {
   page: number;
   page_size: number;
