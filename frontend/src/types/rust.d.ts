@@ -464,6 +464,7 @@ interface FullGitGuessrQuestion {
   question: GitGuessrQuestion;
   correct_answer?: GitGuessrCorrectAnswer;
   user_answer?: GitGuessrUserAnswer;
+  next_question_start_time?: Date;
 }
 
 interface PaginationParams {
@@ -531,6 +532,7 @@ interface FullObfuscatedQuestion {
   answer_choices: Array<ObfuscatedAnswerChoice>;
   correct_answer?: ObfuscatedCorrectAnswer;
   user_answer?: ObfuscatedUserAnswer;
+  next_question_start_time?: Date;
 }
 
 interface PaginationParams {

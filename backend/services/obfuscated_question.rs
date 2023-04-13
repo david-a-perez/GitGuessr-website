@@ -62,6 +62,7 @@ struct FullObfuscatedQuestion {
     answer_choices: Vec<ObfuscatedAnswerChoice>,
     correct_answer: Option<ObfuscatedCorrectAnswer>,
     user_answer: Option<ObfuscatedUserAnswer>,
+    next_question_start_time: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 #[get("/{lobby_id}/{question_num}")]
@@ -77,9 +78,19 @@ async fn read_by_lobby_and_question_num(
             use crate::schema::obfuscated_question::dsl::*;
 
             obfuscated_question
-                .filter(lobby_id.eq(lobby_param))
+                .filter(lobby_id.eq(lobby_param.clone()))
                 .filter(question_num.eq(question_num_param))
                 .first::<ObfuscatedQuestion>(&mut conn)?
+        };
+
+        let next_question = {
+            use crate::schema::obfuscated_question::dsl::*;
+
+            obfuscated_question
+                .filter(lobby_id.eq(lobby_param))
+                .filter(question_num.eq(question_num_param + 1))
+                .first::<ObfuscatedQuestion>(&mut conn)
+                .optional()?
         };
 
         let mut answer_choices = {
@@ -129,6 +140,8 @@ async fn read_by_lobby_and_question_num(
             answer_choices,
             correct_answer,
             user_answer,
+            next_question_start_time: next_question
+                .and_then(|next_question| next_question.start_time),
         })
     })
     .await

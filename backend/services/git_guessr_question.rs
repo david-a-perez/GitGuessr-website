@@ -59,6 +59,7 @@ struct FullGitGuessrQuestion {
     question: GitGuessrQuestion,
     correct_answer: Option<GitGuessrCorrectAnswer>,
     user_answer: Option<GitGuessrUserAnswer>,
+    next_question_start_time: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 #[get("/{lobby_id}/{question_num}")]
@@ -74,9 +75,19 @@ async fn read_by_lobby_and_question_num(
             use crate::schema::git_guessr_question::dsl::*;
 
             git_guessr_question
-                .filter(lobby_id.eq(lobby_param))
+                .filter(lobby_id.eq(lobby_param.clone()))
                 .filter(question_num.eq(question_num_param))
                 .first::<GitGuessrQuestion>(&mut conn)?
+        };
+
+        let next_question = {
+            use crate::schema::git_guessr_question::dsl::*;
+
+            git_guessr_question
+                .filter(lobby_id.eq(lobby_param))
+                .filter(question_num.eq(question_num_param + 1))
+                .first::<GitGuessrQuestion>(&mut conn)
+                .optional()?
         };
 
         // Remove the text from the question and answer choices if the question hasn't started yet
@@ -114,6 +125,9 @@ async fn read_by_lobby_and_question_num(
             question,
             correct_answer,
             user_answer,
+            next_question_start_time: next_question
+            .and_then(|next_question| next_question.start_time),
+
         })
     })
     .await
