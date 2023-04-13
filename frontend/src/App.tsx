@@ -69,7 +69,7 @@ const App = () => {
           {/*<Route path="/select_repo" element={<SelectRepository />} />*/}
           <Route path="/join_lobby" element={<JoinLobby />} />
           <Route path="/lobby/:lobby_id" element={<WaitingRoom />} />
-          <Route path="/game_over" element={<GameOverPage />} />
+          <Route path="/game_over/:lobby_id" element={<GameOverPage />} />
           <Route path="/obfuscated_question/:lobby_id/:question_num" element={<ObfuscatedQuestion />} />
           <Route path="/git_guessr_question/:lobby_id/:question_num" element={<GitGuessrQuestion />} />
           {/* CRA: routes */}

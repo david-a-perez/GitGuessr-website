@@ -99,7 +99,7 @@ export const WaitingRoom = () => {
             variant='success'
             disabled={!lobbyParticipants || lobbyParticipants.total_items === 0 || !!lobby?.start_time}
             onClick={async () => {
-              setLobby(await LobbyAPI.start(lobby_id, { start_time: new Date(Date.now() + 10000) }))
+              setLobby(await LobbyAPI.start(lobby_id, { start_time: new Date(Date.now() + 5000) }))
             }}>
             Start
           </Button>

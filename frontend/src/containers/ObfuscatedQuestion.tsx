@@ -127,7 +127,7 @@ export const ObfuscatedQuestion = () => {
               <Countdown date={game_over_time}
                 onComplete={() => {
                   setQuestion(null)
-                  navigate(`/game_over`)
+                  navigate(`/game_over/${lobby_id}`)
                 }} />
             </div>
           }

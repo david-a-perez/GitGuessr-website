@@ -484,11 +484,13 @@ interface LobbyFilters {
 interface FullObfuscatedQuestions {
   question: ObfuscatedQuestion;
   answer_choices: Array<ObfuscatedAnswerChoice>;
+  correct_answer: ObfuscatedCorrectAnswer;
   user_answer?: ObfuscatedUserAnswer;
 }
 
 interface FullGitGuessrQuestions {
   question: GitGuessrQuestion;
+  correct_answer: GitGuessrCorrectAnswer;
   user_answer?: GitGuessrUserAnswer;
 }
 

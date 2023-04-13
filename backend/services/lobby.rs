@@ -120,6 +120,7 @@ async fn index(
 struct FullObfuscatedQuestions {
     question: ObfuscatedQuestion,
     answer_choices: Vec<ObfuscatedAnswerChoice>,
+    correct_answer: ObfuscatedCorrectAnswer,
     user_answer: Option<ObfuscatedUserAnswer>,
 }
 
@@ -127,6 +128,7 @@ struct FullObfuscatedQuestions {
 #[derive(Serialize)]
 struct FullGitGuessrQuestions {
     question: GitGuessrQuestion,
+    correct_answer: GitGuessrCorrectAnswer,
     user_answer: Option<GitGuessrUserAnswer>,
 }
 
@@ -157,25 +159,33 @@ async fn read(db: Data<Database>, item_id: Path<String>, auth: Auth) -> impl Res
                 ObfuscatedAnswerChoice::belonging_to(&obfuscated_questions)
                     .load::<ObfuscatedAnswerChoice>(&mut conn)?;
 
+            let obfuscated_correct_answers =
+                    ObfuscatedCorrectAnswer::belonging_to(&obfuscated_questions)
+                        .load::<ObfuscatedCorrectAnswer>(&mut conn)?;
+
             let obfuscated_user_answers = ObfuscatedUserAnswer::belonging_to(&participant)
                 .load::<ObfuscatedUserAnswer>(&mut conn)?;
 
             let grouped_obfuscated_answer_choices =
                 obfuscated_answer_choices.grouped_by(&obfuscated_questions);
+            let grouped_obfuscated_correct_answers =
+                obfuscated_correct_answers.grouped_by(&obfuscated_questions);
             let grouped_obfuscated_user_answers =
                 obfuscated_user_answers.grouped_by(&obfuscated_questions);
 
             let grouped_obfuscated_answers = grouped_obfuscated_answer_choices
                 .into_iter()
+                .zip(grouped_obfuscated_correct_answers)
                 .zip(grouped_obfuscated_user_answers);
 
             obfuscated_questions
                 .into_iter()
                 .zip(grouped_obfuscated_answers)
                 .map(
-                    |(question, (answer_choices, user_answers))| FullObfuscatedQuestions {
+                    |(question, ((answer_choices, correct_answers), user_answers))| FullObfuscatedQuestions {
                         question,
                         answer_choices,
+                        correct_answer: correct_answers[0].clone(),
                         user_answer: user_answers.get(0).cloned(),
                     },
                 )
@@ -186,17 +196,23 @@ async fn read(db: Data<Database>, item_id: Path<String>, auth: Auth) -> impl Res
             let git_guessr_questions =
                 GitGuessrQuestion::belonging_to(&lobby).load::<GitGuessrQuestion>(&mut conn)?;
 
+            let git_guessr_correct_answers = GitGuessrCorrectAnswer::belonging_to(&git_guessr_questions)
+                .load::<GitGuessrCorrectAnswer>(&mut conn)?;
             let git_guessr_user_answers = GitGuessrUserAnswer::belonging_to(&participant)
-                .load::<GitGuessrUserAnswer>(&mut conn)?;
+              .load::<GitGuessrUserAnswer>(&mut conn)?;
 
+            let grouped_git_guessr_correct_answers =
+                git_guessr_correct_answers.grouped_by(&git_guessr_questions);
             let grouped_git_guessr_user_answers =
                 git_guessr_user_answers.grouped_by(&git_guessr_questions);
 
             git_guessr_questions
                 .into_iter()
+                .zip(grouped_git_guessr_correct_answers)
                 .zip(grouped_git_guessr_user_answers)
-                .map(|(question, user_answers)| FullGitGuessrQuestions {
+                .map(|((question, correct_answers), user_answers)| FullGitGuessrQuestions {
                     question,
+                    correct_answer: correct_answers[0].clone(),
                     user_answer: user_answers.get(0).cloned(),
                 })
                 .collect::<Vec<_>>()
@@ -372,10 +388,10 @@ async fn update(
             )
             .set((
                 start_time.eq((new_start_time.as_sql::<diesel::sql_types::Timestamptz>()
-                    + 20.seconds().as_sql::<Interval>() * (question_num - 1))
+                    + 30.seconds().as_sql::<Interval>() * (question_num - 1))
                     .nullable()),
                 end_time.eq((new_start_time.as_sql::<diesel::sql_types::Timestamptz>()
-                    + 20.seconds().as_sql::<Interval>() * question_num
+                    + 30.seconds().as_sql::<Interval>() * question_num
                     - 10.seconds())
                 .nullable()),
             ))
