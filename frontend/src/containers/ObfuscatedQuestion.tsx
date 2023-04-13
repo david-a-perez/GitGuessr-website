@@ -103,6 +103,32 @@ export const ObfuscatedQuestion = () => {
                 }} />
             </div>
           }
+          {lobby_id && question?.correct_answer && question?.next_question_start_time &&
+            <div>
+              <br />
+              <p>
+                Next Question starts in:
+              </p>
+              <Countdown date={question?.next_question_start_time}
+                onComplete={() => {
+                  setQuestion(null)
+                  navigate(`/obfuscated_question/${lobby_id}/${question.question.question_num + 1}`)
+                }} />
+            </div>
+          }
+          {lobby_id && question?.correct_answer && !question?.next_question_start_time &&
+            <div>
+              <br />
+              <p>
+                Exiting game in:
+              </p>
+              <Countdown date={game_over_time}
+                onComplete={() => {
+                  setQuestion(null)
+                  navigate(`/game_over`)
+                }} />
+            </div>
+          }
         </div>
       </div>
       <br />
@@ -147,32 +173,6 @@ export const ObfuscatedQuestion = () => {
           </div>
         </div>
       </div>
-      {lobby_id && question?.correct_answer && question?.next_question_start_time &&
-        <div>
-          <br />
-          <p>
-            Next Question starts in:
-          </p>
-          <Countdown date={question?.next_question_start_time}
-            onComplete={() => {
-              setQuestion(null)
-              navigate(`/git_guessr_question/${lobby_id}/${question.question.question_num + 1}`)
-            }} />
-        </div>
-      }
-      {lobby_id && question?.correct_answer && !question?.next_question_start_time &&
-        <div>
-          <br />
-          <p>
-            Exiting game in:
-          </p>
-          <Countdown date={game_over_time}
-            onComplete={() => {
-              setQuestion(null)
-              navigate(`/game_over`)
-            }} />
-        </div>
-      }
     </div>
   )
 }
