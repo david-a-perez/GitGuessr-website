@@ -88,12 +88,13 @@ export const JoinLobby = () => {
                 {lobby.git_guessr_game_format_config_id && <td>GitGuessr</td>}
                 {lobby.obfuscated_game_format_config_id && <td>Obfuscated</td>}
                 <td>
-                  <Button 
-                    variant="success" 
-                    disabled={processing} 
+                  <Button
+                    variant="success"
+                    disabled={processing}
                     onClick={() => {
-                      setSelectedLobby(lobby);}}
-                    >Select
+                      setSelectedLobby(lobby);
+                    }}
+                  >Select
                   </Button>
                 </td>
               </tr>
@@ -104,12 +105,13 @@ export const JoinLobby = () => {
                 {lobby.git_guessr_game_format_config_id && <td>GitGuessr</td>}
                 {lobby.obfuscated_game_format_config_id && <td>Obfuscated</td>}
                 <td>
-                  <Button 
-                    variant="success" 
-                    disabled={processing} 
+                  <Button
+                    variant="success"
+                    disabled={processing}
                     onClick={() => {
-                      setSelectedLobby(lobby);}}
-                    >Select
+                      setSelectedLobby(lobby);
+                    }}
+                  >Select
                   </Button>
                 </td>
               </tr>
@@ -133,11 +135,11 @@ export const JoinLobby = () => {
       )}
       <div className="Form">
         <div style={{ display: 'flex' }}>
-          <Button 
+          <Button
             variant="secondary"
-            disabled={processing || page === 0} 
+            disabled={processing || page === 0}
             onClick={() => setPage(page - 1)}
-            >{`<<`}</Button>
+          >{`<<`}</Button>
           <span style={{ flex: 1, textAlign: 'center' }}>
             Page {page + 1} of {numPages}
           </span>

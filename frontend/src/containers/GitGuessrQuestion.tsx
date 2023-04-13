@@ -101,130 +101,119 @@ export const GitGuessrQuestion = () => {
     game_over_time.setSeconds(game_over_time.getSeconds() + 10)
   }
 
-  return (
-    <div>
-      <br />
-      <div className="container-fluid">
+    return (
         <div>
-          <h3>GitGuessr</h3>
-        </div>
-        <div className="row">
-          <div className="col-xl">
-            <h5>QUESTION: {question_num}</h5>
-          </div>
-          {lobby_id && question?.question.end_time && !question.correct_answer &&
-            <div className='col-xl'>
-              <h2>Time Remaining: </h2>
-              <Countdown
-                date={question?.question.end_time}
-                onComplete={() => {
-                  console.log("Completed countdown")
-                  setProcessing(true)
-                  QuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num)).then((question) => {
-                    setQuestion(question)
-                    setProcessing(false)
-                  })
-                }} />
-            </div>
-          }
-        </div>
-      </div>
-      <br />
-      <div className="container-fluid">
-        <div className="row">
-          <div className="col-xl">
-            <div className="card border-dark mb-3 h-100 w-100" style={{ maxHeight: '80vh', overflowY: 'scroll' }}>
-              <div className="card-header bg-transparent border-dark">CODE SNIPPET</div>
-              <div className="card-body text-success">
-                <pre style={{ textAlign: 'left' }}>
-                  <code>
-                    {question?.question.question_text}
-                  </code>
-                </pre>
-              </div>
-            </div>
-          </div>
-          <div className="col-xl">
-            <div className="card border-dark mb-3 h-100 w-100">
-              <div className="card-header bg-transparent border-dark">
-                {!question && "No question"}
-                Which file contains the code snippet?
-              </div>
-              <div className="card-body">
-                <Breadcrumb>
-                  <Breadcrumb.Item onClick={() => setPath([])}>Root</Breadcrumb.Item>
-                  {path.map(folder =>
-                    <Breadcrumb.Item key={folder}>{folder}</Breadcrumb.Item>
-                  )}
-                </Breadcrumb>
-                {pathContents?.entries.map(dir =>
-                  <>
-                    {dir.is_directory &&
-                      <Button
-                        onClick={() => setPath(path.concat([dir.filename]))}
-                        variant="success"
-                        key={dir.filename}>{dir.filename}</Button>
+            <br />
+            <div className="container-fluid">
+                <div>
+                    <h3>GitGuessr</h3>
+                </div>
+                <div className="row">
+                    <div className="col-xl">
+                        <h5>QUESTION: {question_num}</h5>
+                    </div>
+                    {lobby_id && question?.question.end_time && !question.correct_answer &&
+                        <div className='col-xl'>
+                            <h2>Time Remaining: </h2>
+                            <Countdown
+                                date={question?.question.end_time}
+                                onComplete={() => {
+                                    console.log("Completed countdown")
+                                    setProcessing(true)
+                                    QuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num)).then((question) => {
+                                        setQuestion(question)
+                                        setProcessing(false)
+                                    })
+                                }} />
+                        </div>
                     }
-                    {!dir.is_directory &&
-                      <Button
-                        onClick={() =>
-                          setSelectedAnswer(path.concat([dir.filename]).join('/'))
-                        }
-                        variant="light"
-                        key={dir.filename}>{dir.filename}</Button>
-                    }
-                  </>
-                )}
-              </div>
-              <div style={{ alignContent: 'left', paddingBottom: '10px' }}>
-                <Button
-                  variant='danger'
-                  size='sm'
-                  onClick={() => setPath(path.slice(0, -1))}
-                >
-                  back
-                </Button>
-              </div>
-              <div className="card-footer">
-                <Button
-                  variant="success"
-                  onClick={() => selectedAnswer ? submitUserAnswer(selectedAnswer) : null}
-                >
-                  Submit
-                </Button>
-              </div>
+                </div>
             </div>
-          </div>
+            <br />
+            <div className="container-fluid">
+                <div className="row">
+                    <div className="col-xl">
+                        <div className="card border-dark mb-3 h-100 w-100" style={{ maxHeight: '80vh', overflowY: 'scroll' }}>
+                            <div className="card-header bg-transparent border-dark">CODE SNIPPET</div>
+                            <div className="card-body text-success">
+                                <pre style={{ textAlign: 'left' }}>
+                                    <code>
+                                        {question?.question.question_text}
+                                    </code>
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-xl">
+                        <div className="card border-dark mb-3 h-100 w-100">
+                            <div className="card-header bg-transparent border-dark">
+                                {!question && "No question"}
+                                Which file contains the code snippet?
+                            </div>
+                            <div className="card-body">
+                                <Breadcrumb>
+                                    <Breadcrumb.Item onClick={() => setPath([])}>Root</Breadcrumb.Item>
+                                    {path.map(folder =>
+                                        <Breadcrumb.Item key={folder}>{folder}</Breadcrumb.Item>
+                                    )}
+                                </Breadcrumb>
+                                {pathContents?.entries.map(dir =>
+                                    <>
+                                        {dir.is_directory &&
+                                            <Button
+                                                onClick={() => setPath(path.concat([dir.filename]))}
+                                                variant="success"
+                                                key={dir.filename}>{dir.filename}</Button>
+                                        }
+                                        {!dir.is_directory &&
+                                            <Button
+                                                onClick={() =>
+                                                    setSelectedAnswer(path.concat([dir.filename]).join('/'))
+                                                }
+                                                variant="light"
+                                                key={dir.filename}>{dir.filename}</Button>
+                                        }
+                                    </>
+                                )}
+                            </div>
+                            <div style={{ alignContent: 'left', paddingBottom: '10px' }}>
+                                <Button
+                                    variant='danger'
+                                    size='sm'
+                                    onClick={() => setPath(path.slice(0, -1))}
+                                >
+                                    back
+                                </Button>
+                            </div>
+                            <div className="card-footer">
+                                <Button
+                                    variant="success"
+                                    onClick={() => selectedAnswer ? submitUserAnswer(selectedAnswer) : null}
+                                >
+                                    Submit
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {lobby_id && nextQuestion?.question.start_time && question?.correct_answer &&
+                <div>
+                    <br />
+                    <p>
+                        Next Question starts in:
+                    </p>
+                    <Countdown date={nextQuestion?.question.start_time}
+                        onComplete={() => {
+                            console.log("2x Complete" + nextQuestion?.question.question_num)
+                            setQuestion(null)
+                            setNextQuestion(null)
+                            navigate(`/git_guessr_question/${lobby_id}/${nextQuestion?.question.question_num}`)
+                        }} />
+                </div>
+            }
         </div>
-      </div>
-      {lobby_id && question?.correct_answer && question?.next_question_start_time &&
-        <div>
-          <br />
-          <p>
-            Next Question starts in:
-          </p>
-          <Countdown date={question?.next_question_start_time}
-            onComplete={() => {
-              setQuestion(null)
-              navigate(`/git_guessr_question/${lobby_id}/${question.question.question_num + 1}`)
-            }} />
-        </div>
-      }
-      {lobby_id && question?.correct_answer && !question?.next_question_start_time &&
-        <div>
-          <br />
-          <p>
-            Results in:
-          </p>
-          <Countdown date={game_over_time}
-            onComplete={() => {
-              setQuestion(null)
-              navigate(`/game_over`)
-            }} />
-        </div>
-      }
-    </div>
-  )
+    )
 }
 
 

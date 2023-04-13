@@ -5,7 +5,7 @@ import { useLobbyAPI } from '../apis/lobby'
 import { useRepositoryAPI } from '../apis/repository'
 import { useAuth } from '../hooks/useAuth'
 
-export const SelectRepository = ({setRepository}: { setRepository: React.Dispatch<React.SetStateAction<Repository | null>>}) => {
+export const SelectRepository = ({ setRepository }: { setRepository: React.Dispatch<React.SetStateAction<Repository | null>> }) => {
   const auth = useAuth()
   const pageSize = 5
   const [page, setPage] = useState<number>(0)
