@@ -18,6 +18,7 @@ export const GitGuessrQuestion = () => {
     const [pathContents, setPathContents] = useState<Directory | null>(null)
     const [processing, setProcessing] = useState<boolean>(false)
     const [question, setQuestion] = useState<FullGitGuessrQuestion | null>(null)
+    const [disableSubmit, setDisableSubmit] = useState<boolean>(false)
 
     const [lobbyParticipant, setLobbyParticipant] = useState<LobbyParticipant | null>(null)
 
@@ -138,6 +139,7 @@ export const GitGuessrQuestion = () => {
                                     setPath([])
                                     setSelectedAnswer(null)
                                     setQuestion(null)
+                                    setDisableSubmit(false)
                                     navigate(`/git_guessr_question/${lobby_id}/${question.question.question_num + 1}`)
                                 }} />
                         </div>
@@ -173,7 +175,7 @@ export const GitGuessrQuestion = () => {
                         </div>
                     </div>
                     <div className="col-xl">
-                        <div className="card border-dark mb-3 h-100 w-100">
+                        <div className="card border-dark mb-3 h-70 w-100">
                             <div className="card-header bg-transparent border-dark">
                                 {!question && "No question"}
                                 Which file contains the code snippet?
@@ -206,14 +208,20 @@ export const GitGuessrQuestion = () => {
                                         </span>
                                     )}
                                 </div>
-                            </div>
-                            <div style={{ alignContent: 'left', paddingBottom: '10px' }}>
-
+                                <div style={{ textAlign: 'left', paddingBottom: '10px', paddingTop: '20px' }}>
+                                    <h4>Selected Path: {selectedAnswer}</h4>
+                                    {question?.correct_answer && <h4>Correct Path:  {question?.correct_answer.answer}</h4>}
+                                </div>
                             </div>
                             <div className="card-footer">
                                 <Button
+                                    disabled={disableSubmit}
                                     variant="success"
-                                    onClick={() => selectedAnswer ? submitUserAnswer(selectedAnswer) : null}
+                                    onClick={() => {
+                                        selectedAnswer ? submitUserAnswer(selectedAnswer) : null;
+                                        setDisableSubmit(selectedAnswer ? true: false);
+                                    }
+                                    }
                                 >
                                     Submit
                                 </Button>
