@@ -16,12 +16,10 @@ export const ObfuscatedQuestion = () => {
   const [checked, setChecked] = useState<number | null>(null)
   const [processing, setProcessing] = useState<boolean>(false)
   const [question, setQuestion] = useState<FullObfuscatedQuestion | null>(null)
-  const [nextQuestion, setNextQuestion] = useState<FullObfuscatedQuestion | null>(null)
 
   const [lobbyParticipant, setLobbyParticipant] = useState<LobbyParticipant | null>(null)
 
   const ObfuscatedQuestionAPI = useObfuscatedQuestionAPI(auth)
-  const ObfuscatedAnswerChoiceAPI = useObfuscatedAnswerChoiceAPI(auth)
   const ObfuscatedUserAnswerAPI = useObfuscatedUserAnswerAPI(auth)
   const LobbyParticipantAPI = useLobbyParticipantAPI(auth)
 
@@ -54,9 +52,6 @@ export const ObfuscatedQuestion = () => {
     if (!isMounted()) return
     setQuestion(question)
     setProcessing(false)
-    const nextQuestion = await ObfuscatedQuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num) + 1)
-    if (!isMounted()) return
-    setNextQuestion(nextQuestion)
   }, [auth.isAuthenticated, lobby_id, question_num])
 
   const submitUserAnswer = (answerChoice: ObfuscatedAnswerChoice) => {
@@ -73,6 +68,13 @@ export const ObfuscatedQuestion = () => {
       question_id: question.question.id,
       answer_choice_id: answerChoice.id,
     })
+  }
+
+  let game_over_time;
+
+  if (question?.question.end_time) {
+    game_over_time = new Date(question?.question.end_time)
+    game_over_time.setSeconds(game_over_time.getSeconds() + 10)
   }
 
   return (
@@ -145,29 +147,30 @@ export const ObfuscatedQuestion = () => {
           </div>
         </div>
       </div>
-      {lobby_id && nextQuestion?.question.start_time && question?.correct_answer &&
+      {lobby_id && question?.correct_answer && question?.next_question_start_time &&
         <div>
           <br />
           <p>
             Next Question starts in:
           </p>
-          <Countdown date={nextQuestion?.question.start_time}
+          <Countdown date={question?.next_question_start_time}
             onComplete={() => {
-              console.log("2x Complete" + nextQuestion?.question.question_num)
               setQuestion(null)
-              setNextQuestion(null)
-              navigate(`/obfuscated_question/${lobby_id}/${nextQuestion?.question.question_num}`)
+              navigate(`/git_guessr_question/${lobby_id}/${question.question.question_num + 1}`)
             }} />
         </div>
       }
-      {lobby_id && !nextQuestion?.question.start_time && question?.correct_answer &&
+      {lobby_id && question?.correct_answer && !question?.next_question_start_time &&
         <div>
-            <br />
-            <p>
-                Exiting game in:
-            </p>
-            <Countdown date={Date.now() + 5000}
-                onComplete={() => navigate('/game_over_page')} />
+          <br />
+          <p>
+            Exiting game in:
+          </p>
+          <Countdown date={game_over_time}
+            onComplete={() => {
+              setQuestion(null)
+              navigate(`/game_over`)
+            }} />
         </div>
       }
     </div>
