@@ -21,21 +21,21 @@ import { GameOverPage } from './containers/GameOverPage'
 const App = () => {
   useAuthCheck()
   const auth = useAuth()
-    
+
   const navigate = useNavigate()
   /* CRA: app hooks */
-  
+
   // @ts-ignore
   return (
     <div className="App">
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
         <div className="container-fluid">
           <span className="navbar-brand">
-            <img 
-              src="https://user-images.githubusercontent.com/46609460/231286372-f3968e6c-b5c3-4e11-a1aa-22f76541830c.png" 
-              alt="" 
-              width="50" 
-              height="40" 
+            <img
+              src="https://user-images.githubusercontent.com/46609460/231286372-f3968e6c-b5c3-4e11-a1aa-22f76541830c.png"
+              alt=""
+              width="50"
+              height="40"
             />
           </span>
           <div className="collapse navbar-collapse" id="navbarNav">
@@ -44,18 +44,18 @@ const App = () => {
                 <a className="nav-link active" href='/'>Home</a>
               </li>
               <li>
-                { auth.isAuthenticated &&
-                <a className="nav-link active" href="/create_lobby">Create Lobby</a>
+                {auth.isAuthenticated &&
+                  <a className="nav-link active" href="/create_lobby">Create Lobby</a>
                 }
               </li>
               <li>
-                { auth.isAuthenticated &&
-                <a className="nav-link active" href="/join_lobby">Join Lobby</a>
+                {auth.isAuthenticated &&
+                  <a className="nav-link active" href="/join_lobby">Join Lobby</a>
                 }
               </li>
               <li className="nav-item">
-                { auth.isAuthenticated && <a className="nav-link active" href="/account">Account</a> }
-                { !auth.isAuthenticated && <a className="nav-link active" href="/login">Login/Sign-Up</a> }
+                {auth.isAuthenticated && <a className="nav-link active" href="/account">Account</a>}
+                {!auth.isAuthenticated && <a className="nav-link active" href="/login">Login/Sign-Up</a>}
               </li>
             </ul>
           </div>
@@ -78,7 +78,7 @@ const App = () => {
           <Route path="/reset" element={<ResetPage />} />
           <Route path="/activate" element={<ActivationPage />} />
           <Route path="/register" element={<RegistrationPage />} />
-          <Route path="/account" element={<AccountPage />} />  
+          <Route path="/account" element={<AccountPage />} />
         </Routes>
       </div>
     </div>

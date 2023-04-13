@@ -77,40 +77,40 @@ export const ObfuscatedQuestion = () => {
 
   return (
     <div>
-      <br/>
+      <br />
       <div className="container-fluid">
         <div>
           <h3>OBFUSCATED</h3>
         </div>
         <div className="row">
           <div className="col-xl">
-              <h5>QUESTION: {question_num}</h5>
+            <h5>QUESTION: {question_num}</h5>
           </div>
           {lobby_id && question?.question.end_time && !question.correct_answer &&
-          <div className='col-xl'>
-            <h2>Time Remaining: </h2>
-            <Countdown
-              date={question?.question.end_time}
-              onComplete={() => {
-                console.log("Completed countdown")
-                setProcessing(true)
-                ObfuscatedQuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num)).then((question) => {
-                  setQuestion(question)
-                  setProcessing(false)
-                })
-              }} />
-          </div>
+            <div className='col-xl'>
+              <h2>Time Remaining: </h2>
+              <Countdown
+                date={question?.question.end_time}
+                onComplete={() => {
+                  console.log("Completed countdown")
+                  setProcessing(true)
+                  ObfuscatedQuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num)).then((question) => {
+                    setQuestion(question)
+                    setProcessing(false)
+                  })
+                }} />
+            </div>
           }
         </div>
       </div>
-      <br/>
+      <br />
       <div className="container-fluid">
         <div className="row">
           <div className="col-xl">
-            <div className="card border-dark mb-3 h-100 w-100" style={{maxHeight:'80vh', overflowY:'scroll'}}>
+            <div className="card border-dark mb-3 h-100 w-100" style={{ maxHeight: '80vh', overflowY: 'scroll' }}>
               <div className="card-header bg-transparent border-dark">CODE SNIPPET</div>
               <div className="card-body text-success">
-                <pre style={{textAlign:'left'}}>
+                <pre style={{ textAlign: 'left' }}>
                   <code>
                     {question?.question.question_text}
                   </code>
@@ -118,7 +118,7 @@ export const ObfuscatedQuestion = () => {
               </div>
             </div>
           </div>
-          <div className="col-xl" style={{height:'60vh'}}>
+          <div className="col-xl" style={{ height: '60vh' }}>
             <div className="card border-dark mb-3 h-100 w-100">
               <div className="card-header bg-transparent border-dark">
                 {!question && "No question"}
@@ -126,20 +126,21 @@ export const ObfuscatedQuestion = () => {
               </div>
               <div className="card-body">
                 {question?.answer_choices.map(answerChoice =>
-                <div key={answerChoice.id} style={{paddingTop:'20px'}}>
-                  <button type="button" 
-                    className={question.correct_answer?.answer_choice_id == answerChoice.id ? "btn btn-success" : question.correct_answer?.answer_choice_id != answerChoice.id && question.user_answer?.answer_choice_id == answerChoice.id ? "btn btn-danger" : checked==answerChoice.id ? "btn btn-secondary" : "btn btn-outline-secondary"} 
-                    onClick={() => {
-                      submitUserAnswer(answerChoice);
-                      setChecked(answerChoice.id);}
-                    }
-                    style={{width:'100%'}}
-                  >
-                    {answerChoice.answer}
-                  </button>
-                </div>
+                  <div key={answerChoice.id} style={{ paddingTop: '20px' }}>
+                    <button type="button"
+                      className={question.correct_answer?.answer_choice_id == answerChoice.id ? "btn btn-success" : question.correct_answer?.answer_choice_id != answerChoice.id && question.user_answer?.answer_choice_id == answerChoice.id ? "btn btn-danger" : checked == answerChoice.id ? "btn btn-secondary" : "btn btn-outline-secondary"}
+                      onClick={() => {
+                        submitUserAnswer(answerChoice);
+                        setChecked(answerChoice.id);
+                      }
+                      }
+                      style={{ width: '100%' }}
+                    >
+                      {answerChoice.answer}
+                    </button>
+                  </div>
                 )}
-              </div>     
+              </div>
             </div>
           </div>
         </div>
@@ -148,7 +149,7 @@ export const ObfuscatedQuestion = () => {
         <div>
           <br />
           <p>
-            Next Question starts in: 
+            Next Question starts in:
           </p>
           <Countdown date={nextQuestion?.question.start_time}
             onComplete={() => {

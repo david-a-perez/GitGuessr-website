@@ -78,11 +78,11 @@ export const WaitingRoom = () => {
       </table>
       <div className="Form">
         <div style={{ display: 'flex' }}>
-          <Button 
+          <Button
             variant="secondary"
-            disabled={page === 0} 
+            disabled={page === 0}
             onClick={() => setPage(page - 1)}
-            >{`<<`}</Button>
+          >{`<<`}</Button>
           <span style={{ flex: 1, textAlign: 'center' }}>
             Page {page + 1} of {numPages}
           </span>
@@ -107,8 +107,8 @@ export const WaitingRoom = () => {
       {lobby?.start_time &&
         <Countdown date={lobby?.start_time}>
           <>
-          {(lobby?.git_guessr_game_format_config_id) && (<Navigate to={`/git_guessr_question/${lobby_id}/1`}/>)}
-          {(lobby?.obfuscated_game_format_config_id) && (<Navigate to={`/obfuscated_question/${lobby_id}/1`}/>)}
+            {(lobby?.git_guessr_game_format_config_id) && (<Navigate to={`/git_guessr_question/${lobby_id}/1`} />)}
+            {(lobby?.obfuscated_game_format_config_id) && (<Navigate to={`/obfuscated_question/${lobby_id}/1`} />)}
           </>
         </Countdown>
       }

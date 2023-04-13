@@ -166,7 +166,7 @@ export const GitGuessrQuestion = () => {
                                         }
                                         {!dir.is_directory &&
                                             <Button
-                                                onClick={()=>
+                                                onClick={() =>
                                                     setSelectedAnswer(path.concat([dir.filename]).join('/'))
                                                 }
                                                 variant="light"
@@ -187,7 +187,7 @@ export const GitGuessrQuestion = () => {
                             <div className="card-footer">
                                 <Button
                                     variant="success"
-                                    onClick={()=>selectedAnswer? submitUserAnswer(selectedAnswer) : null}
+                                    onClick={() => selectedAnswer ? submitUserAnswer(selectedAnswer) : null}
                                 >
                                     Submit
                                 </Button>

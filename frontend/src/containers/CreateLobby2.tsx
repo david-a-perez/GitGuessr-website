@@ -43,13 +43,13 @@ export const CreateLobby = () => {
               <p className="card-text">
                 Repository: {repository.name}<br />
               </p>
-              <Button 
+              <Button
                 variant="danger"
                 onClick={() => {
                   setGameFormat(null)
                 }}
               >Back</Button>
-              <Button 
+              <Button
                 variant="success"
                 disabled={processing || !auth.isAuthenticated}
                 onClick={async () => {
@@ -64,7 +64,7 @@ export const CreateLobby = () => {
                   })
                   navigate(`/lobby/${lobby.id}`)
                   setProcessing(false)
-              }}>Create Lobby</Button>
+                }}>Create Lobby</Button>
             </div>
           </div>
         </>
