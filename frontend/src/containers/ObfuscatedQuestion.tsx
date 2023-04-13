@@ -16,6 +16,7 @@ export const ObfuscatedQuestion = () => {
   const [checked, setChecked] = useState<number | null>(null)
   const [processing, setProcessing] = useState<boolean>(false)
   const [question, setQuestion] = useState<FullObfuscatedQuestion | null>(null)
+  const [disableButtons, setDisableButtons] = useState<boolean>(false)
 
   const [lobbyParticipant, setLobbyParticipant] = useState<LobbyParticipant | null>(null)
 
@@ -112,6 +113,7 @@ export const ObfuscatedQuestion = () => {
               <Countdown date={question?.next_question_start_time}
                 onComplete={() => {
                   setQuestion(null)
+                  setDisableButtons(false)
                   navigate(`/obfuscated_question/${lobby_id}/${question.question.question_num + 1}`)
                 }} />
             </div>
@@ -156,10 +158,12 @@ export const ObfuscatedQuestion = () => {
                 {question?.answer_choices.map(answerChoice =>
                   <div key={answerChoice.id} style={{ paddingTop: '20px' }}>
                     <button type="button"
+                      disabled={disableButtons}
                       className={question.correct_answer?.answer_choice_id == answerChoice.id ? "btn btn-success" : question.correct_answer?.answer_choice_id != answerChoice.id && question.user_answer?.answer_choice_id == answerChoice.id ? "btn btn-danger" : checked == answerChoice.id ? "btn btn-secondary" : "btn btn-outline-secondary"}
                       onClick={() => {
                         submitUserAnswer(answerChoice);
                         setChecked(answerChoice.id);
+                        setDisableButtons(true);
                       }
                       }
                       style={{ width: '100%' }}
