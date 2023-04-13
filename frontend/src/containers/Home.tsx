@@ -44,7 +44,40 @@ export const Home = () => {
       </div>
       <div style={{ height: '100vh', display: 'block', scrollSnapAlign: 'start', backgroundColor: 'lightgrey' }}>
         <br />
+        <h1 className='mb-5 mt-4'>Gamemode-Obfuscated</h1>
+        <br />
+        <div className='container' style={{ textAlign: 'left' }}>
+          <div className='row'>
+            <div className='col'>
+              <h4>
+                In the obfuscated game mode, a player is given a random function or struct with
+                obfuscated keywords. The player's goal is to guess the name of the function
+                from a list of potential choices. The level of keyword abstraction can be set to
+                make the game harder or easier. This game mode exposes developers to new functions
+                and pieces of code that they may be familiar with but have never seen the definition
+                of. It will also help develop the skills of quickly reading code and determining its
+                function, without the use of helpful types and variable names. This game mode has
+                the added benefit of holding developers accountable for their naming conventions, as
+                poorly named functions will be difficult to match with certain code blocks.
+              </h4>
+            </div>
+            <div className='col'
+              style={{ paddingLeft: '50px' }}>
+              <img
+                className="d-flex"
+                src="https://user-images.githubusercontent.com/46609460/231286336-006c81ba-e855-47e8-9536-6558d412b309.png"
+                alt="First slide"
+                width='450'
+                height='450'
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style={{ height: '100vh', display: 'block', scrollSnapAlign: 'start' }}>
+        <br />
         <h1 className='mb-5 mt-4'>Gamemode-GitGuessr</h1>
+        <br />
         <div className='container' style={{ textAlign: 'left' }}>
           <div className='row'>
             <div className='col'>
@@ -52,51 +85,22 @@ export const Home = () => {
                 className="d-block"
                 src='https://user-images.githubusercontent.com/46609460/231556799-5e282848-2488-4472-b44e-b10adece3e47.png'
                 alt="gg-logo"
-                height="350px"
-                width="300px"
+                height="500px"
+                width="500px"
               />
             </div>
             <div className='col'>
+              <br />
+              <br />
               <h4>
-                In the GitGuessr game mode, a player is tasked with locating the filename 
-                associated with a snippet of code. The user will be supplied with a snippet 
+                In the GitGuessr game mode, a player is tasked with locating the filename
+                associated with a snippet of code. The user will be supplied with a snippet
                 of code and a series of clickable folders and files that will allow them to
-                navigate throughout the repository. Move quickly, becuase each round is only 
-                10 seconds long. This gamemode helps both new and experienced developers 
+                navigate throughout the repository. Move quickly, becuase each round is only
+                20 seconds long. This gamemode helps both new and experienced developers
                 practice navigating a code base and will lead to better understanding and quicker
                 navigation on the job.
               </h4>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div style={{ height: '100vh', display: 'block', scrollSnapAlign: 'start' }}>
-        <br />
-        <h1 className='mb-5 mt-4'>Gamemode-Obfuscated</h1>
-        <div className='container' style={{ textAlign: 'left' }}>
-          <div className='row'>
-            <div className='col'>
-              <p>
-                In the obfuscated game mode, a player is given a random function or struct with 
-                obfuscated keywords. The player's goal is to guess the name of the function 
-                from a list of potential choices. The level of keyword abstraction can be set to 
-                make the game harder or easier. This game mode exposes developers to new functions 
-                and pieces of code that they may be familiar with but have never seen the definition
-                of. It will also help develop the skills of quickly reading code and determining its 
-                function, without the use of helpful types and variable names. This game mode has 
-                the added benefit of holding developers accountable for their naming conventions, as 
-                poorly named functions will be difficult to match with certain code blocks.
-                
-              </p>
-            </div>
-            <div className='col'>
-              <img
-                className="d-flex"
-                src="https://user-images.githubusercontent.com/46609460/231286336-006c81ba-e855-47e8-9536-6558d412b309.png"
-                alt="First slide"
-                width='400'
-                height='450'
-              />
             </div>
           </div>
         </div>

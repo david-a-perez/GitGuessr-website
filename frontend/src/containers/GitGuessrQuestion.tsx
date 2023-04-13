@@ -18,7 +18,7 @@ export const GitGuessrQuestion = () => {
   const [pathContents, setPathContents] = useState<Directory | null>(null)
   const [processing, setProcessing] = useState<boolean>(false)
   const [question, setQuestion] = useState<FullGitGuessrQuestion | null>(null)
-  const [disableSubmit, setDisableSubmit] = useState<boolean>(false)
+  const [disableButton, setdisableButton] = useState<boolean>(false)
 
   const [lobbyParticipant, setLobbyParticipant] = useState<LobbyParticipant | null>(null)
 
@@ -139,7 +139,7 @@ export const GitGuessrQuestion = () => {
                   setPath([])
                   setSelectedAnswer(null)
                   setQuestion(null)
-                  setDisableSubmit(false)
+                  setdisableButton(false)
                   navigate(`/git_guessr_question/${lobby_id}/${question.question.question_num + 1}`)
                 }} />
             </div>
@@ -192,12 +192,14 @@ export const GitGuessrQuestion = () => {
                     <span style={{ margin: '5px', display: 'inline-block' }}>
                       {dir.is_directory &&
                         <Button
+                          disabled={disableButton}
                           onClick={() => setPath(path.concat([dir.filename]))}
                           variant="success"
                           key={dir.filename}>{dir.filename}</Button>
                       }
                       {!dir.is_directory &&
                         <Button
+                          disabled={disableButton}
                           onClick={() =>
                             setSelectedAnswer(path.concat([dir.filename]).join('/'))
                           }
@@ -215,11 +217,11 @@ export const GitGuessrQuestion = () => {
               </div>
               <div className="card-footer">
                 <Button
-                  disabled={disableSubmit}
+                  disabled={disableButton}
                   variant="success"
                   onClick={() => {
                     selectedAnswer ? submitUserAnswer(selectedAnswer) : null;
-                    setDisableSubmit(selectedAnswer ? true : false);
+                    setdisableButton(selectedAnswer ? true : false);
                   }
                   }
                 >
