@@ -205,8 +205,10 @@ export const GitGuessrQuestion = () => {
           </p>
           <Countdown date={question?.next_question_start_time}
             onComplete={() => {
+              setPath([])
+              setSelectedAnswer(null)
               setQuestion(null)
-              navigate(`/obfuscated_question/${lobby_id}/${question.question.question_num + 1}`)
+              navigate(`/git_guessr_question/${lobby_id}/${question.question.question_num + 1}`)
             }} />
         </div>
       }
