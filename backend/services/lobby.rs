@@ -1,4 +1,4 @@
-use std::{str::Utf8Error, string::FromUtf8Error};
+use std::string::FromUtf8Error;
 
 use crate::{
     gitguessr::{
@@ -29,9 +29,9 @@ use actix_web::{
 };
 use create_rust_app::Database;
 use diesel::{
-    debug_query, dsl::IntervalDsl, pg::Pg, sql_types::Interval, BelongingToDsl,
-    BoolExpressionMethods, ExpressionMethods, GroupedBy, IntoSql, QueryDsl, QueryResult,
-    RunQueryDsl, SelectableHelper,
+    dsl::IntervalDsl,sql_types::Interval, BelongingToDsl,
+    ExpressionMethods, GroupedBy, IntoSql, QueryDsl, QueryResult,
+    RunQueryDsl,
 };
 use gitguessr_auth::Auth;
 use serde::{Deserialize, Serialize};

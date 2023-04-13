@@ -1,9 +1,7 @@
-// #![feature(byte_slice_trim_ascii)]
 use std::{borrow::Cow, collections::HashMap, str::{FromStr, Utf8Error}, num::{ParseFloatError, ParseIntError}, string::FromUtf8Error};
 
-// use anyhow::{Context, Result};
 use rand::{seq::SliceRandom, Rng, distributions::WeightedError};
-use tree_sitter::{Language, Parser, Point, Query, QueryCursor};
+use tree_sitter::{Language, Parser, Query, QueryCursor};
 
 use obfuscator::{
     create_edit_for_node, edit_tree, shift_cursor, AnswerMatch, ObfuscatorMatch,
@@ -270,6 +268,7 @@ pub fn obfuscate(language: &str, text: &[u8], num: usize) -> Result<Vec<Obfuscat
                             Ok(None)
                         }
                     })?;
+                    
                 if let Some(new_text) = new_text {
                     let node = obfuscator_match.node;
                     let node_byte_range = node.byte_range();
@@ -294,8 +293,5 @@ pub fn obfuscate(language: &str, text: &[u8], num: usize) -> Result<Vec<Obfuscat
             text: String::from_utf8(tree_text)?,
             answer,
         })
-        // println!("{}", std::str::from_utf8(&tree_text)?);
-        // println!("{}", tree.root_node().to_sexp());
-        // println!("{}", std::str::from_utf8(&text[node.byte_range()])?);
     }).collect::<Result<Vec<_>>>()?)
 }

@@ -1,11 +1,10 @@
-use std::{collections::VecDeque, io::BufRead, io::Write, path::PathBuf};
+use std::collections::VecDeque;
 
 use gix::{
     bstr::{BStr, BString, ByteSlice, ByteVec},
     objs::{tree::EntryRef, Kind},
-    open,
     traverse::tree::{
-        recorder::{self, Location},
+        recorder,
         visit::Action,
     },
     Object, Repository, Tree,
@@ -65,15 +64,6 @@ pub enum GitGuessrError {
         path: String,
         error: std::str::Utf8Error,
     },
-
-    #[error("Could not create TempDir: {0}")]
-    CreateTempDir(std::io::Error),
-
-    #[error("Could not read line from stdin: {0}")]
-    ReadStdinLine(std::io::Error),
-
-    #[error("Could not init interupt handler: {0}")]
-    GitOxideInitInteruptHandler(std::io::Error),
 
     #[error("GitOxide could not find id: {0}")]
     GitOxideUnknownId(String),
@@ -155,7 +145,7 @@ impl gix::traverse::tree::Visit for FilteredRecorder {
         self.pop_element()
     }
 
-    fn visit_tree(&mut self, entry: &EntryRef<'_>) -> Action {
+    fn visit_tree(&mut self, _entry: &EntryRef<'_>) -> Action {
         Action::Continue
     }
 
@@ -246,155 +236,3 @@ pub fn get_paths_at_path<'a>(repo: &'a Repository, path: &str) -> Result<Tree<'a
 
     Ok(current_dir)
 }
-
-// const REPO_NAME: &'static str = "git2-rs";
-// const REPO_URL: &'static str = "https://github.com/rust-lang/git2-rs.git";
-
-// const REPO_NAME: &'static str = "BizHawk";
-// const REPO_URL: &'static str = "https://github.com/TASEmulators/BizHawk.git";
-
-// const REPO_NAME: &'static str = "linux";
-// const REPO_URL: &'static str = "https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git";
-
-const REPO_NAME: &'static str = "gitoxide";
-const REPO_URL: &'static str = "https://github.com/Byron/gitoxide.git";
-
-// const REPO_NAME: &'static str = "CS395";
-// const REPO_URL: &'static str = "https://github.com/douglascraigschmidt/CS395.git";
-
-const SNIPPET_LEN: usize = 30;
-const NUM_ROUNDS: usize = 5;
-
-fn main() -> Result<()> {
-    let mut temp_dir = PathBuf::from(std::env::temp_dir());
-    temp_dir.push("GitGuessr");
-    if !temp_dir.exists() {
-        std::fs::create_dir(&temp_dir).map_err(|err| GitGuessrError::CreateTempDir(err))?;
-    }
-    temp_dir.push(REPO_NAME);
-    let repo = open(&temp_dir)?;
-
-    let head = repo.head()?;
-
-    let recorder = FilteredRecorder::new(r"\.rs$")?;
-
-    let entries = get_all_file_entries(&repo, recorder)?;
-    println!("File Entries len: {}", entries.len());
-    let chosen_entries: Vec<_> = get_random_entries(&entries, NUM_ROUNDS);
-
-    for entry in chosen_entries {
-        let object = repo.try_find_object(entry.oid)?.unwrap();
-
-        // TODO: only allow files in recorder
-        let blob = object.peel_to_kind(Kind::Blob).unwrap();
-
-        let text = &blob.data;
-
-        let snippet = get_snippet_from_file(entry.filepath.as_ref(), &text, SNIPPET_LEN)?;
-
-        println!("---------------------");
-        for line in snippet {
-            println!("{line}");
-        }
-        println!("---------------------");
-
-        let stdin = std::io::stdin();
-        let mut handle = stdin.lock();
-
-        let mut line = String::new();
-
-        let mut target = PathBuf::new();
-
-        loop {
-            let root = repo
-                .try_find_object(head.id().unwrap())?
-                .unwrap()
-                .peel_to_tree()?;
-
-            let current_dir = if !target.as_os_str().is_empty() {
-                root.lookup_entry_by_path(&target)?
-                    .unwrap()
-                    .object()?
-                    .peel_to_tree()?
-            } else {
-                root
-            };
-
-            for entry in current_dir.iter() {
-                let entry = entry?;
-                println!("{:?} {}", entry.mode(), entry.filename())
-            }
-
-            print!("> ");
-            std::io::stdout().flush().unwrap();
-            line.clear();
-            handle
-                .read_line(&mut line)
-                .map_err(|err| GitGuessrError::ReadStdinLine(err))?;
-
-            if line
-                .trim_end_matches("\n")
-                .trim_end_matches("\r")
-                .is_empty()
-            {
-                println!("Skip (q|s)? ");
-                line.clear();
-                handle
-                    .read_line(&mut line)
-                    .map_err(|err| GitGuessrError::ReadStdinLine(err))?;
-                match &*line
-                    .trim_end_matches("\n")
-                    .trim_end_matches("\r")
-                    .to_ascii_lowercase()
-                {
-                    "q" | "s" => break,
-                    _ => continue,
-                }
-            }
-
-            let line = line.trim_end_matches("\n").trim_end_matches("\r");
-            if line == ".." {
-                target.pop();
-            }
-
-            if let Some(selected_file) = current_dir.lookup_entry_by_path(line)? {
-                target.push(selected_file.filename().to_path().unwrap());
-                match selected_file.mode() {
-                    gix::objs::tree::EntryMode::Blob => break,
-                    _ => {}
-                }
-            }
-        }
-
-        println!("GitGuessr: {} Guess: {:?}", entry.filepath, target);
-    }
-
-    Ok(())
-}
-
-// Big issues that are foreseen:
-// Employee Single Sign On
-// Automatic downloading of private repositories
-//   We need a private key that can view the repository
-// libgit2's implementation of git blame is *extremely* slow
-//   We would need to use the git CLI for blame
-// Making blame interesting and fun (most repos are led by one developer)
-// CVE might not be mentioned in commit message
-//   May need integration with ticket system
-
-// Features:
-// Allow for a "pathspec" besides HEAD to be used
-// Allow for the number of lines to be customizable and potentially dynamic to content
-// Allow for git blame to be for only part of the file
-// Allow for users to download and delete repo's from the website
-// Allow for users to see download progress on website
-// Allow for users to create and play quizzes
-// Allow for users to create and join lobbies
-// Monthly/Weekly Leaderboard
-// Clone with GitOxide for faster speeds
-// Support filters (folders that should not be used, folders that are exclusivly used, and the same for file extensions)
-
-// Potential features:
-// Allow for scrolling and context menu (Ctrl-click) for point reduction
-// Use WASM vim window
-// Editor plugin
