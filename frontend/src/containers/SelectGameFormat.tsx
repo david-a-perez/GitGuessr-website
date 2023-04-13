@@ -54,7 +54,10 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
               />
               <div className="card-body">
                 <h5 className="card-title">Git Guessr</h5>
-                <p className="card-text">This is placeholder text for the GG game.</p>
+                <p className="card-text">
+                  Match a snippet of code to the correct file name. 
+                  Move quickly, because the clock is ticking.
+                </p>
                 <Button variant="success" onClick={() => setGameFormat({
                   git_guessr_game_format_config_id: gitGuessrGameFormatConfigId
                 })}>Select</Button>
@@ -72,7 +75,10 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
               />
               <div className="card-body">
                 <h5 className="card-title">Obfuscated</h5>
-                <p className="card-text">This is placeholder text for obfuscated game.</p>
+                <p className="card-text">
+                  Guess the name of a struct or function in the repository. 
+                  Keywords may not be as helpful as they appear.
+                </p>
                 <Button variant="success" onClick={() => setGameFormat({
                   obfuscated_game_format_config_id: obfuscatedGameFormatConfigId
                 })}>Select</Button>
