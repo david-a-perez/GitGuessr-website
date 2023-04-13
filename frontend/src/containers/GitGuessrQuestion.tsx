@@ -211,6 +211,16 @@ export const GitGuessrQuestion = () => {
                         }} />
                 </div>
             }
+            {lobby_id && !nextQuestion?.question.start_time && question?.correct_answer &&
+                <div>
+                    <br />
+                    <p>
+                        Exiting game in:
+                    </p>
+                    <Countdown date={Date.now() + 5000}
+                        onComplete={() => navigate('/game_over_page')} />
+                </div>
+            }
         </div>
     )
 }
