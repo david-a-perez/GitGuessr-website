@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Countdown from 'react-countdown'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { useObfuscatedAnswerChoiceAPI } from '../apis/obfuscated_answer_choice'
-import { useLobbyAPI } from '../apis/lobby'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useLobbyParticipantAPI } from '../apis/lobby_participant'
 import { useObfuscatedQuestionAPI } from '../apis/obfuscated_question'
 import { useObfuscatedUserAnswerAPI } from '../apis/obfuscated_user_answer'
@@ -16,12 +14,10 @@ export const ObfuscatedQuestion = () => {
   const [checked, setChecked] = useState<number | null>(null)
   const [processing, setProcessing] = useState<boolean>(false)
   const [question, setQuestion] = useState<FullObfuscatedQuestion | null>(null)
-  const [nextQuestion, setNextQuestion] = useState<FullObfuscatedQuestion | null>(null)
 
   const [lobbyParticipant, setLobbyParticipant] = useState<LobbyParticipant | null>(null)
 
   const ObfuscatedQuestionAPI = useObfuscatedQuestionAPI(auth)
-  const ObfuscatedAnswerChoiceAPI = useObfuscatedAnswerChoiceAPI(auth)
   const ObfuscatedUserAnswerAPI = useObfuscatedUserAnswerAPI(auth)
   const LobbyParticipantAPI = useLobbyParticipantAPI(auth)
 
@@ -54,9 +50,6 @@ export const ObfuscatedQuestion = () => {
     if (!isMounted()) return
     setQuestion(question)
     setProcessing(false)
-    const nextQuestion = await ObfuscatedQuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num) + 1)
-    if (!isMounted()) return
-    setNextQuestion(nextQuestion)
   }, [auth.isAuthenticated, lobby_id, question_num])
 
   const submitUserAnswer = (answerChoice: ObfuscatedAnswerChoice) => {
@@ -75,42 +68,49 @@ export const ObfuscatedQuestion = () => {
     })
   }
 
+  let game_over_time;
+
+  if (question?.question.end_time) {
+    game_over_time = new Date(question?.question.end_time)
+    game_over_time.setSeconds(game_over_time.getSeconds() + 10)
+  }
+
   return (
     <div>
-      <br/>
+      <br />
       <div className="container-fluid">
         <div>
           <h3>OBFUSCATED</h3>
         </div>
         <div className="row">
           <div className="col-xl">
-              <h5>QUESTION: {question_num}</h5>
+            <h5>QUESTION: {question_num}</h5>
           </div>
           {lobby_id && question?.question.end_time && !question.correct_answer &&
-          <div className='col-xl'>
-            <h2>Time Remaining: </h2>
-            <Countdown
-              date={question?.question.end_time}
-              onComplete={() => {
-                console.log("Completed countdown")
-                setProcessing(true)
-                ObfuscatedQuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num)).then((question) => {
-                  setQuestion(question)
-                  setProcessing(false)
-                })
-              }} />
-          </div>
+            <div className='col-xl'>
+              <h2>Time Remaining: </h2>
+              <Countdown
+                date={question?.question.end_time}
+                onComplete={() => {
+                  console.log("Completed countdown")
+                  setProcessing(true)
+                  ObfuscatedQuestionAPI.getByLobbyAndQuestionNum(lobby_id, Number(question_num)).then((question) => {
+                    setQuestion(question)
+                    setProcessing(false)
+                  })
+                }} />
+            </div>
           }
         </div>
       </div>
-      <br/>
+      <br />
       <div className="container-fluid">
         <div className="row">
           <div className="col-xl">
-            <div className="card border-dark mb-3 h-100 w-100" style={{maxHeight:'80vh', overflowY:'scroll'}}>
+            <div className="card border-dark mb-3 h-100 w-100" style={{ maxHeight: '80vh', overflowY: 'scroll' }}>
               <div className="card-header bg-transparent border-dark">CODE SNIPPET</div>
               <div className="card-body text-success">
-                <pre style={{textAlign:'left'}}>
+                <pre style={{ textAlign: 'left' }}>
                   <code>
                     {question?.question.question_text}
                   </code>
@@ -118,7 +118,7 @@ export const ObfuscatedQuestion = () => {
               </div>
             </div>
           </div>
-          <div className="col-xl" style={{height:'60vh'}}>
+          <div className="col-xl" style={{ height: '60vh' }}>
             <div className="card border-dark mb-3 h-100 w-100">
               <div className="card-header bg-transparent border-dark">
                 {!question && "No question"}
@@ -126,36 +126,48 @@ export const ObfuscatedQuestion = () => {
               </div>
               <div className="card-body">
                 {question?.answer_choices.map(answerChoice =>
-                <div key={answerChoice.id} style={{paddingTop:'20px'}}>
-                  <button type="button" 
-                    className={question.correct_answer?.answer_choice_id == answerChoice.id ? "btn btn-success" : question.correct_answer?.answer_choice_id != answerChoice.id && question.user_answer?.answer_choice_id == answerChoice.id ? "btn btn-danger" : checked==answerChoice.id ? "btn btn-secondary" : "btn btn-outline-secondary"} 
-                    onClick={() => {
-                      submitUserAnswer(answerChoice);
-                      setChecked(answerChoice.id);}
-                    }
-                    style={{width:'100%'}}
-                  >
-                    {answerChoice.answer}
-                  </button>
-                </div>
+                  <div key={answerChoice.id} style={{ paddingTop: '20px' }}>
+                    <button type="button"
+                      className={question.correct_answer?.answer_choice_id == answerChoice.id ? "btn btn-success" : question.correct_answer?.answer_choice_id != answerChoice.id && question.user_answer?.answer_choice_id == answerChoice.id ? "btn btn-danger" : checked == answerChoice.id ? "btn btn-secondary" : "btn btn-outline-secondary"}
+                      onClick={() => {
+                        submitUserAnswer(answerChoice);
+                        setChecked(answerChoice.id);
+                      }
+                      }
+                      style={{ width: '100%' }}
+                    >
+                      {answerChoice.answer}
+                    </button>
+                  </div>
                 )}
-              </div>     
+              </div>
             </div>
           </div>
         </div>
       </div>
-      {lobby_id && nextQuestion?.question.start_time && question?.correct_answer &&
+      {lobby_id && question?.correct_answer && question?.next_question_start_time &&
         <div>
           <br />
           <p>
-            Next Question starts in: 
+            Next Question starts in:
           </p>
-          <Countdown date={nextQuestion?.question.start_time}
+          <Countdown date={question?.next_question_start_time}
             onComplete={() => {
-              console.log("2x Complete" + nextQuestion?.question.question_num)
               setQuestion(null)
-              setNextQuestion(null)
-              navigate(`/obfuscated_question/${lobby_id}/${nextQuestion?.question.question_num}`)
+              navigate(`/obfuscated_question/${lobby_id}/${question.question.question_num + 1}`)
+            }} />
+        </div>
+      }
+      {lobby_id && question?.correct_answer && !question?.next_question_start_time &&
+        <div>
+          <br />
+          <p>
+            Results in:
+          </p>
+          <Countdown date={game_over_time}
+            onComplete={() => {
+              setQuestion(null)
+              navigate(`/game_over`)
             }} />
         </div>
       }
