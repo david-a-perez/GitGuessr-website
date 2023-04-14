@@ -16,6 +16,9 @@ mod services;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    #[cfg(not(debug_assertions))]
+    dotenv::dotenv().unwrap();
+    
     #[cfg(debug_assertions)]
     create_rust_app::setup_development().await;
     let app_data = create_rust_app::setup();
