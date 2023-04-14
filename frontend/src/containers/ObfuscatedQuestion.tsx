@@ -140,8 +140,8 @@ export const ObfuscatedQuestion = () => {
             <div className="card border-dark mb-3 h-100 w-100" style={{ maxHeight: '80vh', overflowY: 'scroll' }}>
               <div className="card-header bg-transparent border-dark">CODE SNIPPET</div>
               <div className="card-body text-success">
-                <pre style={{ textAlign: 'left' }}>
-                  <code>
+                <pre style={{ textAlign: 'left'}}>
+                  <code style={{ whiteSpace: 'pre'}}>
                     {question?.question.question_text}
                   </code>
                 </pre>

@@ -167,7 +167,7 @@ export const GitGuessrQuestion = () => {
               <div className="card-header bg-transparent border-dark">CODE SNIPPET</div>
               <div className="card-body text-success">
                 <pre style={{ textAlign: 'left' }}>
-                  <code>
+                  <code style={{ whiteSpace: 'pre'}}>
                     {question?.question.question_text}
                   </code>
                 </pre>

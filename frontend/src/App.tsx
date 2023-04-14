@@ -11,7 +11,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import { Home } from './containers/Home'
 import { Todos } from './containers/Todo'
 import { CreateLobby } from './containers/CreateLobby2'
-import { Route, useNavigate, Routes } from 'react-router-dom'
+import { Route, useNavigate, Routes, Link } from 'react-router-dom'
 import { JoinLobby } from './containers/JoinLobby'
 import { WaitingRoom } from './containers/WaitingRoom'
 import { ObfuscatedQuestion } from './containers/ObfuscatedQuestion'
@@ -41,21 +41,21 @@ const App = () => {
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav">
               <li className="nav-item">
-                <a className="nav-link active" href='/'>Home</a>
+                <Link className="nav-link active" to='/'>Home</Link>
               </li>
               <li>
                 {auth.isAuthenticated &&
-                  <a className="nav-link active" href="/create_lobby">Create Lobby</a>
+                  <Link className="nav-link active" to="/create_lobby">Create Lobby</Link>
                 }
               </li>
               <li>
                 {auth.isAuthenticated &&
-                  <a className="nav-link active" href="/join_lobby">Join Lobby</a>
+                  <Link className="nav-link active" to="/join_lobby">Join Lobby</Link>
                 }
               </li>
               <li className="nav-item">
-                {auth.isAuthenticated && <a className="nav-link active" href="/account">Account</a>}
-                {!auth.isAuthenticated && <a className="nav-link active" href="/login">Login/Sign-Up</a>}
+                {auth.isAuthenticated && <Link className="nav-link active" to="/account">Account</Link>}
+                {!auth.isAuthenticated && <Link className="nav-link active" to="/login">Login/Sign-Up</Link>}
               </li>
             </ul>
           </div>
