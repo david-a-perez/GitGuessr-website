@@ -43,7 +43,7 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
       <div className="container">
         <div className="row row-cols-1 row-cols-md-3 g-4">
           <div className="col">
-            <div className="card">
+            <div className="card h-100">
               <img
                 src='https://user-images.githubusercontent.com/46609460/231556799-5e282848-2488-4472-b44e-b10adece3e47.png'
                 className="card-img-top"
@@ -64,7 +64,7 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
             </div>
           </div>
           <div className="col">
-            <div className="card">
+            <div className="card h-100">
               <img
                 src="https://user-images.githubusercontent.com/46609460/231286336-006c81ba-e855-47e8-9536-6558d412b309.png"
                 className="card-img-top"

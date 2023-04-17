@@ -39,7 +39,7 @@ export const SelectRepository = ({ setRepository }: { setRepository: React.Dispa
         <div className='row row-cols-1 row-cols-md-3 g-4'>
           {repositories?.items.map((repository) =>
             <div key={repository.name} className="col">
-              <div className="card">
+              <div className="card h-100">
                 <div className="card-body">
                   <h4 className="card-title">{repository.name}</h4>
                   <p className="card-text">{repository.description}</p>
