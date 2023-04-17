@@ -1,6 +1,4 @@
 import React from 'react'
-import reactLogo from '../images/logo.svg'
-import Carousel from 'react-bootstrap/Carousel';
 
 export const Home = () => {
 
@@ -33,8 +31,8 @@ export const Home = () => {
                 <img
                   src='https://user-images.githubusercontent.com/46609460/231286372-f3968e6c-b5c3-4e11-a1aa-22f76541830c.png'
                   alt='logo'
-                  width='300'
-                  height='250'
+                  width='300px'
+                  height='300px'
                 />
               </div>
               <div className='col-1' />
@@ -67,8 +65,8 @@ export const Home = () => {
                 className="d-flex"
                 src="https://user-images.githubusercontent.com/46609460/231286336-006c81ba-e855-47e8-9536-6558d412b309.png"
                 alt="First slide"
-                width='450'
-                height='450'
+                width='450px'
+                height='450px'
               />
             </div>
           </div>
@@ -85,8 +83,8 @@ export const Home = () => {
                 className="d-block"
                 src='https://user-images.githubusercontent.com/46609460/231556799-5e282848-2488-4472-b44e-b10adece3e47.png'
                 alt="gg-logo"
-                height="500px"
-                width="500px"
+                height="450px"
+                width="450px"
               />
             </div>
             <div className='col'>

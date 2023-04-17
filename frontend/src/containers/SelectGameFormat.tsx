@@ -4,7 +4,6 @@ import { useGitGuessrGameFormatConfigAPI } from '../apis/git_guessr_game_format_
 import { useObfuscatedGameFormatConfigAPI } from '../apis/obfuscated_game_format_config'
 import { useAuth } from '../hooks/useAuth'
 import { Button } from 'react-bootstrap'
-import reactLogo from '../images/logo.svg'
 
 export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
   repository: Repository, setRepository: React.Dispatch<React.SetStateAction<Repository | null>>, setGameFormat: React.Dispatch<React.SetStateAction<{
@@ -49,13 +48,13 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
                 src='https://user-images.githubusercontent.com/46609460/231556799-5e282848-2488-4472-b44e-b10adece3e47.png'
                 className="card-img-top"
                 alt="..."
-                width="250"
-                height="300"
+                width="100%"
+                height="100%"
               />
               <div className="card-body">
                 <h5 className="card-title">Git Guessr</h5>
                 <p className="card-text">
-                  Match a snippet of code to the correct file name. 
+                  Match a snippet of code to the correct file name.
                   Move quickly, because the clock is ticking.
                 </p>
                 <Button variant="success" onClick={() => setGameFormat({
@@ -70,13 +69,13 @@ export const SelectGameFormat = ({ repository, setRepository, setGameFormat }: {
                 src="https://user-images.githubusercontent.com/46609460/231286336-006c81ba-e855-47e8-9536-6558d412b309.png"
                 className="card-img-top"
                 alt="..."
-                width="250"
-                height="300"
+                width="100%"
+                height="100%"
               />
               <div className="card-body">
                 <h5 className="card-title">Obfuscated</h5>
                 <p className="card-text">
-                  Guess the name of a struct or function in the repository. 
+                  Guess the name of a random function.
                   Keywords may not be as helpful as they appear.
                 </p>
                 <Button variant="success" onClick={() => setGameFormat({
