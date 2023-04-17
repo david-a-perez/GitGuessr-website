@@ -3,7 +3,7 @@ import React from 'react'
 export const Home = () => {
 
   return (
-    <div style={{ height: '100vh', overflowY: 'scroll', scrollSnapType: 'y mandatory' }}>
+    <div style={{ height: '90vh', overflowY: 'scroll', scrollSnapType: 'y mandatory' }}>
       <div style={{ height: '100vh', display: 'block', scrollSnapAlign: 'start' }}>
         <br />
         <h1 className='mb-5 mt-4'>Welcome to GitGuessr!</h1>
