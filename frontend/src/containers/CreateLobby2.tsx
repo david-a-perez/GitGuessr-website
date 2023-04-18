@@ -42,6 +42,8 @@ export const CreateLobby = () => {
               <h4 className="card-title">Custom Lobby</h4>
               <p className="card-text">
                 Repository: {repository.name}<br />
+                {gameFormat.git_guessr_game_format_config_id && <p>Game Mode: GitGuessr</p>}
+                {gameFormat.obfuscated_game_format_config_id && <p>Game Mode: Obfuscated</p>}
               </p>
               <Button
                 variant="danger"
