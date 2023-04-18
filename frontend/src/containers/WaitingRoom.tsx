@@ -61,6 +61,11 @@ export const WaitingRoom = () => {
       <div className="mb-4 mt-4 text-center">
         <h1>Watiting Room</h1>
       </div>
+      <div className="text-center">
+        <h4>Repo: {lobby?.repository_id}</h4>
+        {lobby?.git_guessr_game_format_config_id && <h4>Game Mode: GitGuessr</h4>}
+        {lobby?.obfuscated_game_format_config_id && <h4>Game Mode: Obfuscated</h4>}
+      </div>
       {(!lobbyParticipants || lobbyParticipants.total_items === 0) && "No lobby participants"}
       <table className='table table-striped'>
         <thead>
