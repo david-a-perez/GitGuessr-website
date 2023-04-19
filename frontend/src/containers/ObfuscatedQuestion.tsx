@@ -75,7 +75,7 @@ export const ObfuscatedQuestion = () => {
 
   if (question?.question.end_time) {
     game_over_time = new Date(question?.question.end_time)
-    game_over_time.setSeconds(game_over_time.getSeconds() + 10)
+    game_over_time.setSeconds(game_over_time.getSeconds() + 5)
   }
 
   return (
@@ -140,7 +140,7 @@ export const ObfuscatedQuestion = () => {
             <div className="card border-dark mb-3 h-100 w-100" style={{ maxHeight: '80vh', overflowY: 'scroll' }}>
               <div className="card-header bg-transparent border-dark">CODE SNIPPET</div>
               <div className="card-body text-success">
-                <pre style={{ textAlign: 'left'}}>
+                <pre style={{ textAlign: 'left' }}>
                   <code style={{ whiteSpace: 'pre'}}>
                     {question?.question.question_text}
                   </code>

@@ -37,7 +37,7 @@ export const GameOverPage = () => {
       {
         !!lobby?.full_git_guessr_questions.length &&
         <h3>
-          Score: {lobby?.full_git_guessr_questions.filter(question => question.correct_answer == question.user_answer).length}
+          Score: {lobby?.full_git_guessr_questions.filter(question => question.correct_answer.answer == question.user_answer?.answer).length}
           /
           {lobby?.full_git_guessr_questions.length}
         </h3>

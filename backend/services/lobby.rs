@@ -247,7 +247,7 @@ async fn create(db: Data<Database>, Json(item): Json<CreateLobby>) -> impl Respo
 
             let entries = get_all_file_entries(&repo, FilteredRecorder::new(&config.filenames)?)?;
 
-            let chosen_entries: Vec<_> = get_random_entries(&entries, 5);
+            let chosen_entries: Vec<_> = get_random_entries(&entries, 3);
 
             for (i, entry) in chosen_entries.into_iter().enumerate() {
                 let blob = get_text_from_entry(&repo, entry)?;
@@ -261,7 +261,7 @@ async fn create(db: Data<Database>, Json(item): Json<CreateLobby>) -> impl Respo
                     &mut conn,
                     &CreateGitGuessrQuestion {
                         lobby_id: lobby.id.clone(),
-                        question_num: i as i32,
+                        question_num: i as i32 + 1,
                         question_text: snippet.join("\n"),
                         start_time: None,
                         end_time: None,
@@ -302,7 +302,7 @@ async fn create(db: Data<Database>, Json(item): Json<CreateLobby>) -> impl Respo
                 .map_err(ObfuscatedError::FromUtf8Error)?
                 .join("\n");
 
-            for i in 1..5 {
+            for i in 1..=3 {
                 let question_data = obfuscate(&config.language, &full_text.as_bytes(), 4)?;
 
                 let question = ObfuscatedQuestion::create(
@@ -388,11 +388,11 @@ async fn update(
             )
             .set((
                 start_time.eq((new_start_time.as_sql::<diesel::sql_types::Timestamptz>()
-                    + 30.seconds().as_sql::<Interval>() * (question_num - 1))
+                    + 25.seconds().as_sql::<Interval>() * (question_num - 1))
                     .nullable()),
                 end_time.eq((new_start_time.as_sql::<diesel::sql_types::Timestamptz>()
-                    + 30.seconds().as_sql::<Interval>() * question_num
-                    - 10.seconds())
+                    + 25.seconds().as_sql::<Interval>() * question_num
+                    - 5.seconds())
                 .nullable()),
             ))
             .execute(&mut conn)?;
@@ -415,11 +415,11 @@ async fn update(
             )
             .set((
                 start_time.eq((new_start_time.as_sql::<diesel::sql_types::Timestamptz>()
-                    + 20.seconds().as_sql::<Interval>() * (question_num - 1))
+                    + 15.seconds().as_sql::<Interval>() * (question_num - 1))
                     .nullable()),
                 end_time.eq((new_start_time.as_sql::<diesel::sql_types::Timestamptz>()
-                    + 20.seconds().as_sql::<Interval>() * question_num
-                    - 10.seconds())
+                    + 15.seconds().as_sql::<Interval>() * question_num
+                    - 5.seconds())
                 .nullable()),
             ))
             .execute(&mut conn)?;

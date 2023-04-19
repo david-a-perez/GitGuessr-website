@@ -99,7 +99,7 @@ export const GitGuessrQuestion = () => {
 
   if (question?.question.end_time) {
     game_over_time = new Date(question?.question.end_time)
-    game_over_time.setSeconds(game_over_time.getSeconds() + 10)
+    game_over_time.setSeconds(game_over_time.getSeconds() + 5)
   }
 
   return (
