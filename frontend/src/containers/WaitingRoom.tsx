@@ -59,7 +59,7 @@ export const WaitingRoom = () => {
   return (
     <div style={{ display: 'flex', flexFlow: 'column', textAlign: 'left', paddingLeft: '10%', paddingRight: '10%' }}>
       <div className="mb-4 mt-4 text-center">
-        <h1>Watiting Room</h1>
+        <h1>Lobby: {lobby_id}</h1>
       </div>
       <div className="text-center">
         <h4>Repo: {lobby?.repository_id}</h4>
