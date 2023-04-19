@@ -129,7 +129,7 @@ impl ObfuscatorLanguage {
     pub fn get_block_comment_prefix(&self) -> &'static str {
         match self {
             ObfuscatorLanguage::Python => "\"\"\"",
-            ObfuscatorLanguage::Rust => "/* */ ",
+            ObfuscatorLanguage::Rust => "/* ",
         }
     }
 
