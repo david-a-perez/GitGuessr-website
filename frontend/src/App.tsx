@@ -9,8 +9,7 @@ import { SelectRepository } from './containers/SelectRepository'
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.css'
 import { Home } from './containers/Home'
-import { Todos } from './containers/Todo'
-import { CreateLobby } from './containers/CreateLobby2'
+import { CreateLobby } from './containers/CreateLobby'
 import { Route, useNavigate, Routes, Link } from 'react-router-dom'
 import { JoinLobby } from './containers/JoinLobby'
 import { WaitingRoom } from './containers/WaitingRoom'
@@ -64,7 +63,6 @@ const App = () => {
       <div style={{ margin: '0 auto' }}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/todos" element={<Todos />} />
           <Route path="/create_lobby" element={<CreateLobby />} />
           {/*<Route path="/select_repo" element={<SelectRepository />} />*/}
           <Route path="/join_lobby" element={<JoinLobby />} />

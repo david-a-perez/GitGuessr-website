@@ -444,25 +444,10 @@ async fn update(
     })
 }
 
-// #[delete("/{id}")]
-// async fn destroy(db: Data<Database>, item_id: Path<String>) -> impl Responder {
-//     actix_web::web::block(move || {
-//         let mut conn = db.get_connection();
-
-//         Lobby::delete(&mut conn, item_id.into_inner())
-//     })
-//     .await
-//     .map(|result| match result {
-//         Ok(result) => Ok(HttpResponse::Ok().json(result)),
-//         Err(err) => Err(ErrorInternalServerError(err)),
-//     })
-// }
-
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
     scope
         .service(index)
         .service(read)
         .service(create)
         .service(update)
-    // .service(destroy)
 }

@@ -1,120 +1,76 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useLobbyAPI } from '../apis/lobby'
-import { useRepositoryAPI } from '../apis/repository'
+import { useLobbyParticipantAPI } from '../apis/lobby_participant'
 import { useAuth } from '../hooks/useAuth'
+import { SelectGameFormat } from './SelectGameFormat'
+import { SelectRepository } from './SelectRepository'
+import { Button } from 'react-bootstrap'
 
 export const CreateLobby = () => {
   const auth = useAuth()
-  const pageSize = 5
-  const [page, setPage] = useState<number>(0)
-  const [numPages, setPages] = useState<number>(1)
+  const navigate = useNavigate()
+  const [repository, setRepository] = useState<Repository | null>(null);
+  const [gameFormat, setGameFormat] = useState<{ git_guessr_game_format_config_id?: number, obfuscated_game_format_config_id?: number } | null>(null);
   const [processing, setProcessing] = useState<boolean>(false)
-  const [repositories, setRepositories] = useState<PaginationResult<Repository>>()
-  const [selectedRepository, setSelectedRepository] = useState<Repository | null>(null)
-  const RepositoryAPI = useRepositoryAPI(auth)
   const LobbyAPI = useLobbyAPI(auth)
+  const LobbyParticipantAPI = useLobbyParticipantAPI(auth)
 
-  const createLobby = async () => {
-    setProcessing(true)
-    if (selectedRepository)
-      await LobbyAPI.create({
-        repository_id: selectedRepository.name
-      })
-    setProcessing(false)
-  }
 
-  // const updateLobby = async (lobby: Lobby) => {
-  //   setProcessing(true)
-  //   if (selectedRepository)
-  //     await LobbyAPI.update(lobby.id, {
-  //       repository_id: selectedRepository.name
-  //     })
-  //   setProcessing(false)
-  // }
-
-  const deleteLobby = async (lobby: Lobby) => {
-    setProcessing(true)
-    await LobbyAPI.delete(lobby.id)
-    setProcessing(false)
-  }
-
-  // fetch on page change
-  useEffect(() => {
-    setProcessing(true)
-
-    console.log(auth.isAuthenticated)
-    
-    if (!auth.isAuthenticated) {
-      return
+  return (<>
+    {
+      !repository && (
+        <SelectRepository
+          setRepository={setRepository} />
+      )
     }
-
-    RepositoryAPI.index(page, pageSize).then((repositories) => {
-      setRepositories(repositories)
-      setProcessing(false)
-    })
-  }, [auth.isAuthenticated, page])
-
-  // const [oldIsCheckingAuth, setOldIsCheckingAuth] = useState(auth.isCheckingAuth.current);
-
-  // // redirect to login
-  // useEffect(() => {
-  //   console.log([auth.isAuthenticated, oldIsCheckingAuth, auth.isCheckingAuth.current])
-  //   if (!auth.isAuthenticated && oldIsCheckingAuth && !auth.isCheckingAuth.current) {
-  //     navigate('/login')
-  //     return
-  //   }
-  //   setOldIsCheckingAuth(auth.isCheckingAuth.current)
-  // }, [auth.isAuthenticated, auth.isCheckingAuth.current])
-
-  // update total number of pages
-  useEffect(() => {
-    if (repositories) setPages(repositories?.num_pages)
-  }, [repositories])
-
-  return (
-    <div style={{ display: 'flex', flexFlow: 'column', textAlign: 'left' }}>
-      <h1>Repositories</h1>
-      {(!repositories || repositories.total_items === 0) && "No repositories"}
-      {repositories?.items.map((repository) =>
-        repository.name === selectedRepository?.name ? (
-          <div className="Form">
-            <div style={{ flex: 1 }}>
-              {repository.name}
+    {
+      repository && !gameFormat && (
+        <SelectGameFormat
+          repository={repository}
+          setRepository={setRepository}
+          setGameFormat={setGameFormat} />
+      )
+    }
+    {
+      repository && gameFormat && (
+        <>
+          <br />
+          <br />
+          <div className="card w-50 mx-auto bg-light">
+            <div className="card-body">
+              <h4 className="card-title">Custom Lobby</h4>
+              <p className="card-text">
+                Repository: {repository.name}<br />
+                {gameFormat.git_guessr_game_format_config_id && <p>Game Mode: GitGuessr</p>}
+                {gameFormat.obfuscated_game_format_config_id && <p>Game Mode: Obfuscated</p>}
+              </p>
+              <Button
+                variant="danger"
+                onClick={() => {
+                  setGameFormat(null)
+                }}
+              >Back</Button>
+              <Button
+                variant="success"
+                disabled={processing || !auth.isAuthenticated}
+                onClick={async () => {
+                  setProcessing(true)
+                  const lobby = await LobbyAPI.create({
+                    repository_id: repository.name,
+                    ...gameFormat
+                  })
+                  LobbyParticipantAPI.create({
+                    user_id: 0,
+                    lobby_id: lobby.id,
+                  })
+                  navigate(`/lobby/${lobby.id}`)
+                  setProcessing(false)
+                }}>Create Lobby</Button>
             </div>
           </div>
-        ) : (
-          <div className="Form">
-            <div style={{ flex: 1 }} onClick={() => setSelectedRepository(repository)}>
-              {repository.name}
-            </div>
-          </div>
-        )
-      )}
-      {selectedRepository && (
-        <div className="Form">
-          <div style={{ display: 'flex' }}>
-            <button
-              disabled={processing}
-              style={{ height: '40px' }}
-              onClick={() => createLobby()}
-            >
-              Create Lobby
-            </button>
-          </div>
-        </div>
-      )}
-      <div className="Form">
-        <div style={{ display: 'flex' }}>
-          <button disabled={processing || page === 0} onClick={() => setPage(page - 1)}>{`<<`}</button>
-          <span style={{ flex: 1, textAlign: 'center' }}>
-            Page {page + 1} of {numPages}
-          </span>
-          <button
-            disabled={processing || page === numPages - 1}
-            onClick={() => setPage(page + 1)}
-          >{`>>`}</button>
-        </div>
-      </div>
-    </div>
-  )
+        </>
+      )
+    }
+  </>)
 }

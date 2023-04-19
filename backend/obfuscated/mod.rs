@@ -1,6 +1,12 @@
-use std::{borrow::Cow, collections::HashMap, str::{FromStr, Utf8Error}, num::{ParseFloatError, ParseIntError}, string::FromUtf8Error};
+use std::{
+    borrow::Cow,
+    collections::{HashMap, HashSet},
+    num::{ParseFloatError, ParseIntError},
+    str::{FromStr, Utf8Error},
+    string::FromUtf8Error,
+};
 
-use rand::{seq::SliceRandom, Rng, distributions::WeightedError};
+use rand::{distributions::WeightedError, seq::SliceRandom, Rng};
 use tree_sitter::{Language, Parser, Query, QueryCursor};
 
 use obfuscator::{
@@ -43,7 +49,6 @@ pub enum ObfuscatedError {
 
     #[error("Cannot find obfuscator name: {0}")]
     ObfuscatorNameNotFound(String),
-
 
     #[error("Cannot parse obfuscator chance: {0}")]
     ChanceParseFailed(ParseFloatError),
@@ -180,118 +185,128 @@ pub fn obfuscate(language: &str, text: &[u8], num: usize) -> Result<Vec<Obfuscat
         .collect::<Result<Vec<_>>>()?;
 
     let selected_questions: Vec<_> = questions
-        .choose_multiple_weighted(&mut rand::thread_rng(), num, |question_match| {
+        .choose_multiple_weighted(&mut rand::thread_rng(), num * 2, |question_match| {
             question_match.weight
         })?
         .collect();
 
-    Ok(selected_questions.into_iter().map(|query_match| -> Result<ObfuscatedQuestionData> {
-        let node = query_match.question;
+    let mut used_answers = HashSet::new();
 
-        let mut tree_text = Vec::new();
+    Ok(selected_questions
+        .into_iter()
+        .map(|query_match| -> Result<ObfuscatedQuestionData> {
+            let node = query_match.question;
 
-        if node.end_position().row > node.start_position().row {
-            tree_text.resize(node.start_position().column, b' ');
-        }
-        tree_text.extend_from_slice(&text[node.byte_range()]);
+            let mut tree_text = Vec::new();
 
-        let mut tree = parser
-            .parse(tree_text.as_slice(), None)
-            .ok_or(ObfuscatedError::ParsingFailed)?;
-
-        let mut hash_map = HashMap::new();
-
-        let mut cursor = QueryCursor::new();
-
-        let mut temp_query = Query::new(language.get_language(), language.get_questions())?;
-
-        for index in 0..temp_query.pattern_count() {
-            if index != query_match.pattern_index {
-                temp_query.disable_pattern(index);
+            if node.end_position().row > node.start_position().row {
+                tree_text.resize(node.start_position().column, b' ');
             }
-        }
-        temp_query.disable_capture(query_match.question_capture_name.raw_capture_name);
+            tree_text.extend_from_slice(&text[node.byte_range()]);
 
-        let answers = cursor
-            .matches(&temp_query, tree.root_node(), tree_text.as_slice())
-            .map(|query_match| {
-                AnswerMatch::to_answer(query_match, &precomputed_question_answer_names)
-            })
-            .collect::<Result<Vec<_>>>()?;
+            let mut tree = parser
+                .parse(tree_text.as_slice(), None)
+                .ok_or(ObfuscatedError::ParsingFailed)?;
 
-        let answer = answers
-            .choose(&mut rand::thread_rng())
-            .ok_or(ObfuscatedError::AnswerNotFound)?;
+            let mut hash_map = HashMap::new();
 
-        let answer = {
-            let node = answer.answer;
-            let node_byte_range = node.byte_range();
+            let mut cursor = QueryCursor::new();
 
-            let answer = &tree_text[node_byte_range.clone()];
-            let answer_string = std::str::from_utf8(answer)?.to_string();
+            let mut temp_query = Query::new(language.get_language(), language.get_questions())?;
 
-            let new_text = "ANSWER".as_bytes();
-            hash_map.insert(answer.to_vec(), Some(Cow::Borrowed(new_text)));
-            hash_map.insert(new_text.to_vec(), None);
-
-            let edit = create_edit_for_node(node, &tree_text, new_text)?;
-            edit_tree(
-                &mut parser,
-                &mut tree,
-                &mut tree_text,
-                node_byte_range.clone(),
-                &edit,
-                new_text,
-            )?;
-            answer_string
-        };
-
-        'matches: loop {
-            let mut captures =
-                cursor.captures(&obfuscators_query, tree.root_node(), tree_text.as_slice());
-            while let Some((query_match, capture_index)) = captures.next() {
-                let obfuscator_match = ObfuscatorMatch::to_obfuscator(
-                    query_match,
-                    capture_index,
-                    &precomputed_obfuscator_names,
-                )?;
-
-                let new_text = hash_map
-                    .entry(tree_text[obfuscator_match.node.byte_range()].to_vec())
-                    .or_insert_with_failable(|| {
-                        if rand::thread_rng().gen_bool(obfuscator_match.chance) {
-                            Ok(Some((obfuscator_match.node_capture_name.obfuscate)(
-                                &language,
-                                WORDLIST,
-                            )?))
-                        } else {
-                            Ok(None)
-                        }
-                    })?;
-                    
-                if let Some(new_text) = new_text {
-                    let node = obfuscator_match.node;
-                    let node_byte_range = node.byte_range();
-
-                    let edit = create_edit_for_node(node, &tree_text, new_text)?;
-                    edit_tree(
-                        &mut parser,
-                        &mut tree,
-                        &mut tree_text,
-                        node_byte_range,
-                        &edit,
-                        new_text,
-                    )?;
-                    shift_cursor(&tree, &mut cursor, &edit);
-                    continue 'matches;
+            for index in 0..temp_query.pattern_count() {
+                if index != query_match.pattern_index {
+                    temp_query.disable_pattern(index);
                 }
             }
-            break 'matches;
-        };
+            temp_query.disable_capture(query_match.question_capture_name.raw_capture_name);
 
-        Ok(ObfuscatedQuestionData {
-            text: String::from_utf8(tree_text)?,
-            answer,
+            let answers = cursor
+                .matches(&temp_query, tree.root_node(), tree_text.as_slice())
+                .map(|query_match| {
+                    AnswerMatch::to_answer(query_match, &precomputed_question_answer_names)
+                })
+                .collect::<Result<Vec<_>>>()?;
+
+            let answer = answers
+                .choose(&mut rand::thread_rng())
+                .ok_or(ObfuscatedError::AnswerNotFound)?;
+
+            let answer = {
+                let node = answer.answer;
+                let node_byte_range = node.byte_range();
+
+                let answer = &tree_text[node_byte_range.clone()];
+                let answer_string = std::str::from_utf8(answer)?.to_string();
+
+                let new_text = "ANSWER".as_bytes();
+                hash_map.insert(answer.to_vec(), Some(Cow::Borrowed(new_text)));
+                hash_map.insert(new_text.to_vec(), None);
+
+                let edit = create_edit_for_node(node, &tree_text, new_text)?;
+                edit_tree(
+                    &mut parser,
+                    &mut tree,
+                    &mut tree_text,
+                    node_byte_range.clone(),
+                    &edit,
+                    new_text,
+                )?;
+                answer_string
+            };
+
+            'matches: loop {
+                let mut captures =
+                    cursor.captures(&obfuscators_query, tree.root_node(), tree_text.as_slice());
+                while let Some((query_match, capture_index)) = captures.next() {
+                    let obfuscator_match = ObfuscatorMatch::to_obfuscator(
+                        query_match,
+                        capture_index,
+                        &precomputed_obfuscator_names,
+                    )?;
+
+                    let new_text = hash_map
+                        .entry(tree_text[obfuscator_match.node.byte_range()].to_vec())
+                        .or_insert_with_failable(|| {
+                            if rand::thread_rng().gen_bool(obfuscator_match.chance) {
+                                Ok(Some((obfuscator_match.node_capture_name.obfuscate)(
+                                    &language, WORDLIST,
+                                )?))
+                            } else {
+                                Ok(None)
+                            }
+                        })?;
+
+                    if let Some(new_text) = new_text {
+                        let node = obfuscator_match.node;
+                        let node_byte_range = node.byte_range();
+
+                        let edit = create_edit_for_node(node, &tree_text, new_text)?;
+                        edit_tree(
+                            &mut parser,
+                            &mut tree,
+                            &mut tree_text,
+                            node_byte_range,
+                            &edit,
+                            new_text,
+                        )?;
+                        shift_cursor(&tree, &mut cursor, &edit);
+                        continue 'matches;
+                    }
+                }
+                break 'matches;
+            }
+
+            Ok(ObfuscatedQuestionData {
+                text: String::from_utf8(tree_text)?,
+                answer,
+            })
         })
-    }).collect::<Result<Vec<_>>>()?)
+        .filter(|question_data| {
+            question_data.as_ref().map_or(true, |question_data| {
+                used_answers.insert(question_data.answer.clone())
+            })
+        })
+        .take(num)
+        .collect::<Result<Vec<_>>>()?)
 }

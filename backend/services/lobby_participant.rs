@@ -93,38 +93,6 @@ async fn read(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
     })
 }
 
-// #[get("/{lobby_id}")]
-// async fn read_by_lobby(
-//     db: Data<Database>,
-//     param: Path<String>,
-//     auth: Auth,
-// ) -> impl Responder {
-//     actix_web::web::block(move || {
-//         let lobby_param = param.into_inner();
-//         let mut conn = db.get_connection();
-
-//         let lobby_participant = {
-//             use crate::diesel::ExpressionMethods;
-//             use crate::diesel::QueryDsl;
-//             use crate::diesel::RunQueryDsl;
-//             use crate::schema::lobby_participant::dsl::*;
-
-//             lobby_participant
-//                 .filter(lobby_id.eq(lobby_param))
-//                 .filter(user_id.eq(auth.user_id))
-//                 .first::<LobbyParticipant>(&mut conn)?
-//         };
-
-//         QueryResult::Ok(None)
-//     })
-//     .await
-//     .map(|result| match result {
-//         Ok(Some(result)) => Ok(HttpResponse::Ok().json(result)),
-//         Ok(None) => Ok(HttpResponse::Forbidden().finish()), // TODO: use error?
-//         Err(err) => Err(ErrorNotFound(err)),
-//     })
-// }
-
 #[post("")]
 async fn create(
     db: Data<Database>,
@@ -145,40 +113,6 @@ async fn create(
     })
 }
 
-// #[put("/{id}")]
-// async fn update(
-//     db: Data<Database>,
-//     item_id: Path<i32>,
-//     Json(item): Json<UpdateLobbyParticipant>,
-// ) -> impl Responder {
-//     actix_web::web::block(move || {
-//         let mut conn = db.get_connection();
-
-//         LobbyParticipant::update(&mut conn, item_id.into_inner(), &item)
-//     })
-//     .await
-//     .map(|result| match result {
-//         Ok(result) => Ok(HttpResponse::Ok().json(result)),
-//         Err(err) => Err(ErrorInternalServerError(err)),
-//     })
-// }
-
-// #[delete("/{id}")]
-// async fn destroy(db: Data<Database>, item_id: Path<i32>) -> impl Responder {
-//     actix_web::web::block(move || {
-//         let mut conn = db.get_connection();
-
-//         LobbyParticipant::delete(&mut conn, item_id.into_inner())
-//     })
-//     .await
-//     .map(|result| match result {
-//         Ok(result) => Ok(HttpResponse::Ok().json(result)),
-//         Err(err) => Err(ErrorInternalServerError(err)),
-//     })
-// }
-
 pub fn endpoints(scope: actix_web::Scope) -> actix_web::Scope {
     scope.service(index).service(read).service(create)
-    // .service(update)
-    // .service(destroy)
 }
