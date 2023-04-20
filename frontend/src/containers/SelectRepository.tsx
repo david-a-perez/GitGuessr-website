@@ -43,7 +43,7 @@ export const SelectRepository = ({ setRepository }: { setRepository: React.Dispa
                 <div className="card-body">
                   <h4 className="card-title">{repository.name}</h4>
                   <p className="card-text">{repository.description}</p>
-                  <a href={repository.url} className="card-link">Repo Link</a>
+                  <a href={repository.url} className="card-link" target="_blank">Repo Link</a>
                   <br />
                   <br />
                   <Button variant='success' onClick={() => setRepository(repository)}>Select</Button>
