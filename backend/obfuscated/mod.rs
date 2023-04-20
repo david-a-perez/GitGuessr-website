@@ -83,6 +83,7 @@ type Result<T> = std::result::Result<T, ObfuscatedError>;
 pub enum ObfuscatorLanguage {
     Python,
     Rust,
+    C,
 }
 
 impl FromStr for ObfuscatorLanguage {
@@ -92,6 +93,7 @@ impl FromStr for ObfuscatorLanguage {
         match language {
             "python" => Ok(ObfuscatorLanguage::Python),
             "rust" => Ok(ObfuscatorLanguage::Rust),
+            "c" => Ok(ObfuscatorLanguage::C),
             _ => Err(ObfuscatedError::LanguageNotSupported),
         }
     }
@@ -102,6 +104,7 @@ impl ObfuscatorLanguage {
         match self {
             ObfuscatorLanguage::Python => tree_sitter_python::language(),
             ObfuscatorLanguage::Rust => tree_sitter_rust::language(),
+            ObfuscatorLanguage::C => tree_sitter_c::language(),
         }
     }
 
@@ -109,6 +112,7 @@ impl ObfuscatorLanguage {
         match self {
             ObfuscatorLanguage::Python => include_str!("questions-python.scm"),
             ObfuscatorLanguage::Rust => include_str!("questions-rust.scm"),
+            ObfuscatorLanguage::C => include_str!("questions-c.scm"),
         }
     }
 
@@ -116,6 +120,7 @@ impl ObfuscatorLanguage {
         match self {
             ObfuscatorLanguage::Python => include_str!("obfuscators-python.scm"),
             ObfuscatorLanguage::Rust => include_str!("obfuscators-rust.scm"),
+            ObfuscatorLanguage::C => include_str!("obfuscators-c.scm"),
         }
     }
 
@@ -123,6 +128,7 @@ impl ObfuscatorLanguage {
         match self {
             ObfuscatorLanguage::Python => "# ",
             ObfuscatorLanguage::Rust => "// ",
+            ObfuscatorLanguage::C => "// ",
         }
     }
 
@@ -130,6 +136,7 @@ impl ObfuscatorLanguage {
         match self {
             ObfuscatorLanguage::Python => "\"\"\"",
             ObfuscatorLanguage::Rust => "/* ",
+            ObfuscatorLanguage::C => "/* ",
         }
     }
 
@@ -137,6 +144,7 @@ impl ObfuscatorLanguage {
         match self {
             ObfuscatorLanguage::Python => "\"\"\"",
             ObfuscatorLanguage::Rust => " */",
+            ObfuscatorLanguage::C => " */",
         }
     }
 }
