@@ -5,14 +5,14 @@ export const Home = () => {
   const [width, setWidth] = React.useState(window.innerWidth)
 
   React.useEffect(() => {
-    const handleResizeWindow = () => setWidth(window.innerWidth);
+    const handleResizeWindow = () => setWidth(window.innerWidth)
     // subscribe to window resize event "onComponentDidMount"
-    window.addEventListener("resize", handleResizeWindow);
+    window.addEventListener("resize", handleResizeWindow)
     return () => {
       // unsubscribe "onComponentDestroy"
-      window.removeEventListener("resize", handleResizeWindow);
-    };
-  }, []);
+      window.removeEventListener("resize", handleResizeWindow)
+    }
+  }, [])
 
   return (
     <div style={{ height: '92vh', overflowY: 'scroll' }}>
