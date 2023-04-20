@@ -1,3 +1,4 @@
+import React from 'react'
 import { useAuth, useAuthCheck } from './hooks/useAuth'
 import { AccountPage } from './containers/AccountPage'
 import { LoginPage } from './containers/LoginPage'
@@ -10,56 +11,48 @@ import './App.css'
 import 'bootstrap/dist/css/bootstrap.css'
 import { Home } from './containers/Home'
 import { CreateLobby } from './containers/CreateLobby'
-import { Route, useNavigate, Routes, Link } from 'react-router-dom'
+import { Route, Routes, Link } from 'react-router-dom'
 import { JoinLobby } from './containers/JoinLobby'
 import { WaitingRoom } from './containers/WaitingRoom'
 import { ObfuscatedQuestion } from './containers/ObfuscatedQuestion'
 import { GitGuessrQuestion } from './containers/GitGuessrQuestion'
 import { GameOverPage } from './containers/GameOverPage'
+import { Nav, Navbar, Container } from 'react-bootstrap';
 
 const App = () => {
   useAuthCheck()
   const auth = useAuth()
-
-  const navigate = useNavigate()
   /* CRA: app hooks */
 
   // @ts-ignore
   return (
     <div className="App">
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div className="container-fluid">
-          <span className="navbar-brand">
+      <Navbar variant="dark" bg="dark" expand="lg">
+        <Container>
+          <Navbar.Brand>
             <img
               src="https://user-images.githubusercontent.com/46609460/231286372-f3968e6c-b5c3-4e11-a1aa-22f76541830c.png"
               alt=""
               width="50"
               height="40"
             />
-          </span>
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav">
-              <li className="nav-item">
-                <Link className="nav-link active" to='/'>Home</Link>
-              </li>
-              <li>
-                {auth.isAuthenticated &&
-                  <Link className="nav-link active" to="/create_lobby">Create Lobby</Link>
-                }
-              </li>
-              <li>
-                {auth.isAuthenticated &&
-                  <Link className="nav-link active" to="/join_lobby">Join Lobby</Link>
-                }
-              </li>
-              <li className="nav-item">
-                {auth.isAuthenticated && <Link className="nav-link active" to="/account">Account</Link>}
-                {!auth.isAuthenticated && <Link className="nav-link active" to="/login">Login/Sign-Up</Link>}
-              </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="me-auto">
+              <Link className="nav-link active" to='/'>Home</Link>
+              {auth.isAuthenticated &&
+                <Link className="nav-link active" to="/create_lobby">Create Lobby</Link>
+              }
+              {auth.isAuthenticated &&
+                <Link className="nav-link active" to="/join_lobby">Join Lobby</Link>
+              }
+              {auth.isAuthenticated && <Link className="nav-link active" to="/account">Account</Link>}
+              {!auth.isAuthenticated && <Link className="nav-link active" to="/login">Login/Sign-Up</Link>}
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
       <div style={{ margin: '0 auto' }}>
         <Routes>
           <Route path="/" element={<Home />} />
