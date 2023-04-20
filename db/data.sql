@@ -23,7 +23,7 @@ INSERT INTO git_guessr_game_format_config(
 VALUES ('GitOxide', '\.rs$', 30, false),
     ('Tree-sitter', '\.rs$', 30, false),
     ('GitGuessr', '\.rs$', 30, false),
-    ('Containerized Workshops', '\[^_].py$', 30, false),
+    ('Containerized Workshops', '[^_]\.py$', 30, false),
     ('Linux', '\.c$', 30, false) ON CONFLICT (repository_id) DO
 UPDATE
 SET filenames = EXCLUDED.filenames,
