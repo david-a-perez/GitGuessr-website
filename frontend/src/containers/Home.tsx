@@ -2,9 +2,21 @@ import React from 'react'
 
 export const Home = () => {
 
+  const [width, setWidth] = React.useState(window.innerWidth)
+
+  React.useEffect(() => {
+    const handleResizeWindow = () => setWidth(window.innerWidth)
+    // subscribe to window resize event "onComponentDidMount"
+    window.addEventListener("resize", handleResizeWindow)
+    return () => {
+      // unsubscribe "onComponentDestroy"
+      window.removeEventListener("resize", handleResizeWindow)
+    }
+  }, [])
+
   return (
-    <div style={{ height: '90vh', overflowY: 'scroll', scrollSnapType: 'y mandatory' }}>
-      <div style={{ height: '100vh', display: 'block', scrollSnapAlign: 'start' }}>
+    <div style={{ height: '92vh', overflowY: 'scroll' }}>
+      <div style={{ height: '100vh', display: 'block' }}>
         <br />
         <h1 className='mb-5 mt-4'>Welcome to GitGuessr!</h1>
         <br />
@@ -40,11 +52,11 @@ export const Home = () => {
           </div>
         </div>
       </div>
-      <div style={{ height: '100vh', display: 'block', scrollSnapAlign: 'start', backgroundColor: 'lightgrey' }}>
+      <div style={{ height: '100vh', display: 'block', backgroundColor: 'lightgrey' }}>
         <br />
         <h1 className='mb-5 mt-4'>Gamemode-Obfuscated</h1>
         <br />
-        <div className='container' style={{ textAlign: 'left' }}>
+        <div className='container' style={{ textAlign: 'left', overflowY: '-moz-hidden-unscrollable' }}>
           <div className='row'>
             <div className='col'>
               <h4>
@@ -59,34 +71,38 @@ export const Home = () => {
                 poorly named functions will be difficult to match with certain code blocks.
               </h4>
             </div>
-            <div className='col'
-              style={{ paddingLeft: '50px' }}>
-              <img
-                className="d-flex"
-                src="https://user-images.githubusercontent.com/46609460/231286336-006c81ba-e855-47e8-9536-6558d412b309.png"
-                alt="First slide"
-                width='450px'
-                height='450px'
-              />
-            </div>
+            {width > 1000 &&
+              <div className='col'
+                style={{ paddingLeft: '50px' }}>
+                <img
+                  className="d-flex"
+                  src="https://user-images.githubusercontent.com/46609460/231286336-006c81ba-e855-47e8-9536-6558d412b309.png"
+                  alt="First slide"
+                  width='450px'
+                  height='450px'
+                />
+              </div>
+            }
           </div>
         </div>
       </div>
-      <div style={{ height: '100vh', display: 'block', scrollSnapAlign: 'start' }}>
+      <div style={{ height: '100vh', display: 'block' }}>
         <br />
         <h1 className='mb-5 mt-4'>Gamemode-GitGuessr</h1>
         <br />
         <div className='container' style={{ textAlign: 'left' }}>
           <div className='row'>
-            <div className='col'>
-              <img
-                className="d-block"
-                src='https://user-images.githubusercontent.com/46609460/231556799-5e282848-2488-4472-b44e-b10adece3e47.png'
-                alt="gg-logo"
-                height="450px"
-                width="450px"
-              />
-            </div>
+            {width > 1000 &&
+              <div className='col'>
+                <img
+                  className="d-block"
+                  src='https://user-images.githubusercontent.com/46609460/231556799-5e282848-2488-4472-b44e-b10adece3e47.png'
+                  alt="gg-logo"
+                  height="450px"
+                  width="450px"
+                />
+              </div>
+            }
             <div className='col'>
               <br />
               <br />
