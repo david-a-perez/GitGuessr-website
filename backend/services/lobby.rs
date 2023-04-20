@@ -388,10 +388,10 @@ async fn update(
             )
             .set((
                 start_time.eq((new_start_time.as_sql::<diesel::sql_types::Timestamptz>()
-                    + 25.seconds().as_sql::<Interval>() * (question_num - 1))
+                    + 30.seconds().as_sql::<Interval>() * (question_num - 1))
                     .nullable()),
                 end_time.eq((new_start_time.as_sql::<diesel::sql_types::Timestamptz>()
-                    + 25.seconds().as_sql::<Interval>() * question_num
+                    + 30.seconds().as_sql::<Interval>() * question_num
                     - 5.seconds())
                 .nullable()),
             ))
@@ -415,10 +415,10 @@ async fn update(
             )
             .set((
                 start_time.eq((new_start_time.as_sql::<diesel::sql_types::Timestamptz>()
-                    + 15.seconds().as_sql::<Interval>() * (question_num - 1))
+                    + 20.seconds().as_sql::<Interval>() * (question_num - 1))
                     .nullable()),
                 end_time.eq((new_start_time.as_sql::<diesel::sql_types::Timestamptz>()
-                    + 15.seconds().as_sql::<Interval>() * question_num
+                    + 20.seconds().as_sql::<Interval>() * question_num
                     - 5.seconds())
                 .nullable()),
             ))
